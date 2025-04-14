@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CAFU Clone</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+        body {
+            background: #0e0f11;
+            color: #fff;
+        }
+        .navbar-container {
+            max-width: 1000px;
+            margin: 20px auto;
+            background: #161d21;
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+            border-radius: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 18px;
+            gap: 32px;
+        }
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            text-decoration: none;
+            color: #fff;
+        }
+        .logo-img {
+            height: 12px;
+            width: auto;
+            display: block;
+        }
+        .center-links {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+        }
+        .nav-links {
+            display: flex;
+            gap: 17px;
+            list-style: none;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .nav-links a {
+            font-size: small;
+            color: #c9c9c9;
+            text-decoration: none;
+            padding: 5px 8px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+        .nav-links a:hover {
+            color: #00c4b4;
+        }
+        .nav-links .danger {
+            color: #ee5050;
+        }
+        .nav-links .danger:hover {
+            background: rgba(255, 78, 78, 0.1);
+        }
+        .download-btn {
+            background: #4fc4cd;
+            color: #ffffff;
+            padding: 10px 18px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-size: small;
+            transition: all 0.3s ease;
+        }
+        .download-btn:hover {
+            background: #00a89a;
+        }
+        .hero {
+            text-align: center;
+            padding: 80px 20px;
+        }
+        .fuel-truck-icon {
+            width: 150px;
+            margin-bottom: 20px;
+        }
+        .hero h1 {
+            font-size: 48px;
+            font-weight: 600;
+            color: #aaf4f6;
+            margin-bottom: 20px;
+        }
+        .hero p {
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.87);
+            margin-bottom: 30px;
+            max-width: 620px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .qr-box {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background: #21292f;
+            padding: 16px;
+            border-radius: 16px;
+            max-width: 320px;
+            margin: 0 auto 40px;
+        }
+        .qr-box img {
+            height: 100px;
+        }
+        .qr-box span {
+            font-size: 16px;
+            font-weight: 500;
+        }
+        .price-cards {
+            text-align: center;
+            padding-top: 40px;
+            padding-bottom: 60px;
+        }
+        .price-cards h3 {
+            margin-bottom: 20px;
+            font-size: 18px;
+            font-weight: normal;
+        }
+        .price-items {
+            display: flex;
+            justify-content: center;
+            gap: 80px;
+        }
+        .price-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .badge {
+            width: 50px;
+            height: 50px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: white;
+        }
+        .b98 { background: linear-gradient(to bottom, #1e2e38, #0e1216); color: #00c4b4;}
+        .b95 { background: linear-gradient(to bottom, #193a1d, #0e1216);  color: #1faa59;}
+        .bD  { background: linear-gradient(to bottom, #3b370f, #0e1216); color: #ffcc00;}
+        .testimonials {
+            padding: 80px 20px;
+        }
+        .testimonials h2 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 40px;
+            text-align: left;
+            max-width: 1100px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .testimonial-cards {
+            display: flex;
+            gap: 40px;
+            justify-content: center;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            padding-bottom: 20px;
+            scroll-snap-type: x mandatory;
+        }
+        .testimonial-card {
+            background: transparent;
+            width: 300px;
+            text-align: left;
+            scroll-snap-align: center;
+        }
+        .testimonial-card img {
+            height: 50px;
+            margin-bottom: 20px;
+        }
+        .testimonial-card p {
+            font-size: 17px;
+            line-height: 1.6;
+            margin-bottom: 16px;
+            color: #dee0e2;
+        }
+        .testimonial-card strong {
+            font-size: 16px;
+            font-weight: 600;
+            display: block;
+        }
+        footer {
+            background-color: #1a1c1e;
+            padding: 60px 20px;
+            color: #ccc;
+            text-align: center;
+        }
+        footer .footer-content {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+        .footer-column h4 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #fff;
+        }
+        .footer-column ul {
+            list-style: none;
+            padding: 0;
+        }
+        .footer-column ul li a {
+            color: #ccc;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        .footer-column ul li a:hover {
+            color: #00c4b4;
+        }
+        .footer-bottom {
+            font-size: 13px;
+            color: #888;
+            margin-top: 40px;
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar-container">
+    <a href="#" class="logo">
+        <img
+                src="https://images.ctfassets.net/5ho7gz3tsepv/1njKpmf5TeXuCkaxdZVF4O/f718da1babf89e2388e1d6c7973ba3fb/logo_CAFU-EN-nav_24px.svg"
+                alt="CAFU Logo"
+                class="logo-img"
+        />
+    </a>
+    <div class="center-links">
+        <ul class="nav-links">
+            <li><a href="#services">Services</a></li>
+            <li><a href="#business">For Business</a></li>
+            <li><a href="#careers">Careers</a></li>
+            <li><a href="#community">Community</a></li>
+            <li><a href="#about">About Us</a></li>
+            <li><a href="#faqs">FAQs</a></li>
+            <li>
+                <a class="danger" href="#rescue" style="display: flex; align-items: center; gap: 8px;">
+                    <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="cafu image" id="icon_rescue-red-medium_24px.svg">
+                        <path d="M19.5601 7.11902C21.4801 10.089 21.4791 13.913 19.5611 16.882" stroke="#EE5050" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                        <path d="M15.5477 8.45248C17.507 10.4117 17.507 13.5883 15.5477 15.5476C13.5884 17.5068 10.4119 17.5068 8.4526 15.5476C6.49334 13.5883 6.49334 10.4117 8.4526 8.45248C10.4119 6.49322 13.5884 6.49322 15.5477 8.45248" stroke="#EE5050" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                        <path d="M14.321 7.551L16.905 4.412C17.281 3.955 17.969 3.922 18.388 4.34L19.661 5.613C20.08 6.032 20.046 6.72 19.589 7.096L16.45 9.68" stroke="#EE5050" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                        <path d="M9.67911 16.449L7.09511 19.588C6.71911 20.045 6.03111 20.078 5.61211 19.66L4.33911 18.387C3.92011 17.968 3.95411 17.28 4.41111 16.904L7.55011 14.32" stroke="#EE5050" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                        <path d="M7.55096 9.67899L4.41096 7.09499C3.95396 6.71899 3.92096 6.03099 4.33896 5.61199L5.61196 4.33899C6.03096 3.91999 6.71896 3.95399 7.09496 4.41099L9.67896 7.54999" stroke="#EE5050" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                        <path d="M16.4491 14.321L19.5881 16.905C20.0451 17.281 20.0781 17.969 19.6601 18.388L18.3871 19.661C17.9681 20.08 17.2801 20.046 16.9041 19.589L14.3201 16.45" stroke="#EE5050" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                        <path d="M16.8819 19.561C13.9129 21.479 10.0879 21.48 7.1189 19.56" stroke="#EE5050" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                        <path d="M4.43899 7.11798C2.52099 10.087 2.51999 13.911 4.43999 16.881" stroke="#EE5050" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                        <path d="M16.8809 4.43999C13.9109 2.51999 10.0869 2.52099 7.11792 4.43899" stroke="#EE5050" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                    </svg>
+                    Rescue!
+                </a>
+            </li>
+        </ul>
+    </div>
+    <a href="#download" class="download-btn">Download app</a>
+</nav>
+<div class="hero">
+    <img
+            src="https://cafu.com/_next/image?url=https%3A%2F%2Fimages.ctfassets.net%2F5ho7gz3tsepv%2F4HTX8gtVaE2RJEMJX6r92l%2F85afc718cd3acf6afcc8d2b16f22366f%2F3D-icon-web__fuel.webp&w=256&q=75"
+            alt="CAFU Fuel Service Icon"
+            class="fuel-truck-icon"
+    />
+    <h1>Fuel up anywhere 24/7 at petrol <br>station prices</h1>
+    <p>Too good to be true? Absolutely not. High-quality fuel delivered at the same price as petrol stations on wheels to bring the fuel to you.</p>
+</div>
+<div class="qr-box cursor-pointer">
+    <img src="https://cafu.com/_next/image?url=https%3A%2F%2Fimages.ctfassets.net%2F5ho7gz3tsepv%2Fsu3iU7QjFxLE7AZ36CIc2%2F51e3d83113c19b8797f3617485a7ccfa%2Fqr-code__3_.png&w=256&q=75" alt="QR Code">
+    <span>Scan to download</span>
+</div>
+<section class="price-cards">
+    <h3>Petrol station prices with free delivery</h3>
+    <div class="price-items">
+        <div class="price-item">
+            <div class="badge b98">98</div>
+            <div>
+                <span>Super 98</span><br />
+                <span style="color: #00c4b4; font-size: 14px; font-weight: normal">2.57 AED / L</span>
+            </div>
+        </div>
+        <div class="price-item">
+            <div class="badge b95">95</div>
+            <div>
+                <span>Special 95</span><br />
+                <span style="color: #1faa59; font-size: 14px;font-weight: normal">2.46 AED / L</span>
+            </div>
+        </div>
+        <div class="price-item">
+            <div class="badge bD">D</div>
+            <div>
+                <span>Diesel</span><br />
+                <span style="color: #ffcc00; font-size: 14px;font-weight: normal">2.63 AED / L</span>
+            </div>
+        </div>
+    </div>
+</section>
+<section class="testimonials">
+    <h2>The city's buzzing about it...</h2>
+    <div class="testimonial-cards">
+        <div class="testimonial-card">
+            <img src="https://cafu.com/_next/image?url=https%3A%2F%2Fimages.ctfassets.net%2F5ho7gz3tsepv%2F1mDiyqJAYqUt5zcaXOi7Z6%2F20a427898e239ae849cdaca6838263e6%2Fcar__Honda_Civic.png&w=384&q=75" alt="Car">
+            <p>"Easy, even though the cost is same as at petrol station, technically you also save a trip to the station, which in itself saves fuel cost."</p>
+            <span>Ali Bin Mahmood</span>
+        </div>
+        <div class="testimonial-card">
+            <img src="https://cafu.com/_next/image?url=https%3A%2F%2Fimages.ctfassets.net%2F5ho7gz3tsepv%2F4Ob0fYljxMCjWukzSrPSF9%2Facd55ee09a9e966e407abfea654aae1a%2Fcar__Ford_Explorer.png&w=384&q=75" alt="Car">
+            <p>"Very good service. It is the biggest advantage that we don't need to be present or call the service person while fueling. Very convenient and comfortable with the same price of petrol station."</p>
+            <span>Sreejith</span>
+        </div>
+        <div class="testimonial-card">
+            <img src="https://cafu.com/_next/image?url=https%3A%2F%2Fimages.ctfassets.net%2F5ho7gz3tsepv%2F1mDiyqJAYqUt5zcaXOi7Z6%2F20a427898e239ae849cdaca6838263e6%2Fcar__Honda_Civic.png&w=384&q=75" alt="Car">
+            <p>"We are using CAFU for 5 years now and it's really a blessing, helping us to fuel the car when needed and the drivers are very professional and offering amazing services."</p>
+            <span>Aziz Nour</span>
+        </div>
+    </div>
+</section>
+<footer>
+    <div class="footer-content">
+        <div class="footer-column">
+            <h4>Company</h4>
+            <ul>
+                <li><a href="#">About Us</a></li>
+                <li><a href="#">Careers</a></li>
+                <li><a href="#">Contact Us</a></li>
+            </ul>
+        </div>
+        <div class="footer-column">
+            <h4>Fuel</h4>
+            <ul>
+                <li><a href="#">Fuel Delivery</a></li>
+                <li><a href="#">Fuel Prices</a></li>
+                <li><a href="#">Fuel Quality</a></li>
+            </ul>
+        </div>
+        <div class="footer-column">
+            <h4>Car Care</h4>
+            <ul>
+                <li><a href="#">Car Wash</a></li>
+                <li><a href="#">Oil Change</a></li>
+                <li><a href="#">Battery Check</a></li>
+            </ul>
+        </div>
+        <div class="footer-column">
+            <h4>Contact Info</h4>
+            <p>Email: support@cafu.com</p>
+            <p>Phone: +971 800 2278</p>
+            <div class="app-store-badges">
+                <img src="https://via.placeholder.com/120x40?text=App+Store" alt="App Store" />
+                <img src="https://via.placeholder.com/120x40?text=Google+Play" alt="Google Play" />
+            </div>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        © 2025 CAFU. All Rights Reserved.
+    </div>
+</footer>
+</body>
+</html>
