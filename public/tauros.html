@@ -110,9 +110,9 @@
             justify-content: center;
             gap: 10px;
             background: #21292f;
-            padding: 16px;
+            padding: 8px;
             border-radius: 16px;
-            max-width: 320px;
+            max-width: 250px;
             margin: 0 auto 40px;
         }
         .qr-box img {
@@ -198,40 +198,104 @@
             display: block;
         }
         footer {
-            background-color: #1a1c1e;
-            padding: 60px 20px;
-            color: #ccc;
-            text-align: center;
+            background-color: #111315;
+            padding: 60px 20px 20px;
         }
-        footer .footer-content {
-            max-width: 1100px;
-            margin: 0 auto;
+        .footer-content {
             display: flex;
-            flex-wrap: wrap;
             justify-content: space-between;
+            flex-wrap: wrap;
+            margin: 0 auto 30px;
+            padding: 0 20px;
         }
-        .footer-column h4 {
-            font-size: 16px;
-            font-weight: 600;
+        .footer-logo-section {
+            flex: 0 0 auto; /* Prevent logo section from growing */
+            margin-right: 50px; /* Add space between logo and columns */
+        }
+        .footer-logo-section img {
             margin-bottom: 20px;
-            color: #fff;
+            width: 100px;
+        }
+        .footer-apps img {
+            width: 130px;
+            margin-right: 10px;
+        }
+        .footer-columns {
+            display: flex;
+            gap: 32px; /* Increased gap between columns */
+            justify-content: flex-end; /* Keeps columns aligned to the right */
+            margin-left: auto; /* Pushes the columns to the right */
+        }
+        .footer-column {
+            flex: 0 1 auto; /* Allow columns to size based on content */
+            min-width: 160px; /* Minimum width for each column */
         }
         .footer-column ul {
             list-style: none;
             padding: 0;
         }
-        .footer-column ul li a {
-            color: #ccc;
-            text-decoration: none;
+        .footer-column li {
+            margin-bottom: 10px;
             font-size: 14px;
         }
-        .footer-column ul li a:hover {
+        .footer-column li a {
+            color: #788187;
+            text-decoration: none;
+        }
+        .footer-column li a:hover {
             color: #00c4b4;
         }
+        .footer-column .danger {
+            color: #ff4e4e;
+        }
+        .footer-column i {
+            margin-right: 8px;
+        }
         .footer-bottom {
-            font-size: 13px;
-            color: #888;
-            margin-top: 40px;
+            border-top: 1px solid #2a3536;
+            margin-top: 20px;
+            padding: 20px;
+            font-size: 12px;
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .footer-copyright-section {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .footer-socials {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            margin-left: auto;
+        }
+        .footer-links-policy {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-left: auto; /* Push to the right */
+        }
+        .footer-links-policy a {
+            color: #788187;
+            text-decoration: none;
+        }
+        .footer-links-policy a {
+            color: #788187;
+            margin-left: 20px;
+            text-decoration: none;
+        }
+        .footer-socials a {
+            color: #788187;
+            margin-left: 12px;
+            font-size: 18px;
+        }
+        .footer-socials a:hover {
+            color: #00c4b4;
         }
     </style>
 </head>
@@ -283,7 +347,7 @@
 </div>
 <div class="qr-box cursor-pointer">
     <img src="https://cafu.com/_next/image?url=https%3A%2F%2Fimages.ctfassets.net%2F5ho7gz3tsepv%2Fsu3iU7QjFxLE7AZ36CIc2%2F51e3d83113c19b8797f3617485a7ccfa%2Fqr-code__3_.png&w=256&q=75" alt="QR Code">
-    <span>Scan to download</span>
+    <span style="font-size: 12px; font-weight: normal">Scan to download</span>
 </div>
 <section class="price-cards">
     <h3>Petrol station prices with free delivery</h3>
@@ -333,42 +397,87 @@
 </section>
 <footer>
     <div class="footer-content">
-        <div class="footer-column">
-            <h4>Company</h4>
-            <ul>
-                <li><a href="#">About Us</a></li>
-                <li><a href="#">Careers</a></li>
-                <li><a href="#">Contact Us</a></li>
-            </ul>
+        <div class="footer-logo-section">
+            <img src="https://images.ctfassets.net/5ho7gz3tsepv/1njKpmf5TeXuCkaxdZVF4O/f718da1babf89e2388e1d6c7973ba3fb/logo_CAFU-EN-nav_24px.svg" alt="CAFU Logo" class="footer-logo">
+            <div class="footer-apps">
+                <img src="https://images.ctfassets.net/5ho7gz3tsepv/5KHIcz4j5r7vQOTTzgPORH/6b5c0bb168c0d48d5c3f6077e0bc13b0/badge_ios.svg" alt="App Store" class="app-store-badge">
+                <img src="https://images.ctfassets.net/5ho7gz3tsepv/1mOIVrWAChI5pr7U6Jhfw4/7aa9bffd2465f0c7282653de4bbe66b8/badge_android.svg" alt="Google Play" class="google-play-badge">
+            </div>
         </div>
-        <div class="footer-column">
-            <h4>Fuel</h4>
-            <ul>
-                <li><a href="#">Fuel Delivery</a></li>
-                <li><a href="#">Fuel Prices</a></li>
-                <li><a href="#">Fuel Quality</a></li>
-            </ul>
-        </div>
-        <div class="footer-column">
-            <h4>Car Care</h4>
-            <ul>
-                <li><a href="#">Car Wash</a></li>
-                <li><a href="#">Oil Change</a></li>
-                <li><a href="#">Battery Check</a></li>
-            </ul>
-        </div>
-        <div class="footer-column">
-            <h4>Contact Info</h4>
-            <p>Email: support@cafu.com</p>
-            <p>Phone: +971 800 2278</p>
-            <div class="app-store-badges">
-                <img src="https://via.placeholder.com/120x40?text=App+Store" alt="App Store" />
-                <img src="https://via.placeholder.com/120x40?text=Google+Play" alt="Google Play" />
+
+        <div class="footer-columns">
+            <div class="footer-column footer-about">
+                <ul>
+                    <li><a href="#">About Us</a></li>
+                    <li><a href="#">Fleet Services</a></li>
+                    <li><a href="#">Partnerships</a></li>
+                    <li><a href="#">Community</a></li>
+                    <li><a href="#">Careers</a></li>
+                </ul>
+            </div>
+            <div class="footer-column footer-services">
+                <ul>
+                    <li><a href="#">Fuel Delivery</a></li>
+                    <li><a href="#">Car Wash</a></li>
+                    <li><a href="#">Car Battery</a></li>
+                    <li><a href="#">Car Tyres</a></li>
+                    <li><a href="#">Car Engine Oil</a></li>
+                    <li><a href="#" class="danger">Rescue</a></li>
+                </ul>
+            </div>
+            <div class="footer-column footer-contact">
+                <ul>
+                    <li><a href="#"><i class="fas fa-question-circle"></i> FAQs</a></li>
+                    <li><a href="#"><i class="fas fa-phone"></i> 800 692238</a></li>
+                    <li><a href="#"><i class="fab fa-whatsapp"></i> WhatsApp</a></li>
+                    <li><a href="#"><i class="fas fa-language"></i> EN <i class="fas fa-caret-down"></i></a></li>
+                    <li><a href="#"><i class="fas fa-globe"></i> UAE <i class="fas fa-caret-down"></i></a></li>
+                </ul>
             </div>
         </div>
     </div>
+
     <div class="footer-bottom">
-        © 2025 CAFU. All Rights Reserved.
+        <div class="footer-copyright-section">
+            <span style="color: #788187">© 2024 CAFU. All Rights Reserved</span>
+            <a style="color: #788187; text-decoration: none" href="#">Terms</a>
+            <a style="color: #788187; text-decoration: none" href="#">Privacy</a>
+        </div>
+        <span class="footer-socials">
+    <a href="#" class="social-instagram">
+        <svg width="25" height="25" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Instagram">
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M7.496 3H16.505C18.987 3 21 5.012 21 7.496V16.505C21 18.987 18.988 21 16.504 21H7.496C5.013 21 3 18.988 3 16.504V7.496C3 5.013 5.012 3 7.496 3V3Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+            <path d="M16.9492 6.71301C16.7632 6.71401 16.6122 6.86501 16.6122 7.05101C16.6122 7.23701 16.7642 7.38801 16.9502 7.38801C17.1362 7.38801 17.2872 7.23701 17.2872 7.05101C17.2882 6.86401 17.1362 6.71301 16.9492 6.71301" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+            <path d="M14.5455 9.45441C15.9514 10.8603 15.9514 13.1397 14.5455 14.5456C13.1396 15.9515 10.8602 15.9515 9.45432 14.5456C8.04843 13.1397 8.04843 10.8603 9.45432 9.45441C10.8602 8.04852 13.1396 8.04852 14.5455 9.45441" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+        </svg>
+    </a>
+    <a href="#" class="social-facebook">
+        <svg width="25" height="25" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Facebook">
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M7.5 3H16.504C18.987 3 21 5.013 21 7.496V16.505C21 18.987 18.987 21 16.504 21H7.496C5.013 21 3 18.987 3 16.504V7.5C3 5.015 5.015 3 7.5 3V3Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+            <path d="M11.1001 12.9H16.5001" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+            <path d="M16.4999 8.39999H15.5549C14.0889 8.39999 12.8999 9.58899 12.8999 11.055V12V21" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+        </svg>
+    </a>
+    <a href="#" class="social-linkedin">
+        <svg width="25" height="25" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="LinkedIn">
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M7.5 3H16.504C18.987 3 21 5.013 21 7.496V16.505C21 18.987 18.987 21 16.504 21H7.496C5.013 21 3 18.987 3 16.504V7.5C3 5.015 5.015 3 7.5 3V3Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+            <path d="M8.12012 11.1V16.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+            <path d="M11.7192 16.5V13.35C11.7192 12.107 12.7262 11.1 13.9692 11.1V11.1C15.2122 11.1 16.2192 12.107 16.2192 13.35V16.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+            <path d="M8.11814 7.83799C7.99414 7.83799 7.89314 7.93899 7.89414 8.06299C7.89414 8.18699 7.99514 8.28799 8.11914 8.28799C8.24314 8.28799 8.34414 8.18699 8.34414 8.06299C8.34414 7.93799 8.24314 7.83799 8.11814 7.83799" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+        </svg>
+    </a>
+    <a href="#" class="social-tiktok">
+        <svg width="25" height="25" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="TikTok">
+            <path d="M9.5 12H9C6.79086 12 5 13.7909 5 16C5 18.2091 6.79086 20 9 20H9.5C11.9853 20 14 17.9853 14 15.5V4.5M14 4.5V4M14 4.5C14 7.26142 16.2386 9.5 19 9.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+        </svg>
+    </a>
+    <a href="#" class="social-youtube">
+        <svg width="25" height="25" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="YouTube">
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M21.583 6.37299C21.354 5.36899 20.676 4.57699 19.814 4.30499C18.255 3.81799 12 3.81799 12 3.81799C12 3.81799 5.748 3.81799 4.186 4.30499C3.327 4.57299 2.649 5.36499 2.417 6.37299C2 8.19499 2 12 2 12C2 12 2 15.805 2.417 17.627C2.646 18.631 3.324 19.423 4.186 19.695C5.748 20.182 12 20.182 12 20.182C12 20.182 18.255 20.182 19.814 19.695C20.673 19.427 21.351 18.635 21.583 17.627C22 15.805 22 12 22 12C22 12 22 8.19499 21.583 6.37299Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M10.002 15L15.198 12L10.002 9V15Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+        </svg>
+    </a>
+</span>
     </div>
 </footer>
 </body>
