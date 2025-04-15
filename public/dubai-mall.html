@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dubai Mall - Top Section</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Family Inter', sans-serif;
+    }
+
+    /* Header Styles */
+    header {
+      background-color: #fff;
+      color: #000;
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 10%;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    .top-bar .language {
+      font-size: 14px;
+    }
+
+    .top-bar .logo {
+      font-size: 22px;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+
+    .top-bar .utility-links a {
+      margin-left: 20px;
+      text-decoration: none;
+      color: #000;
+      font-size: 14px;
+    }
+
+    .primary-nav {
+      background-color: #fff;
+      padding: 10px 0;
+      text-align: center;
+    }
+
+    .primary-nav ul {
+      list-style: none;
+      display: flex;
+      justify-content: center;
+      gap: 80px;
+    }
+
+    .primary-nav ul li {
+      position: relative;
+    }
+
+    .primary-nav ul li a {
+      text-decoration: none;
+      color: #000;
+      font-size: 14px;
+      font-weight: 500;
+      text-transform: uppercase;
+    }
+
+    .primary-nav ul li a::after {
+      content: '▼';
+      font-size: 10px;
+      margin-left: 5px;
+    }
+
+    .secondary-nav {
+      background-color: #000;
+      padding: 10px 0;
+      text-align: center;
+    }
+
+    .secondary-nav ul {
+      list-style: none;
+      display: flex;
+      justify-content: center;
+      gap: 50px;
+    }
+
+    .secondary-nav ul li a {
+      text-decoration: none;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 500;
+      text-transform: uppercase;
+    }
+
+    .hero {
+      display: flex;
+      position: relative;
+      height: 800px;
+      background-image: url('https://mcpprodcdn.azureedge.net/uploads/mall/carousel/pictureMobile/668b8636f1880.jpg');
+      background-position: 80% 39%;
+      background-size: cover;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 0 60px;
+      color: #fff;
+      text-align: left;
+    }
+
+    .hero-content {
+      max-width: 100%;
+      width: 100%;
+      padding-top: 20%;
+    }
+
+    .hero-content .tag {
+      font-size: 14px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    .hero-content h1 {
+      font-family: 'Times New Roman', serif;
+      font-size: 64px;
+      font-weight: bold;
+      margin: 0;
+    }
+
+    .hero-content hr {
+      margin: 20px 0;
+      border: 0;
+      border-top: 1px solid #fff;
+      width: 100%;
+    }
+
+    .sub-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 40px;
+      flex-wrap: wrap;
+    }
+
+    .sub-content .left {
+      max-width: 600px;
+    }
+
+    .sub-content .left p {
+      font-size: 16px;
+      margin-bottom: 20px;
+    }
+
+    .sub-content .btn {
+      display: inline-block;
+      padding: 10px 24px;
+      border: 1px solid #fff;
+      background: transparent;
+      color: #fff;
+      text-decoration: none;
+      font-size: 14px;
+      text-transform: uppercase;
+    }
+
+    .sub-content .right {
+      display: flex;
+      gap: 40px;
+      flex-wrap: wrap;
+    }
+
+    .sub-content .info {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+
+    .sub-content .info .label {
+      font-weight: bold;
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+
+    .sub-content .info a {
+      color: #fff;
+      font-size: 14px;
+      text-decoration: none;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .hero {
+        padding: 40px 20px;
+        height: auto;
+      }
+
+      .hero-content h1 {
+        font-size: 42px;
+      }
+
+      .sub-content {
+        flex-direction: column;
+      }
+
+      .sub-content .right {
+        gap: 20px;
+      }
+    }
+
+  </style>
+</head>
+<body>
+<!-- Header Section -->
+<header>
+  <!-- Top Bar -->
+  <div class="top-bar">
+    <div class="language">العربية</div>
+    <div class="logo">
+      <img src="https://dmassetsprodcdn.azureedge.net/assets/images/dubai-mall-logo-en.png" alt="Dubai Mall Logo" style="height: 23px;">
+    </div>
+    <div class="utility-links">
+      <a href="#">Emaar Gift Card</a>
+      <a href="#">Search</a>
+    </div>
+  </div>
+
+  <!-- Primary Navigation -->
+  <nav class="primary-nav">
+    <ul>
+      <li><a href="#">What's New</a></li>
+      <li><a href="#">Shop</a></li>
+      <li><a href="#">Dine</a></li>
+      <li><a href="#">Stay</a></li>
+      <li><a href="#">Entertain</a></li>
+      <li><a href="#">Plan Your Visit</a></li>
+      <li><a href="#">Services</a></li>
+    </ul>
+  </nav>
+
+  <!-- Secondary Navigation -->
+  <nav class="secondary-nav">
+    <ul>
+      <li><a href="#">Fashion Avenue</a></li>
+      <li><a href="#">Fountain Views</a></li>
+      <li><a href="#">Chinatown</a></li>
+      <li><a href="#">Souk Al Bahar</a></li>
+      <li><a href="#">Offers</a></li>
+      <li><a href="#">Events</a></li>
+    </ul>
+  </nav>
+</header>
+
+<section class="hero">
+  <div class="hero-content">
+    <h5 class="tag">EVENT</h5>
+    <h1 style="font-weight: normal">YOU SHOP. WE DELIVER.</h1>
+    <hr />
+    <div class="sub-content">
+      <div class="left">
+        <p>Enjoy a seamless shopping experience with our Delivery Service.</p>
+        <a href="#" class="btn">Learn More</a>
+      </div>
+      <div class="right">
+        <div class="info">
+          <span>🕒</span>
+          <div>
+            <div class="label">OPEN TODAY</div>
+            <div>10 AM – 11 PM</div>
+          </div>
+        </div>
+        <div class="info">
+          <span>📍</span>
+          <div>
+            <div class="label">PLAN YOUR VISIT</div>
+            <a href="#">View Mall Map</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</body>
+</html>
