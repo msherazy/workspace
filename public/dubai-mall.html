@@ -3,46 +3,72 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Import Inter Font from Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
   <title>Dubai Mall - Top Section</title>
   <style>
+    /* Import custom font: Romain BP Headline for HERO content */
+    @font-face {
+      font-family: 'Romain BP Headline';
+      src: url('RomainBPHeadline.woff2') format('woff2'),
+      url('RomainBPHeadline.woff') format('woff');
+      font-weight: normal;
+      font-style: normal;
+    }
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      font-family: 'Family Inter', sans-serif;
+      font-family: 'Inter', sans-serif;
     }
 
-    /* Header Styles */
-    header {
-      background-color: #fff;
-      color: #000;
-    }
-
+    /* Top Bar */
     .top-bar {
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      padding: 10px 10%;
+      justify-content: space-between;
+      padding: 10px 5%;
       border-bottom: 1px solid #e0e0e0;
+      height: 60px;
     }
 
-    .top-bar .language {
+    .language {
       font-size: 14px;
     }
 
-    .top-bar .logo {
-      font-size: 22px;
-      font-weight: bold;
-      text-transform: uppercase;
+    .logo {
+      text-align: center;
+      flex: 1;
+      margin-left: 10%;
     }
 
-    .top-bar .utility-links a {
-      margin-left: 20px;
+    .logo img {
+      vertical-align: middle;
+      height: 23px;
+    }
+
+    .utility-links {
+      display: flex;
+      align-items: center;
+    }
+
+    .utility-links a {
       text-decoration: none;
       color: #000;
       font-size: 14px;
+      margin: 0 10px;
+      display: inline-flex;
+      align-items: center;
     }
 
+    .utility-links .separator {
+      margin: 0;
+      color: #000;
+      font-size: 12px;
+      opacity: 0.5;
+    }
+
+    /* Primary Navigation */
     .primary-nav {
       background-color: #fff;
       padding: 10px 0;
@@ -56,24 +82,28 @@
       gap: 80px;
     }
 
-    .primary-nav ul li {
-      position: relative;
-    }
-
     .primary-nav ul li a {
+      display: inline-flex;
+      align-items: center;
       text-decoration: none;
       color: #000;
       font-size: 14px;
       font-weight: 500;
       text-transform: uppercase;
+      position: relative;
     }
 
     .primary-nav ul li a::after {
-      content: '▼';
-      font-size: 10px;
+      content: url("data:image/svg+xml,%3Csvg%20viewBox%3D'0%200%20512%20512'%20xmlns%3D'http%3A//www.w3.org/2000/svg'%20preserveAspectRatio%3D'xMidYMid%20meet'%3E%3Cg%20transform%3D'translate(0%2C512)%20scale(0.1%2C-0.1)'%20fill%3D'%23000'%20stroke%3D'none'%3E%3Cpath%20d%3D'M1006%203618%20c-58-16-129-90-145-151-13-55-7-108%2019-154%2010-17%20362-424%20783-905%20827-945%20794-912%20897-912%20103%200%2069-34%20906%20923%20712%20813%20776%20889%20790%20938%2013%2045%2014%2062%203%20105-16%2069-84%20139-151%20156-62%2016-3043%2015-3102%200z'%3E%3C/path%3E%3C/g%3E%3C/svg%3E");
+      display: inline-block;
+      width: 16px;
+      height: 16px;
       margin-left: 5px;
+      font-size: 10px;
+      line-height: 1;
     }
 
+    /* Secondary Navigation */
     .secondary-nav {
       background-color: #000;
       padding: 10px 0;
@@ -84,7 +114,7 @@
       list-style: none;
       display: flex;
       justify-content: center;
-      gap: 50px;
+      gap: 70px;
     }
 
     .secondary-nav ul li a {
@@ -95,12 +125,13 @@
       text-transform: uppercase;
     }
 
+    /* Hero Section */
     .hero {
       display: flex;
       position: relative;
       height: 800px;
-      background-image: url('https://mcpprodcdn.azureedge.net/uploads/mall/carousel/pictureMobile/668b8636f1880.jpg');
-      background-position: 80% 39%;
+      background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.7) 100%), url('https://mcpprodcdn.azureedge.net/uploads/mall/carousel/picture/668b84b10cfb7.jpg');
+      background-position: 0 39%;
       background-size: cover;
       align-items: center;
       justify-content: flex-start;
@@ -177,15 +208,20 @@
     }
 
     .sub-content .info .label {
-      font-weight: bold;
+      font-weight: 700;
       font-size: 14px;
       margin-bottom: 4px;
+      line-height: 14px;
+      letter-spacing: 1px;
     }
 
     .sub-content .info a {
       color: #fff;
-      font-size: 14px;
+      font-weight: normal;
       text-decoration: none;
+      font-size: 13px;
+      line-height: 14px;
+      letter-spacing: 1px;
     }
 
     /* Responsive */
@@ -207,7 +243,6 @@
         gap: 20px;
       }
     }
-
   </style>
 </head>
 <body>
@@ -217,11 +252,19 @@
   <div class="top-bar">
     <div class="language">العربية</div>
     <div class="logo">
-      <img src="https://dmassetsprodcdn.azureedge.net/assets/images/dubai-mall-logo-en.png" alt="Dubai Mall Logo" style="height: 23px;">
+      <img src="https://dmassetsprodcdn.azureedge.net/assets/images/dubai-mall-logo-en.png" alt="Dubai Mall Logo">
     </div>
     <div class="utility-links">
       <a href="#">Emaar Gift Card</a>
-      <a href="#">Search</a>
+      <span class="separator">|</span>
+      <a style="opacity: 0.7; font-size: 12px;" href="#">
+        Search &nbsp;
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="14" fill="currentColor" viewBox="0 0 16 16" style="vertical-align: middle; margin-right: 4px;">
+          <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001l3.85 3.85a1 1 0 0 0
+            1.415-1.414l-3.867-3.867zm-5.242 1.606a5.5 5.5 0 1 1 0-11
+            5.5 5.5 0 0 1 0 11z"/>
+        </svg>
+      </a>
     </div>
   </div>
 
@@ -263,15 +306,24 @@
       </div>
       <div class="right">
         <div class="info">
-          <span>🕒</span>
+          <svg width="35px" height="35px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2.75C6.89137 2.75 2.75 6.89137 2.75 12C2.75 17.1086 6.89137 21.25 12 21.25C17.1086 21.25 21.25 17.1086 21.25 12C21.25 6.89137 17.1086 2.75 12 2.75ZM1.25 12C1.25 6.06294 6.06294 1.25 12 1.25C17.9371 1.25 22.75 6.06294 22.75 12C22.75 17.9371 17.9371 22.75 12 22.75C6.06294 22.75 1.25 17.9371 1.25 12ZM12 7.25C12.4142 7.25 12.75 7.58579 12.75 8V11.6893L15.0303 13.9697C15.3232 14.2626 15.3232 14.7374 15.0303 15.0303C14.7374 15.3232 14.2626 15.3232 13.9697 15.0303L11.4697 12.5303C11.329 12.3897 11.25 12.1989 11.25 12V8C11.25 7.58579 11.5858 7.25 12 7.25Z" fill="#ffffff"></path> </g></svg>
           <div>
             <div class="label">OPEN TODAY</div>
-            <div>10 AM – 11 PM</div>
+            <div style="color: #fff;
+      font-weight: 100;
+      text-decoration: none;
+      padding-top: 5px;
+      font-size: 14px;
+      line-height: 14px;
+      letter-spacing: 1px;">10 AM – 11 PM</div>
           </div>
         </div>
         <div class="info">
-          <span>📍</span>
-          <div>
+          <svg width="35px" height="35px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <g id="SVGRepo_bgCarrier" stroke-width="0"/>
+            <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"/>
+            <g id="SVGRepo_iconCarrier"> <path d="M12 21C15.5 17.4 19 14.1764 19 10.2C19 6.22355 15.866 3 12 3C8.13401 3 5 6.22355 5 10.2C5 14.1764 8.5 17.4 12 21Z" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/> <path d="M12 13C13.6569 13 15 11.6569 15 10C15 8.34315 13.6569 7 12 7C10.3431 7 9 8.34315 9 10C9 11.6569 10.3431 13 12 13Z" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/> </g>
+          </svg>          <div>
             <div class="label">PLAN YOUR VISIT</div>
             <a href="#">View Mall Map</a>
           </div>
