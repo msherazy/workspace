@@ -1,422 +1,508 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:wght@500&display=swap" rel="stylesheet">
-  <title>Dubai Mall - Top Section</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Inter', sans-serif;
-    }
-    
-    .top-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 10px 5%;
-      border-bottom: 1px solid #e0e0e0;
-      height: 53px;
-    }
-    
-    .language {
-      font-size: 14px;
-    }
-    
-    .logo {
-      text-align: center;
-      flex: 1;
-      margin-left: 10%;
-    }
-    
-    .logo img {
-      vertical-align: middle;
-      height: 22px;
-    }
-    
-    .utility-links {
-      display: flex;
-      align-items: center;
-    }
-    
-    .utility-links a {
-      text-decoration: none;
-      color: #000;
-      font-size: 14px;
-      margin: 0 10px;
-      display: inline-flex;
-      align-items: center;
-    }
-    
-    .utility-links .separator {
-      margin: 0;
-      color: #000;
-      font-size: 12px;
-      opacity: 0.5;
-    }
-    
-    .primary-nav {
-      background-color: #fff;
-      padding: 10px 0;
-      text-align: center;
-    }
-    
-    .primary-nav ul {
-      list-style: none;
-      display: flex;
-      justify-content: center;
-      gap: 80px;
-    }
-    
-    .primary-nav ul li a {
-      display: inline-flex;
-      align-items: center;
-      text-decoration: none;
-      color: #000;
-      font-size: 14px;
-      font-weight: 500;
-      text-transform: uppercase;
-      position: relative;
-    }
-    
-    .primary-nav ul li a::after {
-      content: url("data:image/svg+xml,%3Csvg%20viewBox%3D'0%200%20512%20512'%20xmlns%3D'http%3A//www.w3.org/2000/svg'%20preserveAspectRatio%3D'xMidYMid%20meet'%3E%3Cg%20transform%3D'translate(0%2C512)%20scale(0.1%2C-0.1)'%20fill%3D'%23000'%20stroke%3D'none'%3E%3Cpath%20d%3D'M1006%203618%20c-58-16-129-90-145-151-13-55-7-108%2019-154%2010-17%20362-424%20783-905%20827-945%20794-912%20897-912%20103%200%2069-34%20906%20923%20712%20813%20776%20889%20790%20938%2013%2045%2014%2062%203%20105-16%2069-84%20139-151%20156-62%2016-3043%2015-3102%200z'%3E%3C/path%3E%3C/g%3E%3C/svg%3E");
-      display: inline-block;
-      width: 16px;
-      height: 16px;
-      margin-left: 5px;
-      font-size: 10px;
-      line-height: 1;
-    }
-    
-    .secondary-nav {
-      background-color: #000;
-      padding: 10px 0;
-      text-align: center;
-    }
-    
-    .secondary-nav ul {
-      list-style: none;
-      display: flex;
-      justify-content: center;
-      gap: 70px;
-    }
-    
-    .secondary-nav ul li a {
-      text-decoration: none;
-      color: #fff;
-      font-size: 14px;
-      font-weight: 500;
-      text-transform: uppercase;
-    }
-    
-    .hero {
-      position: relative;
-      display: flex;
-      height: 750px;
-      background-image: linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.7) 100%), url('https://mcpprodcdn.azureedge.net/uploads/mall/carousel/picture/668b84b10cfb7.jpg');
-      background-position: 80% 20%;
-      background-size: cover;
-      align-items: center;
-      justify-content: flex-start;
-      padding: 0 60px;
-      color: #fff;
-      text-align: left;
-    }
-    
-    .hero-content {
-      max-width: 100%;
-      width: 100%;
-      padding: 20% 5% 0 5%;
-    }
-    
-    .hero-content .tag {
-      font-size: 14px;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-    }
-    
-    .hero-content h1 {
-      font-family: 'Bodoni Moda', serif;
-      font-size: 64px;
-      font-weight: 500;
-      margin: 0;
-      letter-spacing: 2px;
-    }
-    
-    .hero-content hr {
-      margin: 20px 0;
-      border: 0;
-      border-top: 1px solid #fff;
-      width: 100%;
-    }
-    
-    .hero-nav {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-    }
-    
-    .arrow {
-      position: absolute;
-      top: 70%;
-      transform: translateY(-50%);
-      cursor: pointer;
-      pointer-events: auto;
-    }
-    
-    .arrow-left {
-      left: 20px;
-    }
-    
-    .arrow-right {
-      right: 20px;
-    }
-    
-    .arrow svg {
-      fill: #fff;
-      width: 30px;
-      height: 30px;
-      opacity: 0.8;
-    }
-    
-    .pagination {
-      position: absolute;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      gap: 10px;
-      pointer-events: auto;
-    }
-    
-    .dot {
-      width: 7px;
-      height: 7px;
-      background-color: transparent;
-      border-radius: 50%;
-      cursor: pointer;
-      border: 1px solid #fff;
-    }
-    
-    .dot.active {
-      background-color: #100f0f;
-    }
-    
-    .sub-content {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 40px;
-      flex-wrap: wrap;
-    }
-    
-    .sub-content .left {
-      max-width: 600px;
-    }
-    
-    .sub-content .left p {
-      font-size: 16px;
-      margin-bottom: 20px;
-    }
-    
-    .sub-content .btn {
-      display: inline-block;
-      padding: 10px 24px;
-      border: 1px solid #fff;
-      background: transparent;
-      color: #fff;
-      text-decoration: none;
-      font-size: 14px;
-      text-transform: uppercase;
-    }
-    
-    .sub-content .right {
-      display: flex;
-      gap: 40px;
-      flex-wrap: wrap;
-    }
-    
-    .sub-content .info {
-      display: flex;
-      gap: 10px;
-      align-items: flex-start;
-    }
-    
-    .sub-content .info .label {
-      font-weight: 700;
-      font-size: 14px;
-      margin-bottom: 4px;
-      line-height: 14px;
-      letter-spacing: 1px;
-    }
-    
-    .sub-content .info a {
-      color: #fff;
-      font-weight: normal;
-      text-decoration: none;
-      font-size: 13px;
-      line-height: 14px;
-      letter-spacing: 1px;
-    }
-    
-    @media (max-width: 768px) {
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:wght@500&display=swap"
+      rel="stylesheet"
+    />
+    <title>Dubai Mall - Top Section</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Inter", sans-serif;
+      }
+
       .top-bar {
-        flex-direction: column;
-        align-items: flex-start;
-        justify-content: center;
-        height: auto;
-        padding: 8px 10px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 5%;
+        border-bottom: 1px solid #e0e0e0;
+        height: 53px;
       }
-      
+
+      .language {
+        font-size: 14px;
+      }
+
       .logo {
-        margin: 10px auto;
+        text-align: center;
+        flex: 1;
+        margin-left: 10%;
       }
-      
+
+      .logo img {
+        vertical-align: middle;
+        height: 22px;
+      }
+
       .utility-links {
-        margin-top: 10px;
-        margin-left: 0;
-        align-self: flex-end;
+        display: flex;
+        align-items: center;
       }
-      
-      .primary-nav,
+
+      .utility-links a {
+        text-decoration: none;
+        color: #000;
+        font-size: 14px;
+        margin: 0 10px;
+        display: inline-flex;
+        align-items: center;
+      }
+
+      .utility-links .separator {
+        margin: 0;
+        color: #000;
+        font-size: 12px;
+        opacity: 0.5;
+      }
+
+      .primary-nav {
+        background-color: #fff;
+        padding: 10px 0;
+        text-align: center;
+      }
+
+      .primary-nav ul {
+        list-style: none;
+        display: flex;
+        justify-content: center;
+        gap: 80px;
+      }
+
+      .primary-nav ul li a {
+        display: inline-flex;
+        align-items: center;
+        text-decoration: none;
+        color: #000;
+        font-size: 14px;
+        font-weight: 500;
+        text-transform: uppercase;
+        position: relative;
+      }
+
+      .primary-nav ul li a::after {
+        content: url("data:image/svg+xml,%3Csvg%20viewBox%3D'0%200%20512%20512'%20xmlns%3D'http%3A//www.w3.org/2000/svg'%20preserveAspectRatio%3D'xMidYMid%20meet'%3E%3Cg%20transform%3D'translate(0%2C512)%20scale(0.1%2C-0.1)'%20fill%3D'%23000'%20stroke%3D'none'%3E%3Cpath%20d%3D'M1006%203618%20c-58-16-129-90-145-151-13-55-7-108%2019-154%2010-17%20362-424%20783-905%20827-945%20794-912%20897-912%20103%200%2069-34%20906%20923%20712%20813%20776%20889%20790%20938%2013%2045%2014%2062%203%20105-16%2069-84%20139-151%20156-62%2016-3043%2015-3102%200z'%3E%3C/path%3E%3C/g%3E%3C/svg%3E");
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        margin-left: 5px;
+        font-size: 10px;
+        line-height: 1;
+      }
+
       .secondary-nav {
-        padding: 10px;
+        background-color: #000;
+        padding: 10px 0;
+        text-align: center;
       }
-      
-      .primary-nav ul,
+
       .secondary-nav ul {
-        flex-direction: column;
-        gap: 20px;
+        list-style: none;
+        display: flex;
+        justify-content: center;
+        gap: 70px;
       }
-      
-      .primary-nav ul li a,
+
       .secondary-nav ul li a {
-        justify-content: flex-start;
+        text-decoration: none;
+        color: #fff;
+        font-size: 14px;
+        font-weight: 500;
+        text-transform: uppercase;
       }
-      
+
       .hero {
-        height: auto;
+        position: relative;
+        display: flex;
+        height: 750px;
+        background-image:
+          linear-gradient(
+            to bottom,
+            rgba(0, 0, 0, 0.1) 0%,
+            rgba(0, 0, 0, 0.7) 100%
+          ),
+          url("https://mcpprodcdn.azureedge.net/uploads/mall/carousel/picture/668b84b10cfb7.jpg");
+        background-position: 80% 20%;
+        background-size: cover;
+        align-items: center;
+        justify-content: flex-start;
         padding: 0 60px;
+        color: #fff;
+        text-align: left;
       }
-      
+
       .hero-content {
+        max-width: 100%;
+        width: 100%;
         padding: 20% 5% 0 5%;
       }
-    }
-  </style>
-</head>
-<body>
-  <header>
-    <div class="top-bar">
-      <div class="language">العربية</div>
-      <div class="logo">
-        <img src="https://dmassetsprodcdn.azureedge.net/assets/images/dubai-mall-logo-en.png" alt="Dubai Mall Logo">
-      </div>
-      <div class="utility-links">
-        <a href="#">Emaar Gift Card</a>
-        <span class="separator">|</span>
-        <a style="opacity: 0.7; font-size: 12px;" href="#">
-          Search &nbsp;
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="14" fill="currentColor" viewBox="0 0 16 16" style="vertical-align: middle; margin-right: 4px;">
-            <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001l3.85 3.85a1 1 0 0 0
-              1.415-1.414l-3.867-3.867zm-5.242 1.606a5.5 5.5 0 1 1 0-11
-              5.5 5.5 0 0 1 0 11z"/>
-          </svg>
-        </a>
-      </div>
-    </div>
 
-    <nav class="primary-nav">
-      <ul>
-        <li><a href="#">What's New</a></li>
-        <li><a href="#">Shop</a></li>
-        <li><a href="#">Dine</a></li>
-        <li><a href="#">Stay</a></li>
-        <li><a href="#">Entertain</a></li>
-        <li><a href="#">Plan Your Visit</a></li>
-        <li><a href="#">Services</a></li>
-      </ul>
-    </nav>
+      .hero-content .tag {
+        font-size: 14px;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+      }
 
-    <nav class="secondary-nav">
-      <ul>
-        <li><a href="#">Fashion Avenue</a></li>
-        <li><a href="#">Fountain Views</a></li>
-        <li><a href="#">Chinatown</a></li>
-        <li><a href="#">Souk Al Bahar</a></li>
-        <li><a href="#">Offers</a></li>
-        <li><a href="#">Events</a></li>
-      </ul>
-    </nav>
-  </header>
+      .hero-content h1 {
+        font-family: "Bodoni Moda", serif;
+        font-size: 64px;
+        font-weight: 500;
+        margin: 0;
+        letter-spacing: 2px;
+      }
 
-  <section class="hero">
-    <div class="hero-content">
-      <h5 class="tag">EVENT</h5>
-      <h1 style="font-weight: normal">YOU SHOP. WE DELIVER.</h1>
-      <hr />
-      <div class="sub-content">
-        <div class="left">
-          <p>Enjoy a seamless shopping experience with our Delivery Service.</p>
-          <a href="#" class="btn">Learn More</a>
+      .hero-content hr {
+        margin: 20px 0;
+        border: 0;
+        border-top: 1px solid #fff;
+        width: 100%;
+      }
+
+      .hero-nav {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+      }
+
+      .arrow {
+        position: absolute;
+        top: 70%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        pointer-events: auto;
+      }
+
+      .arrow-left {
+        left: 20px;
+      }
+
+      .arrow-right {
+        right: 20px;
+      }
+
+      .arrow svg {
+        fill: #fff;
+        width: 30px;
+        height: 30px;
+        opacity: 0.8;
+      }
+
+      .pagination {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 10px;
+        pointer-events: auto;
+      }
+
+      .dot {
+        width: 7px;
+        height: 7px;
+        background-color: transparent;
+        border-radius: 50%;
+        cursor: pointer;
+        border: 1px solid #fff;
+      }
+
+      .dot.active {
+        background-color: #100f0f;
+      }
+
+      .sub-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 40px;
+        flex-wrap: wrap;
+      }
+
+      .sub-content .left {
+        max-width: 600px;
+      }
+
+      .sub-content .left p {
+        font-size: 16px;
+        margin-bottom: 20px;
+      }
+
+      .sub-content .btn {
+        display: inline-block;
+        padding: 10px 24px;
+        border: 1px solid #fff;
+        background: transparent;
+        color: #fff;
+        text-decoration: none;
+        font-size: 14px;
+        text-transform: uppercase;
+      }
+
+      .sub-content .right {
+        display: flex;
+        gap: 40px;
+        flex-wrap: wrap;
+      }
+
+      .sub-content .info {
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+      }
+
+      .sub-content .info .label {
+        font-weight: 700;
+        font-size: 14px;
+        margin-bottom: 4px;
+        line-height: 14px;
+        letter-spacing: 1px;
+      }
+
+      .sub-content .info a {
+        color: #fff;
+        font-weight: normal;
+        text-decoration: none;
+        font-size: 13px;
+        line-height: 14px;
+        letter-spacing: 1px;
+      }
+
+      @media (max-width: 768px) {
+        .top-bar {
+          flex-direction: column;
+          align-items: flex-start;
+          justify-content: center;
+          height: auto;
+          padding: 8px 10px;
+        }
+
+        .logo {
+          margin: 10px auto;
+        }
+
+        .utility-links {
+          margin-top: 10px;
+          margin-left: 0;
+          align-self: flex-end;
+        }
+
+        .primary-nav,
+        .secondary-nav {
+          padding: 10px;
+        }
+
+        .primary-nav ul,
+        .secondary-nav ul {
+          flex-direction: column;
+          gap: 20px;
+        }
+
+        .primary-nav ul li a,
+        .secondary-nav ul li a {
+          justify-content: flex-start;
+        }
+
+        .hero {
+          height: auto;
+          padding: 0 60px;
+        }
+
+        .hero-content {
+          padding: 20% 5% 0 5%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="top-bar">
+        <div class="language">العربية</div>
+        <div class="logo">
+          <img
+            src="https://dmassetsprodcdn.azureedge.net/assets/images/dubai-mall-logo-en.png"
+            alt="Dubai Mall Logo"
+          />
         </div>
-        <div class="right">
-          <div class="info">
-            <svg width="35px" height="35px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-              <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
-              <g id="SVGRepo_iconCarrier">
-                <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2.75C6.89137 2.75 2.75 6.89137 2.75 12C2.75 17.1086 6.89137 21.25 12 21.25C17.1086 21.25 21.25 17.1086 21.25 12C21.25 6.89137 17.1086 2.75 12 2.75ZM1.25 12C1.25 6.06294 6.06294 1.25 12 1.25C17.9371 1.25 22.75 6.06294 22.75 12C22.75 17.9371 17.9371 22.75 12 22.75C6.06294 22.75 1.25 17.9371 1.25 12ZM12 7.25C12.4142 7.25 12.75 7.58579 12.75 8V11.6893L15.0303 13.9697C15.3232 14.2626 15.3232 14.7374 15.0303 15.0303C14.7374 15.3232 14.2626 15.3232 13.9697 15.0303L11.4697 12.5303C11.329 12.3897 11.25 12.1989 11.25 12V8C11.25 7.58579 11.5858 7.25 12 7.25Z" fill="#ffffff"></path>
-              </g>
+        <div class="utility-links">
+          <a href="#">Emaar Gift Card</a>
+          <span class="separator">|</span>
+          <a style="opacity: 0.7; font-size: 12px" href="#">
+            Search &nbsp;
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="14"
+              fill="currentColor"
+              viewBox="0 0 16 16"
+              style="vertical-align: middle; margin-right: 4px"
+            >
+              <path
+                d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001l3.85 3.85a1 1 0 0 0
+              1.415-1.414l-3.867-3.867zm-5.242 1.606a5.5 5.5 0 1 1 0-11
+              5.5 5.5 0 0 1 0 11z"
+              />
             </svg>
-            <div>
-              <div class="label">OPEN TODAY</div>
-              <div style="color: #fff; font-weight: 100; padding-top: 5px; font-size: 14px; line-height: 14px; letter-spacing: 1px;">
-                10 AM – 11 PM
+          </a>
+        </div>
+      </div>
+
+      <nav class="primary-nav">
+        <ul>
+          <li><a href="#">What's New</a></li>
+          <li><a href="#">Shop</a></li>
+          <li><a href="#">Dine</a></li>
+          <li><a href="#">Stay</a></li>
+          <li><a href="#">Entertain</a></li>
+          <li><a href="#">Plan Your Visit</a></li>
+          <li><a href="#">Services</a></li>
+        </ul>
+      </nav>
+
+      <nav class="secondary-nav">
+        <ul>
+          <li><a href="#">Fashion Avenue</a></li>
+          <li><a href="#">Fountain Views</a></li>
+          <li><a href="#">Chinatown</a></li>
+          <li><a href="#">Souk Al Bahar</a></li>
+          <li><a href="#">Offers</a></li>
+          <li><a href="#">Events</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <section class="hero">
+      <div class="hero-content">
+        <h5 class="tag">EVENT</h5>
+        <h1 style="font-weight: normal">YOU SHOP. WE DELIVER.</h1>
+        <hr />
+        <div class="sub-content">
+          <div class="left">
+            <p>
+              Enjoy a seamless shopping experience with our Delivery Service.
+            </p>
+            <a href="#" class="btn">Learn More</a>
+          </div>
+          <div class="right">
+            <div class="info">
+              <svg
+                width="35px"
+                height="35px"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                <g
+                  id="SVGRepo_tracerCarrier"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                ></g>
+                <g id="SVGRepo_iconCarrier">
+                  <path
+                    fill-rule="evenodd"
+                    clip-rule="evenodd"
+                    d="M12 2.75C6.89137 2.75 2.75 6.89137 2.75 12C2.75 17.1086 6.89137 21.25 12 21.25C17.1086 21.25 21.25 17.1086 21.25 12C21.25 6.89137 17.1086 2.75 12 2.75ZM1.25 12C1.25 6.06294 6.06294 1.25 12 1.25C17.9371 1.25 22.75 6.06294 22.75 12C22.75 17.9371 17.9371 22.75 12 22.75C6.06294 22.75 1.25 17.9371 1.25 12ZM12 7.25C12.4142 7.25 12.75 7.58579 12.75 8V11.6893L15.0303 13.9697C15.3232 14.2626 15.3232 14.7374 15.0303 15.0303C14.7374 15.3232 14.2626 15.3232 13.9697 15.0303L11.4697 12.5303C11.329 12.3897 11.25 12.1989 11.25 12V8C11.25 7.58579 11.5858 7.25 12 7.25Z"
+                    fill="#ffffff"
+                  ></path>
+                </g>
+              </svg>
+              <div>
+                <div class="label">OPEN TODAY</div>
+                <div
+                  style="
+                    color: #fff;
+                    font-weight: 100;
+                    padding-top: 5px;
+                    font-size: 14px;
+                    line-height: 14px;
+                    letter-spacing: 1px;
+                  "
+                >
+                  10 AM – 11 PM
+                </div>
+              </div>
+            </div>
+            <div class="info">
+              <svg
+                width="35px"
+                height="35px"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                <g
+                  id="SVGRepo_tracerCarrier"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                ></g>
+                <g id="SVGRepo_iconCarrier">
+                  <path
+                    d="M12 21C15.5 17.4 19 14.1764 19 10.2C19 6.22355 15.866 3 12 3C8.13401 3 5 6.22355 5 10.2C5 14.1764 8.5 17.4 12 21Z"
+                    stroke="#ffffff"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                  <path
+                    d="M12 13C13.6569 13 15 11.6569 15 10C15 8.34315 13.6569 7 12 7C10.3431 7 9 8.34315 9 10C9 11.6569 10.3431 13 12 13Z"
+                    stroke="#ffffff"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </g>
+              </svg>
+              <div>
+                <div class="label">PLAN YOUR VISIT</div>
+                <a href="#">View Mall Map</a>
               </div>
             </div>
           </div>
-          <div class="info">
-            <svg width="35px" height="35px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-              <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
-              <g id="SVGRepo_iconCarrier">
-                <path d="M12 21C15.5 17.4 19 14.1764 19 10.2C19 6.22355 15.866 3 12 3C8.13401 3 5 6.22355 5 10.2C5 14.1764 8.5 17.4 12 21Z" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M12 13C13.6569 13 15 11.6569 15 10C15 8.34315 13.6569 7 12 7C10.3431 7 9 8.34315 9 10C9 11.6569 10.3431 13 12 13Z" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              </g>
-            </svg>
-            <div>
-              <div class="label">PLAN YOUR VISIT</div>
-              <a href="#">View Mall Map</a>
-            </div>
-          </div>
         </div>
       </div>
-    </div>
-    <div class="hero-nav">
-      <div class="arrow arrow-left">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-          <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="1" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
+      <div class="hero-nav">
+        <div class="arrow arrow-left">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path
+              d="M15 18l-6-6 6-6"
+              stroke="currentColor"
+              stroke-width="1"
+              fill="none"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </div>
+        <div class="arrow arrow-right">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path
+              d="M9 6l6 6-6 6"
+              stroke="currentColor"
+              stroke-width="1"
+              fill="none"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </div>
+        <div class="pagination">
+          <span class="dot active"></span>
+          <span class="dot"></span>
+        </div>
       </div>
-      <div class="arrow arrow-right">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-          <path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="1" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </div>
-      <div class="pagination">
-        <span class="dot active"></span>
-        <span class="dot"></span>
-      </div>
-    </div>
-  </section>
-</body>
+    </section>
+  </body>
 </html>
