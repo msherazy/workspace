@@ -1,459 +1,889 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import {
-  CartesianGrid,
-  Line,
-  LineChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
-import { format, subDays } from "date-fns";
-import { Titillium_Web } from "next/font/google";
+import { useEffect, useState } from "react";
+import Head from "next/head";
+import { toast, Toaster } from "react-hot-toast";
 
-const titillium = Titillium_Web({ subsets: ["latin"], weight: ["400", "700"] });
-
-interface MoodEntry {
-  date: string;
-  emotion: string;
-  intensity: number;
-  notes: string;
-}
-
-interface ChartData {
-  date: string;
-  score: number;
-  emotion: string;
-}
-
-const getEmotionScore = (emotion: string): number => {
-  switch (emotion) {
-    case "Very Happy":
-      return 5;
-    case "Happy":
-      return 4;
-    case "Neutral":
-      return 3;
-    case "Sad":
-      return 2;
-    case "Very Sad":
-      return 1;
-    default:
-      return 3;
-  }
+// types
+type Font = {
+  family: string;
+  category: string;
+  variants: string[];
+  tags: string[];
 };
 
-const getEmotionColor = (emotion: string): string => {
-  switch (emotion) {
-    case "Very Happy":
-      return "#10B981";
-    case "Happy":
-      return "#6EE7B7";
-    case "Neutral":
-      return "#F59E0B";
-    case "Sad":
-      return "#F87171";
-    case "Very Sad":
-      return "#EF4444";
-    default:
-      return "#6B7280";
-  }
+type FilterOption = {
+  id: string;
+  label: string;
+  examples: { text: string; fonts: string[] }[];
 };
 
-const CustomTooltip = ({ active, payload, label }: never) => {
-  if (active && payload && payload?.length) {
-    const date = new Date(label);
-    const formattedDate = format(date, "EEEE, MMMM d, yyyy");
-    const emotion = payload[0]?.payload?.emotion;
-    const score = payload[0]?.value;
+// consts
+const DEFAULT_PREVIEW_TEXT =
+  "Everyone has the right to freedom of thought, conscience and religion; this right includes freedom to change his religion or belief";
 
-    return (
-      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg p-4 min-w-[180px]">
-        <div className="flex items-center gap-2 mb-2">
-          <span
-            className="w-3 h-3 rounded-full"
-            style={{ backgroundColor: getEmotionColor(emotion) }}
-          />
-          <span className="font-medium text-gray-900 dark:text-white">
-            {emotion}
-          </span>
-        </div>
-        <div className="text-sm text-gray-500 dark:text-gray-300">
-          <div>{formattedDate}</div>
-          <div className="mt-1">
-            <span className="font-medium text-gray-900 dark:text-white">
-              {score}
-            </span>
-            /5 Intensity
-          </div>
-        </div>
-      </div>
-    );
-  }
-  return null;
-};
+const filterOptions: FilterOption[] = [
+  {
+    id: "feeling",
+    label: "Feeling",
+    examples: [
+      {
+        text: "Fancy",
+        fonts: ["Dancing Script", "Playfair Display", "Great Vibes"],
+      },
+      { text: "Business", fonts: ["Roboto", "Montserrat", "Open Sans"] },
+      { text: "Friendly", fonts: ["Comic Neue", "Baloo 2", "Nunito"] },
+    ],
+  },
+  {
+    id: "appearance",
+    label: "Appearance",
+    examples: [
+      { text: "Modern", fonts: ["Poppins", "Raleway", "Inter"] },
+      {
+        text: "Classic",
+        fonts: ["Times New Roman", "Garamond", "Baskerville"],
+      },
+      { text: "Minimal", fonts: ["Helvetica", "Arial", "Fira Sans"] },
+    ],
+  },
+  {
+    id: "serif",
+    label: "Serif",
+    examples: [
+      {
+        text: "Traditional",
+        fonts: ["Times New Roman", "Georgia", "Palatino"],
+      },
+      { text: "Contemporary", fonts: ["PT Serif", "Lora", "Source Serif Pro"] },
+      { text: "Display", fonts: ["Playfair Display", "Bodoni", "Didot"] },
+    ],
+  },
+  {
+    id: "sans-serif",
+    label: "Sans Serif",
+    examples: [
+      { text: "Geometric", fonts: ["Futura", "Avant Garde", "Century Gothic"] },
+      { text: "Humanist", fonts: ["Gill Sans", "Myriad", "Frutiger"] },
+      { text: "Grotesque", fonts: ["Helvetica", "Arial", "Univers"] },
+    ],
+  },
+  {
+    id: "technology",
+    label: "Technology",
+    examples: [
+      { text: "Futuristic", fonts: ["Orbitron", "Rajdhani", "Titillium Web"] },
+      {
+        text: "Techy",
+        fonts: ["Share Tech Mono", "Courier Prime", "Inconsolata"],
+      },
+      { text: "Digital", fonts: ["Digital-7", "LCD", "Seven Segment"] },
+    ],
+  },
+];
+//fonts families
+const mockFonts: Font[] = [
+  {
+    family: "Roboto",
+    category: "sans-serif",
+    variants: ["100", "300", "400", "500", "700", "900"],
+    tags: ["Business", "Modern"],
+  },
+  {
+    family: "Open Sans",
+    category: "sans-serif",
+    variants: ["300", "400", "500", "600", "700", "800"],
+    tags: ["Business", "Friendly"],
+  },
+  {
+    family: "Lato",
+    category: "sans-serif",
+    variants: ["100", "300", "400", "700", "900"],
+    tags: ["Modern", "Friendly"],
+  },
+  {
+    family: "Montserrat",
+    category: "sans-serif",
+    variants: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
+    tags: ["Business", "Modern"],
+  },
+  {
+    family: "Poppins",
+    category: "sans-serif",
+    variants: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
+    tags: ["Modern", "Minimal"],
+  },
+  {
+    family: "Playfair Display",
+    category: "serif",
+    variants: ["400", "500", "600", "700", "800", "900"],
+    tags: ["Fancy", "Classic"],
+  },
+  {
+    family: "Merriweather",
+    category: "serif",
+    variants: ["300", "400", "700", "900"],
+    tags: ["Classic", "Traditional"],
+  },
+  {
+    family: "PT Serif",
+    category: "serif",
+    variants: ["400", "700"],
+    tags: ["Contemporary", "Traditional"],
+  },
+  {
+    family: "Courier Prime",
+    category: "monospace",
+    variants: ["400", "700"],
+    tags: ["Techy", "Minimal"],
+  },
+  {
+    family: "Inconsolata",
+    category: "monospace",
+    variants: ["200", "300", "400", "500", "600", "700", "800", "900"],
+    tags: ["Techy", "Digital"],
+  },
+  {
+    family: "Dancing Script",
+    category: "handwriting",
+    variants: ["400", "700"],
+    tags: ["Fancy", "Friendly"],
+  },
+  {
+    family: "Pacifico",
+    category: "handwriting",
+    variants: ["400"],
+    tags: ["Fancy", "Friendly"],
+  },
+  {
+    family: "Great Vibes",
+    category: "handwriting",
+    variants: ["400"],
+    tags: ["Fancy", "Classic"],
+  },
+  {
+    family: "Comic Neue",
+    category: "handwriting",
+    variants: ["300", "400", "700"],
+    tags: ["Friendly", "Modern"],
+  },
+  {
+    family: "Baloo 2",
+    category: "display",
+    variants: ["400", "500", "600", "700", "800"],
+    tags: ["Friendly", "Modern"],
+  },
+  {
+    family: "Nunito",
+    category: "sans-serif",
+    variants: ["200", "300", "400", "500", "600", "700", "800", "900"],
+    tags: ["Friendly", "Minimal"],
+  },
+  {
+    family: "Raleway",
+    category: "sans-serif",
+    variants: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
+    tags: ["Modern", "Minimal"],
+  },
+  {
+    family: "Inter",
+    category: "sans-serif",
+    variants: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
+    tags: ["Modern", "Minimal"],
+  },
+  {
+    family: "Times New Roman",
+    category: "serif",
+    variants: ["400", "700"],
+    tags: ["Classic", "Traditional"],
+  },
+  {
+    family: "Garamond",
+    category: "serif",
+    variants: ["400", "500", "600", "700", "800"],
+    tags: ["Classic", "Traditional"],
+  },
+  {
+    family: "Baskerville",
+    category: "serif",
+    variants: ["400", "500", "600", "700"],
+    tags: ["Classic", "Traditional"],
+  },
+  {
+    family: "Helvetica",
+    category: "sans-serif",
+    variants: ["100", "300", "400", "500", "700", "900"],
+    tags: ["Minimal", "Modern"],
+  },
+  {
+    family: "Arial",
+    category: "sans-serif",
+    variants: ["400", "500", "600", "700", "800", "900"],
+    tags: ["Minimal", "Modern"],
+  },
+  {
+    family: "Fira Sans",
+    category: "sans-serif",
+    variants: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
+    tags: ["Minimal", "Modern"],
+  },
+  {
+    family: "Lora",
+    category: "serif",
+    variants: ["400", "500", "600", "700"],
+    tags: ["Contemporary", "Classic"],
+  },
+  {
+    family: "Source Serif Pro",
+    category: "serif",
+    variants: ["200", "300", "400", "600", "700", "900"],
+    tags: ["Contemporary", "Traditional"],
+  },
+  {
+    family: "Bodoni",
+    category: "serif",
+    variants: ["400", "500", "600", "700", "800", "900"],
+    tags: ["Display", "Classic"],
+  },
+  {
+    family: "Didot",
+    category: "serif",
+    variants: ["400", "500", "600", "700", "800", "900"],
+    tags: ["Display", "Classic"],
+  },
+  {
+    family: "Futura",
+    category: "sans-serif",
+    variants: ["300", "400", "500", "600", "700", "800", "900"],
+    tags: ["Geometric", "Modern"],
+  },
+  {
+    family: "Century Gothic",
+    category: "sans-serif",
+    variants: ["400", "500", "600", "700", "800", "900"],
+    tags: ["Geometric", "Modern"],
+  },
+  {
+    family: "Gill Sans",
+    category: "sans-serif",
+    variants: ["300", "400", "500", "600", "700", "800"],
+    tags: ["Humanist", "Friendly"],
+  },
+  {
+    family: "Myriad",
+    category: "sans-serif",
+    variants: ["300", "400", "500", "600", "700", "800", "900"],
+    tags: ["Humanist", "Modern"],
+  },
+  {
+    family: "Frutiger",
+    category: "sans-serif",
+    variants: ["300", "400", "500", "600", "700", "800", "900"],
+    tags: ["Humanist", "Friendly"],
+  },
+  {
+    family: "Univers",
+    category: "sans-serif",
+    variants: ["300", "400", "500", "600", "700", "800", "900"],
+    tags: ["Grotesque", "Modern"],
+  },
+  {
+    family: "Orbitron",
+    category: "display",
+    variants: ["400", "500", "600", "700", "800", "900"],
+    tags: ["Futuristic", "Digital"],
+  },
+  {
+    family: "Rajdhani",
+    category: "sans-serif",
+    variants: ["300", "400", "500", "600", "700"],
+    tags: ["Futuristic", "Modern"],
+  },
+  {
+    family: "Titillium Web",
+    category: "sans-serif",
+    variants: ["200", "300", "400", "600", "700", "900"],
+    tags: ["Futuristic", "Modern"],
+  },
+  {
+    family: "Share Tech Mono",
+    category: "monospace",
+    variants: ["400"],
+    tags: ["Techy", "Digital"],
+  },
+  {
+    family: "Digital-7",
+    category: "monospace",
+    variants: ["400"],
+    tags: ["Digital", "Techy"],
+  },
+  {
+    family: "LCD",
+    category: "monospace",
+    variants: ["400"],
+    tags: ["Digital", "Techy"],
+  },
+  {
+    family: "Seven Segment",
+    category: "monospace",
+    variants: ["400"],
+    tags: ["Digital", "Techy"],
+  },
+];
 
-const MoodTracker = () => {
-  const [moodEntries, setMoodEntries] = useState<MoodEntry[]>([]);
-  const [chartData, setChartData] = useState<ChartData[]>([]);
-  const [isClient, setIsClient] = useState(false);
-  const [showAllMoods, setShowAllMoods] = useState(false);
-  const [newMood, setNewMood] = useState<Omit<MoodEntry, "date">>({
-    emotion: "Happy",
-    intensity: 3,
-    notes: "",
-  });
-
-  const emotions = ["Very Happy", "Happy", "Neutral", "Sad", "Very Sad"];
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const currentDate = new Date().toISOString().split("T")[0];
-    setMoodEntries([...moodEntries, { date: currentDate, ...newMood }]);
-    setNewMood({ emotion: "Happy", intensity: 3, notes: "" });
-  };
+export default function GoogleFontsClone() {
+  // states
+  const [fonts, setFonts] = useState<Font[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [previewText, setPreviewText] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [activeFilter, setActiveFilter] = useState<string | null>(null);
+  const [selectedFonts, setSelectedFonts] = useState<string[]>([]);
+  const [darkMode, setDarkMode] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [activeSubFilter, setActiveSubFilter] = useState<string | null>(null);
+  const [viewingSelectedFonts, setViewingSelectedFonts] = useState(false);
 
   useEffect(() => {
-    setIsClient(true);
-    const storedMoods = localStorage.getItem("moodEntries");
-    if (storedMoods) {
-      setMoodEntries(JSON.parse(storedMoods));
-    }
+    setFonts(mockFonts);
+    setLoading(false);
   }, []);
 
-  useEffect(() => {
-    localStorage.setItem("moodEntries", JSON.stringify(moodEntries));
-    const last30Days = Array.from({ length: 30 }, (_, i) => {
-      const date = subDays(new Date(), i);
-      const formattedDate = date.toISOString().split("T")[0];
-      const matchingEntry = moodEntries.find(
-        (entry) => entry.date === formattedDate,
-      );
-      if (matchingEntry) {
-        return {
-          date: formattedDate,
-          score: getEmotionScore(matchingEntry.emotion),
-          emotion: matchingEntry.emotion,
-        };
-      }
-      return null;
-    }).filter((entry) => entry !== null);
-    setChartData(last30Days.reverse() as ChartData[]);
-  }, [moodEntries]);
-
-  const handleIntensityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseInt(e.target.value, 10);
-    if (!isNaN(value) && value >= 1 && value <= 5) {
-      setNewMood({ ...newMood, intensity: value });
-    }
+  // methods
+  const handleFilterClick = (filterId: string) => {
+    setActiveFilter(activeFilter === filterId ? null : filterId);
+    setActiveSubFilter(null);
   };
 
-  const handleDeleteMood = (index: number) => {
-    const updatedMoods = [...moodEntries];
-    updatedMoods.splice(index, 1);
-    setMoodEntries(updatedMoods);
+  const handleSubFilterClick = (fontFamily: string) => {
+    setActiveSubFilter(activeSubFilter === fontFamily ? null : fontFamily);
+  };
+
+  const toggleFontSelection = (fontFamily: string) => {
+    setSelectedFonts((prev) =>
+      prev.includes(fontFamily)
+        ? prev.filter((font) => font !== fontFamily)
+        : [...prev, fontFamily],
+    );
+  };
+
+  const toggleDarkMode = () => {
+    setDarkMode(!darkMode);
+  };
+
+  const handleViewSelectedFonts = () => {
+    setViewingSelectedFonts(true);
+  };
+
+  const handleRemoveFont = (fontFamily: string) => {
+    setSelectedFonts((prev) => prev.filter((font) => font !== fontFamily));
+  };
+
+  const handleDownloadFont = (fontFamily: string) => {
+    toast.success(`Downloading ${fontFamily}...`, {
+      position: "bottom-right",
+      style: {
+        background: darkMode ? "#1B1B1B" : "#fff",
+        color: darkMode ? "#fff" : "#000",
+      },
+    });
+  };
+
+  const handleDownloadAll = () => {
+    toast.success(`Downloading ${selectedFonts.length} fonts...`, {
+      position: "bottom-right",
+      style: {
+        background: darkMode ? "#1B1B1B" : "#fff",
+        color: darkMode ? "#fff" : "#000",
+      },
+    });
+  };
+
+  const handleBackToBrowse = () => {
+    setViewingSelectedFonts(false);
+  };
+
+  const filteredFonts = fonts.filter((font) => {
+    if (viewingSelectedFonts) {
+      return selectedFonts.includes(font.family);
+    }
+
+    const matchesSearch = font.family
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase());
+
+    if (activeSubFilter) {
+      return matchesSearch && font.family === activeSubFilter;
+    }
+
+    if (!activeFilter) return matchesSearch;
+
+    const filterOption = filterOptions.find((f) => f.id === activeFilter);
+    if (!filterOption) return matchesSearch;
+
+    const isExampleFont = filterOption.examples.some((example) =>
+      example.fonts.includes(font.family),
+    );
+
+    return matchesSearch && isExampleFont;
+  });
+
+  // styles
+  const styles = {
+    sidebar: {
+      light: "bg-gray-50 border-gray-200",
+      dark: "bg-[#1B1B1B] border-[#333333]",
+    },
+    mainContent: {
+      light: "bg-white",
+      dark: "bg-[#131314]",
+    },
+    text: {
+      light: "text-gray-900",
+      dark: "text-gray-100",
+    },
+    secondaryText: {
+      light: "text-gray-600",
+      dark: "text-gray-400",
+    },
+    input: {
+      light: "bg-white border-gray-300 text-gray-900 placeholder-gray-400",
+      dark: "bg-[#282A2C] border-[#333333] text-white placeholder-gray-500",
+    },
+    button: {
+      light: "bg-gray-100 hover:bg-gray-200 text-gray-800",
+      dark: "bg-gray-700 hover:bg-gray-600 text-gray-100",
+    },
+    selectedFont: {
+      light: "bg-blue-50",
+      dark: "bg-[#282A2C]",
+    },
+    filterButton: {
+      light: {
+        base: "hover:bg-gray-100",
+        active: "bg-blue-100 text-blue-800",
+      },
+      dark: {
+        base: "hover:bg-gray-700",
+        active: "bg-blue-600 text-white",
+      },
+    },
+    subFilterButton: {
+      light: {
+        base: "hover:bg-gray-100",
+        active: "bg-blue-200 text-blue-800",
+      },
+      dark: {
+        base: "hover:bg-gray-700",
+        active: "bg-blue-700 text-white",
+      },
+    },
   };
 
   return (
     <div
-      className={`min-h-screen bg-gradient-to-br from-blue-50 to-teal-50 dark:from-gray-900 dark:to-gray-800 text-gray-900 dark:text-white ${titillium.className}`}
+      className={`min-h-screen flex ${darkMode ? "text-gray-100" : "text-gray-900"}`}
     >
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="flex flex-col items-center mb-8">
-          <div className="relative mb-6">
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-teal-500/20 blur-2xl" />
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-teal-500 text-transparent bg-clip-text tracking-tight">
-              Mood Journal
-            </h1>
-            <div className="absolute -bottom-1 left-0 w-24 h-1 bg-gradient-to-r from-blue-600 to-teal-500 rounded-full"></div>
-          </div>
-          <p className="text-gray-600 dark:text-gray-400 max-w-xl text-center">
-            Track your emotional journey through data visualization
-          </p>
-        </div>
+      <Head>
+        <title>Google Fonts Clone</title>
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
 
-        <div className="grid grid-cols-1 lg:grid-cols-7 gap-6">
-          <div className="lg:col-span-3 bg-white dark:bg-gray-900 rounded-2xl shadow-lg p-6 transition-all duration-300 border border-gray-100">
-            <h2 className="text-xl font-semibold mb-6 pb-2 border-b border-gray-100 dark:text-gray-200 flex items-center">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5 mr-2 text-blue-500"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M18 13V5a2 2 0 00-2-2H4a2 2 0 00-2 2v8a2 2 0 002 2h3l3 3 3-3h3a2 2 0 002-2zM5 7a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1zm1 3a1 1 0 100 2h3a1 1 0 100-2H6z"
-                  clipRule="evenodd"
-                />
-              </svg>
-              Today&#39;s Mood
-            </h2>
+      {/* toaster for successful download */}
+      <Toaster />
 
-            <form onSubmit={handleSubmit}>
-              <div className="mb-5">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  How are you feeling today?
-                </label>
-                <div className="flex flex-wrap gap-2">
-                  {emotions.map((emotion) => (
+      {/* sidebar */}
+      <div
+        className={`${sidebarOpen ? "w-64" : "w-0"} transition-all duration-300 flex-shrink-0 border-r ${darkMode ? styles.sidebar.dark : styles.sidebar.light}`}
+      >
+        <div className="p-4 h-full flex flex-col">
+          <div className="flex-1 overflow-y-auto">
+            <div className="mb-8">
+              <h2 className="text-lg font-semibold mb-3">Preview Text</h2>
+              <textarea
+                placeholder="Type something to preview fonts..."
+                className={`w-full px-3 py-2 rounded-lg border ${darkMode ? styles.input.dark : styles.input.light} focus:outline-none`}
+                value={previewText}
+                onChange={(e) => setPreviewText(e.target.value)}
+                rows={4}
+              />
+            </div>
+
+            <div className="mb-8">
+              <h2 className="text-lg font-semibold mb-3">Filters</h2>
+              <div className="space-y-4">
+                {filterOptions.map((filter) => (
+                  <div key={filter.id} className="space-y-2">
                     <button
-                      key={emotion}
-                      type="button"
-                      onClick={() => setNewMood({ ...newMood, emotion })}
-                      className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200
-    ${
-      newMood.emotion === emotion
-        ? "bg-blue-600 text-white shadow-md"
-        : "bg-gray-200 text-gray-800 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600"
-    }`}
+                      onClick={() => handleFilterClick(filter.id)}
+                      className={`w-full text-left px-3 py-2 rounded-lg transition-colors font-medium ${
+                        activeFilter === filter.id
+                          ? darkMode
+                            ? styles.filterButton.dark.active
+                            : styles.filterButton.light.active
+                          : darkMode
+                            ? styles.filterButton.dark.base
+                            : styles.filterButton.light.base
+                      }`}
                     >
-                      {emotion}
+                      {filter.label}
                     </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="mb-5">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Intensity:{" "}
-                  <span className="text-blue-600 font-bold">
-                    {newMood.intensity}
-                  </span>
-                  /5
-                </label>
-                <input
-                  type="range"
-                  min="1"
-                  max="5"
-                  value={newMood.intensity}
-                  onChange={handleIntensityChange}
-                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-                />
-                <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
-                  <span>Very Low</span>
-                  <span>Very High</span>
-                </div>
-              </div>
-
-              <div className="mb-5">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
-                  Notes (optional)
-                </label>
-                <textarea
-                  value={newMood.notes}
-                  onChange={(e) =>
-                    setNewMood({ ...newMood, notes: e.target.value })
-                  }
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl bg-white dark:bg-gray-900  text-gray-900  dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                  rows={3}
-                  placeholder="What's on your mind?"
-                  maxLength={250}
-                />
-              </div>
-
-              <button
-                type="submit"
-                className="w-full bg-blue-600 text-white py-3 px-4 rounded-xl font-medium shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200"
-              >
-                Record Mood
-              </button>
-            </form>
-          </div>
-
-          <div className="lg:col-span-4 space-y-6">
-            {isClient && chartData.length > 0 && (
-              <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-lg p-6 transition-all duration-300 border border-gray-100">
-                <h2 className="text-xl font-semibold mb-6 pb-2 border-b border-gray-100 flex items-center">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5 mr-2 text-blue-500"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                  </svg>
-                  Last 30 Days
-                </h2>
-                <div className="h-[320px] transition-all duration-300">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart
-                      data={chartData}
-                      margin={{ top: 20, right: 30, left: 20, bottom: 40 }}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                      <XAxis
-                        dataKey="date"
-                        tickFormatter={(value) =>
-                          format(new Date(value), "MMM dd")
-                        }
-                        axisLine={{ stroke: "#e0e0e0" }}
-                        tickLine={{ stroke: "#e0e0e0" }}
-                        label={{
-                          value: "Date",
-                          position: "insideBottom",
-                          offset: 0,
-                          dy: 15,
-                          style: { textAnchor: "middle", fill: "#6B7280" },
-                        }}
-                      />
-                      <YAxis
-                        domain={[0, 5]}
-                        ticks={[1, 2, 3, 4, 5]}
-                        axisLine={{ stroke: "#e0e0e0" }}
-                        tickLine={{ stroke: "#e0e0e0" }}
-                        tickFormatter={(value) => `${value}/5`}
-                        label={{
-                          value: "Mood Intensity",
-                          angle: -90,
-                          position: "insideLeft",
-                          offset: -5,
-                          style: { textAnchor: "middle", fill: "#6B7280" },
-                        }}
-                      />
-                      <Tooltip
-                        content={<CustomTooltip />}
-                        cursor={{ stroke: "#e0e0e0", strokeDasharray: "3 3" }}
-                        wrapperStyle={{ zIndex: 100 }}
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="score"
-                        stroke="#3B82F6"
-                        strokeWidth={3}
-                        dot={({ cx, cy, payload }) => (
-                          <circle
-                            cx={cx}
-                            cy={cy}
-                            r={6}
-                            fill={getEmotionColor(payload.emotion)}
-                            stroke="#ffffff"
-                            strokeWidth={2}
-                          />
-                        )}
-                        activeDot={{
-                          r: 8,
-                          stroke: "#ffffff",
-                          strokeWidth: 2,
-                          fill: "#3B82F6",
-                        }}
-                        animationDuration={800}
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </div>
-                <div className="mt-2 text-center text-sm text-gray-500 dark:text-gray-400">
-                  Showing mood data for the last 30 days
-                </div>
-              </div>
-            )}
-
-            <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-lg p-6 transition-all duration-300 border border-gray-100">
-              <h2 className="text-xl font-semibold mb-6 pb-2 border-b border-gray-100 flex items-center">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5 mr-2 text-blue-500"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-                Recent Entries
-              </h2>
-
-              {moodEntries.length === 0 ? (
-                <div className="text-center py-8">
-                  <div className="text-6xl mb-4">🌞</div>
-                  <p className="text-lg font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    No mood entries yet
-                  </p>
-                  <p className="text-gray-500 dark:text-gray-400">
-                    Track your emotions to see them displayed here
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2">
-                  {[...moodEntries]
-                    .sort(
-                      (a, b) =>
-                        new Date(b.date).getTime() - new Date(a.date).getTime(),
-                    )
-                    .slice(0, showAllMoods ? moodEntries.length : 5)
-                    .map((entry, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 transition-all duration-200"
-                      >
-                        <div className="flex items-center">
-                          <div
-                            className="w-3 h-3 rounded-full mr-3"
-                            style={{
-                              backgroundColor: getEmotionColor(entry.emotion),
-                            }}
-                          />
-                          <div>
-                            <span className="font-medium text-gray-900 dark:text-white">
-                              {entry.emotion}
-                            </span>
-                            <span className="ml-2 text-gray-500 dark:text-gray-400 text-sm">
-                              {format(new Date(entry.date), "MMM dd, yyyy")}
-                            </span>
-                            <div className="max-w-[160px] sm:max-w-xs truncate text-sm text-gray-600 dark:text-gray-400 mt-1 break-words">
-                              {entry.notes}
+                    {activeFilter === filter.id && (
+                      <div className="ml-4 space-y-2">
+                        {filter.examples.map((example, index) => (
+                          <div key={index} className="space-y-2">
+                            <p
+                              className={`text-sm mb-1 ${darkMode ? "text-gray-300" : "text-gray-600"}`}
+                            >
+                              {example.text}
+                            </p>
+                            <div className="space-y-1">
+                              {example.fonts.map((fontName) => {
+                                const font = fonts.find(
+                                  (f) => f.family === fontName,
+                                );
+                                if (!font) return null;
+                                return (
+                                  <button
+                                    key={fontName}
+                                    onClick={() =>
+                                      handleSubFilterClick(fontName)
+                                    }
+                                    className={`w-full text-left px-2 py-1.5 rounded transition-all ${
+                                      activeSubFilter === fontName
+                                        ? darkMode
+                                          ? styles.subFilterButton.dark.active
+                                          : styles.subFilterButton.light.active
+                                        : darkMode
+                                          ? styles.subFilterButton.dark.base
+                                          : styles.subFilterButton.light.base
+                                    }`}
+                                    style={{ fontFamily: font.family }}
+                                  >
+                                    {fontName}
+                                  </button>
+                                );
+                              })}
                             </div>
                           </div>
-                        </div>
-                        <div className="flex items-center">
-                          <span className="text-sm font-medium text-gray-700 dark:text-gray-300 mr-3">
-                            Intensity: {entry.intensity}/5
-                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* dark/light mode toggler */}
+            <div className="mb-4">
+              <button
+                onClick={toggleDarkMode}
+                className={`flex items-center justify-center w-full py-2 rounded-lg ${darkMode ? "bg-gray-700 text-yellow-300" : "bg-gray-200 text-gray-700"}`}
+              >
+                {darkMode ? (
+                  <>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5 mr-2"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </>
+                ) : (
+                  <>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5 mr-2"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
+                    </svg>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* content */}
+      <div
+        className={`flex-1 flex flex-col ${darkMode ? styles.mainContent.dark : styles.mainContent.light}`}
+      >
+        {/* nav */}
+        <nav
+          className={`sticky top-0 z-10 ${darkMode ? "bg-[#1B1B1B] border-[#333333]" : "bg-white border-gray-200"} border-b px-6 py-4`}
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <button
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+                className={`mr-4 p-2 rounded-md ${darkMode ? "hover:bg-gray-700" : "hover:bg-gray-100"}`}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 6h16M4 12h16M4 18h16"
+                  />
+                </svg>
+              </button>
+              <h1 className="text-2xl font-bold">Google Fonts</h1>
+            </div>
+
+            <div className="flex-1 max-w-xl mx-6">
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Search fonts"
+                  className={`w-full pr-10 pl-4 py-2.5 rounded-lg border focus:outline-none placeholder:invisible sm:placeholder:visible ${darkMode ? styles.input.dark : styles.input.light}`}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+                <div
+                  className={`absolute right-3 top-1/2 -translate-y-1/2 ${darkMode ? "text-gray-400" : "text-gray-500"}`}
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                    />
+                  </svg>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center">
+              <button
+                onClick={
+                  selectedFonts.length > 0 ? handleViewSelectedFonts : undefined
+                }
+                className={`flex items-center space-x-1 px-4 py-2 rounded-lg transition-colors ${darkMode ? styles.button.dark : styles.button.light} ${selectedFonts.length === 0 ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
+              >
+                <span className="text-sm font-medium">
+                  {selectedFonts.length}
+                </span>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
+                  />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </nav>
+
+        {/* font list area */}
+        <main className="flex-1 p-6">
+          {viewingSelectedFonts ? (
+            <div>
+              <div className="flex justify-between items-center mb-6">
+                <button
+                  onClick={handleBackToBrowse}
+                  className={`flex items-center px-4 py-2 rounded-lg ${darkMode ? styles.button.dark : styles.button.light}`}
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 mr-2"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                    />
+                  </svg>
+                  Back to Browse
+                </button>
+                {selectedFonts.length > 1 && (
+                  <button
+                    onClick={handleDownloadAll}
+                    className={`flex items-center px-4 py-2 rounded-lg ${darkMode ? "bg-green-700 hover:bg-green-600 text-white" : "bg-green-100 hover:bg-green-200 text-green-800"}`}
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5 mr-2"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                      />
+                    </svg>
+                    Download All ({selectedFonts.length})
+                  </button>
+                )}
+              </div>
+
+              <div className="space-y-4">
+                {selectedFonts.length === 0 ? (
+                  <div
+                    className={`text-center py-16 ${darkMode ? styles.secondaryText.dark : styles.secondaryText.light}`}
+                  >
+                    <h3 className="text-xl font-medium mb-2">
+                      No fonts selected
+                    </h3>
+                    <p>Select some fonts to see them here</p>
+                  </div>
+                ) : (
+                  filteredFonts.map((font) => (
+                    <div
+                      key={font.family}
+                      className={`p-5 rounded-lg transition-all ${darkMode ? "hover:bg-gray-800/50" : "hover:bg-gray-50"}`}
+                    >
+                      <div className="flex justify-between items-start mb-3">
+                        <h2 className="text-xl font-semibold">{font.family}</h2>
+                        <div className="flex space-x-2">
                           <button
-                            onClick={() => handleDeleteMood(index)}
-                            className="text-red-500 hover:text-red-700 transition-colors duration-200"
+                            onClick={() => handleRemoveFont(font.family)}
+                            className={`p-2 rounded-full ${darkMode ? "hover:bg-gray-700 text-red-400" : "hover:bg-gray-200 text-red-500"}`}
                           >
                             <svg
                               xmlns="http://www.w3.org/2000/svg"
                               className="h-5 w-5"
-                              viewBox="0 0 20 20"
-                              fill="currentColor"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
                             >
                               <path
-                                fillRule="evenodd"
-                                d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
-                                clipRule="evenodd"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                              />
+                            </svg>
+                          </button>
+                          <button
+                            onClick={() => handleDownloadFont(font.family)}
+                            className={`p-2 rounded-full ${darkMode ? "hover:bg-gray-700 text-green-400" : "hover:bg-gray-200 text-green-500"}`}
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="h-5 w-5"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
                               />
                             </svg>
                           </button>
                         </div>
                       </div>
-                    ))}
-                </div>
-              )}
-
-              {moodEntries.length > 5 && (
-                <div className="mt-4 text-center">
-                  <button
-                    onClick={() => setShowAllMoods(!showAllMoods)}
-                    className="text-blue-600 hover:text-blue-800 font-medium text-sm transition-colors duration-200"
+                      <div
+                        className="text-2xl py-4 break-words leading-snug"
+                        style={{ fontFamily: font.family }}
+                      >
+                        {previewText || DEFAULT_PREVIEW_TEXT}
+                      </div>
+                      <div
+                        className={`text-sm ${darkMode ? styles.secondaryText.dark : styles.secondaryText.light}`}
+                      >
+                        {font.variants.length} styles • {font.category}
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          ) : loading ? (
+            <div className="flex justify-center items-center h-64">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {filteredFonts.map((font) => (
+                <div
+                  key={font.family}
+                  onClick={() => toggleFontSelection(font.family)}
+                  className={`p-5 rounded-lg cursor-pointer transition-all duration-200 ${
+                    selectedFonts.includes(font.family)
+                      ? darkMode
+                        ? styles.selectedFont.dark
+                        : styles.selectedFont.light
+                      : darkMode
+                        ? "hover:bg-gray-900 hover:shadow-sm"
+                        : "hover:bg-gray-200 hover:shadow-sm"
+                  }`}
+                >
+                  <div className="flex justify-between items-center mb-3">
+                    <div className="flex items-center space-x-2">
+                      <h2 className="text-lg font-semibold">{font.family}</h2>
+                      <span
+                        className={`text-sm ${darkMode ? styles.secondaryText.dark : styles.secondaryText.light}`}
+                      >
+                        <span
+                          className={`text-sm ${darkMode ? styles.secondaryText.dark : styles.secondaryText.light} pr-2`}
+                        >
+                          |
+                        </span>
+                        {font.variants.length} styles • {font.category}
+                      </span>
+                    </div>
+                  </div>
+                  <div
+                    className="text-2xl py-4 break-words leading-snug"
+                    style={{ fontFamily: font.family }}
                   >
-                    {showAllMoods
-                      ? "Show Less"
-                      : `Show All ${moodEntries.length} Entries`}
-                  </button>
+                    {previewText || DEFAULT_PREVIEW_TEXT}
+                  </div>
+                </div>
+              ))}
+
+              {filteredFonts.length === 0 && !loading && (
+                <div
+                  className={`text-center py-16 ${darkMode ? styles.secondaryText.dark : styles.secondaryText.light}`}
+                >
+                  <h3 className="text-xl font-medium mb-2">No fonts found</h3>
+                  <p>Try adjusting your search or filters</p>
                 </div>
               )}
             </div>
-          </div>
-        </div>
+          )}
+        </main>
       </div>
     </div>
   );
-};
-
-export default MoodTracker;
+}
