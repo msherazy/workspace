@@ -25,30 +25,25 @@ const App = () => {
 
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  const toggleDarkMode = () => {
-    setIsDarkMode((prev) => !prev);
-  };
+  const toggleDarkMode = () => setIsDarkMode((prev) => !prev);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // When the logo is clicked, reset the state of the search input.
   const handleLogoClick = () => {
     setSearchTerm("");
     setSearchResults([]);
+    setPageContent(null);
   };
 
-  // Handler for fetching results based on the search term.
   const fetchSearchResults = async () => {
     if (!searchTerm.trim()) {
       setSearchResults([]);
       setPageContent(null);
       return;
     }
-
     setLoading(true);
     setError(null);
-
     try {
       const response = await axios.get("https://en.wikipedia.org/w/api.php", {
         params: {
@@ -59,7 +54,6 @@ const App = () => {
           origin: "*",
         },
       });
-
       setSearchResults(response.data.query.search);
       setPageContent(null);
     } catch (err) {
@@ -73,10 +67,8 @@ const App = () => {
     }
   };
 
-  // Add a 500ms delay after typing in the search input.
   const debouncedFetch = debounce(fetchSearchResults, 500);
 
-  // Perform a new debounced search for results each time the search term is updated.
   useEffect(() => {
     debouncedFetch(searchTerm);
     return () => {
@@ -84,11 +76,9 @@ const App = () => {
     };
   }, [searchTerm]);
 
-  // When a dropdown option is clicked, fetch the data for that topic.
   const fetchPageContent = async (pageId: number) => {
     setLoading(true);
     setError(null);
-
     try {
       const response = await axios.get("https://en.wikipedia.org/w/api.php", {
         params: {
@@ -101,7 +91,6 @@ const App = () => {
           origin: "*",
         },
       });
-
       const page = response.data.query.pages[pageId];
       setPageContent({
         title: page.title,
@@ -116,7 +105,6 @@ const App = () => {
     }
   };
 
-  // If the user clicks outside of the search results while they are open, close the results.
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -128,7 +116,6 @@ const App = () => {
         setSearchResults([]);
       }
     };
-
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
@@ -137,22 +124,25 @@ const App = () => {
 
   return (
     <div
-      className={`min-h-screen ${isDarkMode ? "bg-gray-800" : "bg-gray-50"}`}
+      className={`min-h-screen ${isDarkMode ? "bg-[#181a1b]" : "bg-gray-50"}`}
     >
       <header
         className={`w-full h-20 p-4 border-b flex justify-between items-center ${
-          isDarkMode ? "bg-gray-800 border-white" : "bg-gray-50 border-zinc-200"
+          isDarkMode
+            ? "bg-[#181a1b] border-[#23272f]"
+            : "bg-gray-50 border-zinc-200"
         }`}
       >
         <button
           type="button"
           className="h-12 cursor-pointer"
           onClick={handleLogoClick}
+          aria-label="Wikipedia Home"
         >
           <img
             src="https://pngimg.com/d/wikipedia_PNG11.png"
             alt="Wikipedia logo"
-            className={`h-8 sm:h-9 md:h-full text-white ${isDarkMode && "invert"}`}
+            className={`h-8 sm:h-9 md:h-full ${isDarkMode && "invert"}`}
           />
         </button>
         <button
@@ -178,7 +168,7 @@ const App = () => {
           )}
         </button>
       </header>
-      <main className="w-full mx-auto mt-20 px-4 md:px-6">
+      <main className="w-full mx-auto mt-20 px-4 md:px-6 pb-8 md:pb-12">
         <div className="mb-8 max-w-3xl mx-auto">
           <div className="flex flex-col items-center gap-2 mb-4">
             <img
@@ -212,7 +202,7 @@ const App = () => {
               placeholder="Search Wikipedia..."
               className={`w-full p-4 pl-12 text-lg border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                 isDarkMode
-                  ? "bg-gray-800 text-white placeholder:text-white"
+                  ? "bg-[#23272f] text-white placeholder:text-gray-300"
                   : "bg-white text-gray-800 placeholder:text-gray-600"
               }`}
             />
@@ -238,18 +228,24 @@ const App = () => {
 
         {loading ? (
           <div className="flex justify-center py-8 max-w-3xl mx-auto">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+            <div className="animate-spin rounded-lg h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
           </div>
         ) : error ? (
           <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg mb-6 max-w-3xl mx-auto">
             <p className="text-red-600 dark:text-red-400">{error}</p>
           </div>
+        ) : searchTerm.trim() && searchResults.length === 0 && !pageContent ? (
+          <div className="text-center text-gray-500 dark:text-gray-400 py-8 max-w-3xl mx-auto">
+            <p>No content found. Try searching for something else.</p>
+          </div>
         ) : (
           <>
             {searchResults.length > 0 && !pageContent && (
               <div
-                className={`rounded-lg shadow mb-6 max-w-3xl mx-auto ${
-                  isDarkMode ? "bg-gray-800" : "bg-gray-100"
+                className={`rounded-lg shadow-md mb-6 max-w-[750px] mx-auto border ${
+                  isDarkMode
+                    ? "bg-[#23272f] border-[#262b33]"
+                    : "bg-gray-100 border-gray-200"
                 }`}
                 ref={searchInputRef}
               >
@@ -263,7 +259,7 @@ const App = () => {
                       role="button"
                       aria-label={`View topic: ${result.title}`}
                       key={result.pageid}
-                      className={`p-4 cursor-pointer ${
+                      className={`p-4 cursor-pointer transition-colors ${
                         isDarkMode ? "hover:bg-gray-700" : "hover:bg-gray-200"
                       }`}
                       onClick={() => fetchPageContent(result.pageid)}
@@ -289,15 +285,22 @@ const App = () => {
 
             {pageContent && (
               <div
-                className={`rounded-lg shadow p-4 md:p-6 mb-6 max-w-[750px] mx-auto ${
-                  isDarkMode ? "bg-gray-800" : "bg-white"
-                }`}
+                className={`
+      rounded-lg shadow-md
+      max-w-[750px] mx-auto my-8
+      border
+      flex flex-col gap-4
+      p-6
+      ${
+        isDarkMode
+          ? "bg-[#23272f] border-[#262b33]"
+          : "bg-white border-gray-200"
+      }
+    `}
               >
-                <div className="flex justify-between items-start mb-6">
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
                   <h1
-                    className={`text-3xl font-bold ${
-                      isDarkMode ? "text-white" : "text-gray-800"
-                    }`}
+                    className={`text-3xl font-bold ${isDarkMode ? "text-white" : "text-gray-800"}`}
                   >
                     {pageContent.title}
                   </h1>
@@ -305,7 +308,15 @@ const App = () => {
                     href={pageContent.fullurl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-block px-4 py-2 rounded-md bg-blue-600 text-white font-semibold shadow-md hover:bg-blue-700 transition"
+                    className={`
+          inline-block px-5 py-2 rounded-lg
+          bg-blue-600 text-white font-semibold
+          shadow-md border border-blue-700
+          hover:bg-blue-700
+          focus:outline-none focus:ring-2 focus:ring-blue-300
+          transition
+        `}
+                    tabIndex={0}
                   >
                     View on Wikipedia
                   </a>
@@ -314,9 +325,7 @@ const App = () => {
                 {pageContent.extract && (
                   <div className="prose dark:prose-invert max-w-none">
                     <p
-                      className={`mb-4 ${
-                        isDarkMode ? "text-gray-300" : "text-gray-600"
-                      }`}
+                      className={`mb-2 ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}
                     >
                       {pageContent.extract}
                     </p>
