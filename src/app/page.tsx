@@ -192,149 +192,159 @@ const App = () => {
               the free encyclopedia that anyone can edit.
             </p>
           </div>
-
-          <div className="relative">
-            <input
-              id="wikiSearch"
-              type="search"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search Wikipedia..."
-              className={`w-full p-4 pl-12 text-lg border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                isDarkMode
-                  ? "bg-[#23272f] text-white placeholder:text-gray-300"
-                  : "bg-white text-gray-800 placeholder:text-gray-600"
-              }`}
-            />
-            <label htmlFor="wikiSearch">
-              <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <circle cx="11" cy="11" r="8" />
-                  <line x1="21" y1="21" x2="16.65" y2="16.65" />
-                </svg>
-              </span>
-            </label>
-          </div>
         </div>
 
-        {loading ? (
-          <div className="flex justify-center py-8 max-w-3xl mx-auto">
-            <div className="animate-spin rounded-lg h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-          </div>
-        ) : error ? (
-          <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg mb-6 max-w-3xl mx-auto">
-            <p className="text-red-600 dark:text-red-400">{error}</p>
-          </div>
-        ) : searchTerm.trim() && searchResults.length === 0 && !pageContent ? (
-          <div className="text-center text-gray-500 dark:text-gray-400 py-8 max-w-3xl mx-auto">
-            <p>No content found. Try searching for something else.</p>
-          </div>
-        ) : (
-          <>
-            {searchResults.length > 0 && !pageContent && (
-              <div
-                className={`rounded-lg shadow-md mb-6 max-w-[750px] mx-auto border ${
+        {/* NEW: Unified container for search and content */}
+        <div className="max-w-[750px] mx-auto px-4">
+          {/* Search */}
+          <div className="mb-8">
+            <div className="relative">
+              <input
+                id="wikiSearch"
+                type="search"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search Wikipedia..."
+                className={`w-full p-4 pl-12 text-lg border border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                   isDarkMode
-                    ? "bg-[#23272f] border-[#262b33]"
-                    : "bg-gray-100 border-gray-200"
+                    ? "bg-[#23272f] text-white placeholder:text-gray-300"
+                    : "bg-white text-gray-800 placeholder:text-gray-600"
                 }`}
-                ref={searchInputRef}
-              >
-                <ul
-                  className={`divide-y max-h-[400px] overflow-y-auto ${
-                    isDarkMode ? "divide-gray-700" : "divide-gray-200"
+              />
+              <label htmlFor="wikiSearch">
+                <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <circle cx="11" cy="11" r="8" />
+                    <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                  </svg>
+                </span>
+              </label>
+            </div>
+          </div>
+
+          {/* Loading/Error/No Results */}
+          {loading ? (
+            <div className="flex justify-center py-8">
+              <div className="animate-spin rounded-xl h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+            </div>
+          ) : error ? (
+            <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-xl mb-6">
+              <p className="text-red-600 dark:text-red-400">{error}</p>
+            </div>
+          ) : searchTerm.trim() &&
+            searchResults.length === 0 &&
+            !pageContent ? (
+            <div className="text-center text-gray-500 dark:text-gray-400 py-8">
+              <p>No content found. Try searching for something else.</p>
+            </div>
+          ) : (
+            <>
+              {searchResults.length > 0 && !pageContent && (
+                <div
+                  className={`rounded-xl shadow-md mb-6 border ${
+                    isDarkMode
+                      ? "bg-[#23272f] border-[#262b33]"
+                      : "bg-gray-100 border-gray-200"
                   }`}
+                  ref={searchInputRef}
                 >
-                  {searchResults.map((result) => (
-                    <li
-                      role="button"
-                      aria-label={`View topic: ${result.title}`}
-                      key={result.pageid}
-                      className={`p-4 cursor-pointer transition-colors ${
-                        isDarkMode ? "hover:bg-gray-700" : "hover:bg-gray-200"
-                      }`}
-                      onClick={() => fetchPageContent(result.pageid)}
-                    >
-                      <h2
-                        className={`text-xl font-semibold mb-1 ${
-                          isDarkMode ? "text-white" : "text-gray-800"
+                  <ul
+                    className={`divide-y max-h-[400px] overflow-y-auto ${
+                      isDarkMode ? "divide-gray-700" : "divide-gray-200"
+                    }`}
+                  >
+                    {searchResults.map((result) => (
+                      <li
+                        role="button"
+                        aria-label={`View topic: ${result.title}`}
+                        key={result.pageid}
+                        className={`p-4 cursor-pointer transition-colors ${
+                          isDarkMode ? "hover:bg-gray-700" : "hover:bg-gray-200"
                         }`}
+                        onClick={() => fetchPageContent(result.pageid)}
                       >
-                        {result.title}
-                      </h2>
-                      <div
-                        className={`text-sm line-clamp-2 ${
-                          isDarkMode ? "text-gray-300" : "text-gray-600"
-                        }`}
-                        dangerouslySetInnerHTML={{ __html: result.snippet }}
-                      />
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            {pageContent && (
-              <div
-                className={`
-      rounded-lg shadow-md
-      max-w-[750px] mx-auto my-8
-      border
-      flex flex-col gap-4
-      p-6
-      ${
-        isDarkMode
-          ? "bg-[#23272f] border-[#262b33]"
-          : "bg-white border-gray-200"
-      }
-    `}
-              >
-                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-                  <h1
-                    className={`text-3xl font-bold ${isDarkMode ? "text-white" : "text-gray-800"}`}
-                  >
-                    {pageContent.title}
-                  </h1>
-                  <a
-                    href={pageContent.fullurl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={`
-          inline-block px-5 py-2 rounded-lg
-          bg-blue-600 text-white font-semibold
-          shadow-md border border-blue-700
-          hover:bg-blue-700
-          focus:outline-none focus:ring-2 focus:ring-blue-300
-          transition
-        `}
-                    tabIndex={0}
-                  >
-                    View on Wikipedia
-                  </a>
+                        <h2
+                          className={`text-xl font-semibold mb-1 ${
+                            isDarkMode ? "text-white" : "text-gray-800"
+                          }`}
+                        >
+                          {result.title}
+                        </h2>
+                        <div
+                          className={`text-sm line-clamp-2 ${
+                            isDarkMode ? "text-gray-300" : "text-gray-600"
+                          }`}
+                          dangerouslySetInnerHTML={{ __html: result.snippet }}
+                        />
+                      </li>
+                    ))}
+                  </ul>
                 </div>
+              )}
 
-                {pageContent.extract && (
-                  <div className="prose dark:prose-invert max-w-none">
-                    <p
-                      className={`mb-2 ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}
+              {pageContent && (
+                <div
+                  className={`
+                    rounded-xl shadow-md
+                    my-8
+                    border
+                    flex flex-col gap-4
+                    p-6
+                    ${
+                      isDarkMode
+                        ? "bg-[#23272f] border-[#262b33]"
+                        : "bg-white border-gray-200"
+                    }
+                  `}
+                >
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+                    <h1
+                      className={`text-3xl font-bold ${isDarkMode ? "text-white" : "text-gray-800"}`}
                     >
-                      {pageContent.extract}
-                    </p>
+                      {pageContent.title}
+                    </h1>
+                    <a
+                      href={pageContent.fullurl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`
+    block w-full sm:w-auto px-5 py-2 rounded-xl
+    bg-blue-600 text-white font-semibold
+    shadow-md border border-blue-700
+    hover:bg-blue-700
+    focus:outline-none focus:ring-2 focus:ring-blue-300
+    transition
+    text-center
+  `}
+                      tabIndex={0}
+                    >
+                      View on Wikipedia
+                    </a>
                   </div>
-                )}
-              </div>
-            )}
-          </>
-        )}
+
+                  {pageContent.extract && (
+                    <div className="prose dark:prose-invert max-w-none">
+                      <p
+                        className={`mb-2 ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}
+                      >
+                        {pageContent.extract}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </>
+          )}
+        </div>
       </main>
     </div>
   );
