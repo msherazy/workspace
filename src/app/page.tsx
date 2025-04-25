@@ -2,6 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import { Poppins } from "next/font/google";
+
+// Set up Poppins font
+const poppins = Poppins({
+  weight: ["400", "500", "600", "700"],
+  subsets: ["latin"],
+  display: "swap",
+});
 
 // Demo images for realism
 const experienceImages = [
@@ -171,8 +179,7 @@ export default function IslandQuest() {
 
   return (
     <div
-      style={{ fontFamily: "'Poppins', Arial, sans-serif" }}
-      className={`min-h-screen flex flex-col transition-colors duration-300 ${darkMode ? "bg-slate-900 text-slate-100" : "bg-sky-50 text-slate-800"}`}
+      className={`${poppins.className} min-h-screen flex flex-col transition-colors duration-300 ${darkMode ? "bg-slate-900 text-slate-100" : "bg-sky-50 text-slate-800"}`}
     >
       <nav
         className={`sticky top-0 z-50 ${darkMode ? "bg-slate-800" : "bg-white"} shadow-lg transition-colors duration-300`}
