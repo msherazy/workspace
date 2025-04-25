@@ -14,10 +14,14 @@ const PALETTE = {
     text: "#502c07",
     secondaryText: "#661829",
     gridOn: "#a53860",
+    gridOnIcon: "#ffe3e3",
     gridOff: "#fdf1e5",
+    gridOffIcon: "#a53860",
     button: "#da627d",
     buttonText: "#fff",
     gridBorder: "#cd3052",
+    solutionBg: "#a53860",
+    solutionText: "#fff",
   },
   dark: {
     background: "#2a1421",
@@ -29,10 +33,14 @@ const PALETTE = {
     text: "#ffe3e3",
     secondaryText: "#ffc8cc",
     gridOn: "#ffa5ab",
+    gridOnIcon: "#3a2230",
     gridOff: "#3a2230",
+    gridOffIcon: "#ffa5ab",
     button: "#f1af6d",
     buttonText: "#3a2230",
     gridBorder: "#ff505b",
+    solutionBg: "#ffe3e3",
+    solutionText: "#a53860",
   }
 };
 
@@ -275,16 +283,16 @@ export default function Home() {
   };
 
   // Accessibility: use an icon for ON/OFF, with ARIA
-  const LightIcon = ({ on }: { on: boolean }) =>
+  const LightIcon = ({ on, theme }: { on: boolean; theme: "light" | "dark" }) =>
     on ? (
-      <svg aria-label="Light is on" width="24" height="24" fill="none" viewBox="0 0 24 24">
-        <circle cx="12" cy="12" r="10" fill={colors.gridOn} />
-        <rect x="10.5" y="4" width="3" height="7" rx="1.5" fill={colors.accent} />
+      <svg aria-label="Light is on" width="32" height="32" fill="none" viewBox="0 0 32 32">
+        <circle cx="16" cy="16" r="14" fill={PALETTE[theme].gridOnIcon} stroke={PALETTE[theme].gridOn} strokeWidth="3" />
+        <rect x="14" y="8" width="4" height="10" rx="2" fill={PALETTE[theme].gridOn} />
       </svg>
     ) : (
-      <svg aria-label="Light is off" width="24" height="24" fill="none" viewBox="0 0 24 24">
-        <circle cx="12" cy="12" r="10" fill={colors.gridOff} stroke={colors.gridBorder} strokeWidth="2"/>
-        <rect x="10.5" y="4" width="3" height="7" rx="1.5" fill={colors.gridBorder} opacity={0.25} />
+      <svg aria-label="Light is off" width="32" height="32" fill="none" viewBox="0 0 32 32">
+        <circle cx="16" cy="16" r="14" fill={PALETTE[theme].gridOff} stroke={PALETTE[theme].gridBorder} strokeWidth="3"/>
+        <rect x="14" y="8" width="4" height="10" rx="2" fill={PALETTE[theme].gridBorder} opacity={0.35} />
       </svg>
     );
 
@@ -303,7 +311,7 @@ export default function Home() {
         whileTap={{ scale: 0.93 }}
         style={{
           background: cell.isActive ? colors.gridOn : colors.gridOff,
-          border: `2px solid ${colors.gridBorder}`,
+          border: `2.5px solid ${colors.gridBorder}`,
           borderRadius: isTopRow && isLeftCol
             ? "18px 0 0 0"
             : isTopRow && isRightCol
@@ -312,17 +320,17 @@ export default function Home() {
                 ? "0 0 0 18px"
                 : isBottomRow && isRightCol
                   ? "0 0 18px 0"
-                  : "8px",
+                  : "12px",
           cursor: "pointer",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          minHeight: 38,
+          minHeight: 48,
           transition: "background 0.15s, border 0.15s"
         }}
         aria-label={cell.isActive ? "Light is on" : "Light is off"}
       >
-        <LightIcon on={cell.isActive} />
+        <LightIcon on={cell.isActive} theme={theme} />
       </motion.div>
     );
   };
@@ -343,27 +351,33 @@ export default function Home() {
 
   // --- UI sections (Intro, LevelTransition, NameInput, Game, Leaderboard, Info) ---
 
+  // THEME TOGGLE (now fixed at top right)
   const renderThemeToggle = () => (
-    <button
-      aria-label={theme === "light" ? "Switch to dark mode" : "Switch to light mode"}
-      onClick={() => setTheme(theme === "light" ? "dark" : "light")}
-      style={{
-        background: theme === "dark" ? colors.card : colors.primary,
-        color: theme === "dark" ? colors.primary : colors.card,
-        fontWeight: 600,
-        borderRadius: "999px",
-        fontSize: "1rem",
-        border: "none",
-        padding: "0.5rem 1.2rem",
-        boxShadow: `0 1px 8px ${colors.cardShadow}`,
-        marginLeft: 8,
-        marginTop: 10,
-        marginRight: 10,
-        cursor: "pointer"
-      }}
-    >
-      {theme === "light" ? "Dark mode" : "Light mode"}
-    </button>
+    <div style={{
+      position: 'fixed',
+      top: isMobile ? 14 : 24,
+      right: isMobile ? 10 : 36,
+      zIndex: 100
+    }}>
+      <button
+        aria-label={theme === "light" ? "Switch to dark mode" : "Switch to light mode"}
+        onClick={() => setTheme(theme === "light" ? "dark" : "light")}
+        style={{
+          background: theme === "dark" ? colors.card : colors.primary,
+          color: theme === "dark" ? colors.primary : colors.card,
+          fontWeight: 600,
+          borderRadius: "999px",
+          fontSize: "1rem",
+          border: "none",
+          padding: "0.52rem 1.35rem",
+          boxShadow: `0 1px 8px ${colors.cardShadow}`,
+          marginLeft: 8,
+          cursor: "pointer"
+        }}
+      >
+        {theme === "light" ? "Dark mode" : "Light mode"}
+      </button>
+    </div>
   );
 
   const renderIntro = () => (
@@ -374,7 +388,6 @@ export default function Home() {
       transition={{ duration: 0.5 }}
       style={{ background: colors.background }}
     >
-      {renderThemeToggle()}
       <motion.div
         className="p-8 rounded-2xl shadow-2xl text-center max-w-md"
         style={{
@@ -586,10 +599,6 @@ export default function Home() {
       transition={{ duration: 0.5 }}
       style={{ background: colors.background }}
     >
-      <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
-        {renderThemeToggle()}
-        <div style={{ flexGrow: 1 }} />
-      </div>
       <motion.div
         className="p-8 rounded-2xl shadow-2xl text-center max-w-md w-full"
         style={{
@@ -650,8 +659,8 @@ export default function Home() {
           <div
             className="px-4 py-2 rounded-xl text-sm font-medium"
             style={{
-              background: colors.accentSoft,
-              color: colors.primary,
+              background: colors.solutionBg,
+              color: colors.solutionText,
               fontFamily: "Montserrat, sans-serif"
             }}
           >
@@ -877,6 +886,7 @@ export default function Home() {
           <div className="col-span-1">{renderInfoPanel()}</div>
         </div>
       </div>
+      {renderThemeToggle()}
     </div>
   );
 
@@ -889,6 +899,7 @@ export default function Home() {
           {renderInfoPanel()}
         </div>
       </div>
+      {renderThemeToggle()}
       {renderBottomNav()}
     </div>
   );
