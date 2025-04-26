@@ -1,969 +1,352 @@
 "use client";
-import { useCallback, useEffect, useState } from "react";
-import { motion } from "framer-motion";
 
-// Color palettes for light and dark mode
-const PALETTE = {
-  light: {
-    background: "#fef8f2",
-    card: "#fae2cb",
-    cardShadow: "#f1af6d",
-    primary: "#a53860",
-    accent: "#da627d",
-    accentSoft: "#e9a1b0",
-    text: "#502c07",
-    secondaryText: "#661829",
-    gridOn: "#a53860",
-    gridOnIcon: "#ffe3e3",
-    gridOff: "#fdf1e5",
-    gridOffIcon: "#a53860",
-    button: "#da627d",
-    buttonText: "#fff",
-    gridBorder: "#cd3052",
-    solutionBg: "#a53860",
-    solutionText: "#fff",
-  },
-  dark: {
-    background: "#2a1421",
-    card: "#3a2230",
-    cardShadow: "#4e2641",
-    primary: "#ffa5ab",
-    accent: "#f1af6d",
-    accentSoft: "#ffb6ba",
-    text: "#ffe3e3",
-    secondaryText: "#ffc8cc",
-    gridOn: "#ffa5ab",
-    gridOnIcon: "#3a2230",
-    gridOff: "#3a2230",
-    gridOffIcon: "#ffa5ab",
-    button: "#f1af6d",
-    buttonText: "#3a2230",
-    gridBorder: "#ff505b",
-    solutionBg: "#ffe3e3",
-    solutionText: "#a53860",
-  }
-};
+import {useEffect, useState} from "react";
+import {AnimatePresence, motion} from "framer-motion";
+import {FaHeart, FaMoon, FaPaperPlane, FaRegCommentDots, FaRegHeart, FaShare, FaSun} from "react-icons/fa";
 
-interface LightGrid {
-  id: number;
-  isActive: boolean;
-}
-
-interface LeaderboardEntry {
-  id: string;
-  name: string;
-  score: number;
-  level: number;
-  timestamp: number;
-}
-
-interface LevelConfig {
-  gridSize: number;
-  initialActiveLights: number;
-  maxMoves: number;
-}
-
-const LEVELS: LevelConfig[] = [
-  { gridSize: 3, initialActiveLights: 3, maxMoves: 5 },
-  { gridSize: 4, initialActiveLights: 4, maxMoves: 7 },
-  { gridSize: 5, initialActiveLights: 6, maxMoves: 10 },
-  { gridSize: 6, initialActiveLights: 8, maxMoves: 14 },
-  { gridSize: 7, initialActiveLights: 10, maxMoves: 18 },
+const avatarColors = [
+  "bg-blue-500",
+  "bg-green-500",
+  "bg-pink-500",
+  "bg-yellow-500",
+  "bg-indigo-500",
+  "bg-purple-500",
+  "bg-red-500",
 ];
 
-const DEFAULT_NAME = "Anonymous";
-const LEADERBOARD_STORAGE_KEY = "lightsOutLeaderboard";
+function getAvatarColor(name: string) {
+  const idx = name
+      .split("")
+      .reduce((acc, char) => acc + char.charCodeAt(0), 0) % avatarColors.length;
+  return avatarColors[idx];
+}
 
-const MOCK_LEADERBOARD: LeaderboardEntry[] = [
-  { id: "mock1", name: "Alex", score: 340, level: 4, timestamp: Date.now() - 120000 },
-  { id: "mock2", name: "Sam", score: 300, level: 3, timestamp: Date.now() - 80000 },
-  { id: "mock3", name: "Jamie", score: 250, level: 3, timestamp: Date.now() - 50000 }
-];
+function getInitials(name: string) {
+  return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase();
+}
 
-// Utils
-const generateId = () =>
-  Date.now().toString(36) + Math.random().toString(36).substring(2);
+export default function SocialWall() {
+  const [dark, setDark] = useState(false);
+  const [posts, setPosts] = useState([
+    {
+      id: 1,
+      author: "Jane Cooper",
+      content:
+          "Just finished reading Atomic Habits. Highly recommend for anyone looking to build better habits! What are you all reading lately?",
+      timestamp: "2h ago",
+      likes: 24,
+      comments: 2,
+      liked: false,
+      commentOpen: false,
+      commentsList: [
+        {
+          id: 1,
+          author: "Alex Morgan",
+          content: "I just started this too! So insightful.",
+          timestamp: "1h ago",
+        },
+        {
+          id: 2,
+          author: "Sam Wilson",
+          content: "The power of tiny changes is game-changing.",
+          timestamp: "45m ago",
+        },
+      ],
+      newComment: "",
+    },
+    {
+      id: 2,
+      author: "Michael Scott",
+      content: "Beach day with the team! 🏖️ Who else is enjoying the summer?",
+      timestamp: "5h ago",
+      likes: 42,
+      comments: 1,
+      liked: false,
+      commentOpen: false,
+      commentsList: [
+        {
+          id: 1,
+          author: "Jim Halpert",
+          content: "Looks amazing! What beach is that?",
+          timestamp: "4h ago",
+        },
+      ],
+      newComment: "",
+    },
+  ]);
+  const [newPost, setNewPost] = useState("");
 
-const generateGrid = (size: number, initialActive: number): LightGrid[] => {
-  const totalCells = size * size;
-  const activeCells = new Set<number>();
-  while (activeCells.size < initialActive) {
-    const randomPos = Math.floor(Math.random() * totalCells);
-    activeCells.add(randomPos);
-  }
-  return Array.from({ length: totalCells }, (_, index) => ({
-    id: index,
-    isActive: activeCells.has(index)
-  }));
-};
-
-const getAdjacentCells = (index: number, size: number): number[] => {
-  const x = Math.floor(index / size);
-  const y = index % size;
-  const directions = [
-    [0, 1], [0, -1], [1, 0], [-1, 0]
-  ];
-  return directions
-    .map(([dx, dy]) => {
-      const newX = x + dx;
-      const newY = y + dy;
-      return newX >= 0 && newX < size && newY >= 0 && newY < size
-        ? newX * size + newY
-        : null;
-    })
-    .filter((i): i is number => i !== null);
-};
-
-const isGridSolved = (grid: LightGrid[]) => !grid.some((cell) => cell.isActive);
-
-// --- Main Component ---
-
-export default function Home() {
-  // Theme state and persistence
-  const [theme, setTheme] = useState<"light" | "dark">("light");
-
+  // Light/dark mode toggle
   useEffect(() => {
-    const saved = localStorage.getItem("lightsOutTheme");
-    if (saved === "dark" || saved === "light") setTheme(saved);
-  }, []);
+    document.documentElement.classList.toggle("dark", dark);
+  }, [dark]);
 
-  useEffect(() => {
-    localStorage.setItem("lightsOutTheme", theme);
-    if (theme === "dark") {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-  }, [theme]);
-
-  const colors = PALETTE[theme];
-
-  // Responsive
-  const [isMobile, setIsMobile] = useState(false);
-  useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 768);
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  // Game state
-  const [levelConfig, setLevelConfig] = useState<LevelConfig>(LEVELS[0]);
-  const [grid, setGrid] = useState<LightGrid[]>([]);
-  const [moves, setMoves] = useState(0);
-  const [score, setScore] = useState(0);
-  const [level, setLevel] = useState(1);
-  const [solved, setSolved] = useState(false);
-  const [showConfetti, setShowConfetti] = useState(false);
-  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
-  const [playerName, setPlayerName] = useState(DEFAULT_NAME);
-  const [showIntro, setShowIntro] = useState(true);
-  const [showLevelTransition, setShowLevelTransition] = useState(false);
-  const [showNameInput, setShowNameInput] = useState(false);
-  const [newHighScore, setNewHighScore] = useState(false);
-  const [levelScore, setLevelScore] = useState(0);
-
-  // Leaderboard: load and save
-  useEffect(() => {
-    const stored = localStorage.getItem(LEADERBOARD_STORAGE_KEY);
-    if (stored) {
-      try {
-        setLeaderboard(JSON.parse(stored));
-      } catch {
-        setLeaderboard([]);
-      }
-    }
-  }, []);
-
-  const saveScore = (name: string, score: number, level: number) => {
-    const newEntry: LeaderboardEntry = {
-      id: generateId(),
-      name,
-      score,
-      level,
-      timestamp: Date.now()
-    };
-    const updated = [...leaderboard, newEntry]
-      .sort((a, b) => b.score - a.score)
-      .slice(0, 10);
-    setLeaderboard(updated);
-    localStorage.setItem(LEADERBOARD_STORAGE_KEY, JSON.stringify(updated));
-  };
-
-  // Grid init
-  const initializeGrid = useCallback(() => {
-    setGrid(generateGrid(levelConfig.gridSize, levelConfig.initialActiveLights));
-    setMoves(0);
-    setSolved(false);
-  }, [levelConfig]);
-
-  useEffect(() => {
-    if (!showIntro && !showLevelTransition) {
-      initializeGrid();
-    }
-  }, [levelConfig, showIntro, showLevelTransition, initializeGrid]);
-
-  // Solve check
-  useEffect(() => {
-    if (grid.length > 0 && !solved && isGridSolved(grid)) {
-      setSolved(true);
-      setShowConfetti(true);
-      setNewHighScore(false);
-
-      const newLevelScore = calculateScore(moves, levelConfig.gridSize);
-      setLevelScore(newLevelScore);
-      const newScore = score + newLevelScore;
-      setScore(newScore);
-
-      if (
-        leaderboard.length < 10 ||
-        newScore > leaderboard[leaderboard.length - 1]?.score
-      ) {
-        setNewHighScore(true);
-        setShowNameInput(true);
-      }
-
-      setTimeout(() => {
-        if (!showNameInput) setShowLevelTransition(true);
-        setShowConfetti(false);
-      }, 2500);
-    }
-  }, [grid, solved, moves, score, levelConfig.maxMoves, leaderboard, showNameInput]);
-
-  const calculateScore = (movesMade: number, gridSize: number) => {
-    const baseScore = 100;
-    const perfectMoves = Math.ceil((gridSize * gridSize) / 2);
-    const efficiency = Math.max(0, 1 - (movesMade - perfectMoves) / (perfectMoves * 2));
-    return Math.round(baseScore * efficiency);
-  };
-
-  const toggleCell = (index: number) => {
-    if (solved) return;
-    const newGrid = [...grid];
-    const cellsToToggle = [index, ...getAdjacentCells(index, levelConfig.gridSize)];
-    cellsToToggle.forEach((cellIndex) => {
-      if (cellIndex >= 0 && cellIndex < newGrid.length) {
-        newGrid[cellIndex].isActive = !newGrid[cellIndex].isActive;
-      }
-    });
-    setGrid(newGrid);
-    setMoves((prev) => prev + 1);
-  };
-
-  // Game event handlers
-  const handleStartGame = () => {
-    setShowIntro(false);
-    initializeGrid();
-  };
-
-  const handleNextLevel = () => {
-    setShowLevelTransition(false);
-    setSolved(false);
-    const idx = LEVELS.findIndex((l) => l.gridSize === levelConfig.gridSize);
-    const nextIdx = idx + 1;
-    if (nextIdx < LEVELS.length) {
-      setLevelConfig(LEVELS[nextIdx]);
-      setLevel((prev) => prev + 1);
-      setMoves(0);
-      initializeGrid();
-    } else {
-      setShowIntro(true);
-      setLevel(1);
-      setScore(0);
-      setLevelConfig(LEVELS[0]);
-    }
-  };
-
-  const handleNameSubmit = () => {
-    if (!playerName.trim()) return;
-    saveScore(playerName, score, level);
-    setShowNameInput(false);
-    setSolved(false);
-    setShowLevelTransition(true);
-  };
-
-  // Accessibility: use an icon for ON/OFF, with ARIA
-  const LightIcon = ({ on, theme }: { on: boolean; theme: "light" | "dark" }) =>
-    on ? (
-      <svg aria-label="Light is on" width="32" height="32" fill="none" viewBox="0 0 32 32">
-        <circle cx="16" cy="16" r="14" fill={PALETTE[theme].gridOnIcon} stroke={PALETTE[theme].gridOn} strokeWidth="3" />
-        <rect x="14" y="8" width="4" height="10" rx="2" fill={PALETTE[theme].gridOn} />
-      </svg>
-    ) : (
-      <svg aria-label="Light is off" width="32" height="32" fill="none" viewBox="0 0 32 32">
-        <circle cx="16" cy="16" r="14" fill={PALETTE[theme].gridOff} stroke={PALETTE[theme].gridBorder} strokeWidth="3"/>
-        <rect x="14" y="8" width="4" height="10" rx="2" fill={PALETTE[theme].gridBorder} opacity={0.35} />
-      </svg>
-    );
-
-  // Render grid cells with feedback
-  const renderCell = (cell: LightGrid) => {
-    const row = Math.floor(cell.id / levelConfig.gridSize);
-    const col = cell.id % levelConfig.gridSize;
-    const isTopRow = row === 0;
-    const isBottomRow = row === levelConfig.gridSize - 1;
-    const isLeftCol = col === 0;
-    const isRightCol = col === levelConfig.gridSize - 1;
-    return (
-      <motion.div
-        key={cell.id}
-        onClick={() => toggleCell(cell.id)}
-        whileTap={{ scale: 0.93 }}
-        style={{
-          background: cell.isActive ? colors.gridOn : colors.gridOff,
-          border: `2.5px solid ${colors.gridBorder}`,
-          borderRadius: isTopRow && isLeftCol
-            ? "18px 0 0 0"
-            : isTopRow && isRightCol
-              ? "0 18px 0 0"
-              : isBottomRow && isLeftCol
-                ? "0 0 0 18px"
-                : isBottomRow && isRightCol
-                  ? "0 0 18px 0"
-                  : "12px",
-          cursor: "pointer",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          minHeight: 48,
-          transition: "background 0.15s, border 0.15s"
-        }}
-        aria-label={cell.isActive ? "Light is on" : "Light is off"}
-      >
-        <LightIcon on={cell.isActive} theme={theme} />
-      </motion.div>
+  const handleLike = (postId: number) => {
+    setPosts(
+        posts.map((post) =>
+            post.id === postId
+                ? {
+                  ...post,
+                  liked: !post.liked,
+                  likes: post.liked ? post.likes - 1 : post.likes + 1,
+                }
+                : post
+        )
     );
   };
 
-  const renderGrid = () => (
-    <div
-      className="grid gap-2 p-5 rounded-xl shadow-xl"
-      style={{
-        background: colors.card,
-        boxShadow: `0 8px 24px ${colors.cardShadow}`,
-        gridTemplateColumns: `repeat(${levelConfig.gridSize}, minmax(36px, 1fr))`,
-        display: "grid"
-      }}
-    >
-      {grid.map(renderCell)}
-    </div>
-  );
-
-  // --- UI sections (Intro, LevelTransition, NameInput, Game, Leaderboard, Info) ---
-
-  // THEME TOGGLE (now fixed at top right)
-  const renderThemeToggle = () => (
-    <div style={{
-      position: 'fixed',
-      top: isMobile ? 14 : 24,
-      right: isMobile ? 10 : 36,
-      zIndex: 100
-    }}>
-      <button
-        aria-label={theme === "light" ? "Switch to dark mode" : "Switch to light mode"}
-        onClick={() => setTheme(theme === "light" ? "dark" : "light")}
-        style={{
-          background: theme === "dark" ? colors.card : colors.primary,
-          color: theme === "dark" ? colors.primary : colors.card,
-          fontWeight: 600,
-          borderRadius: "999px",
-          fontSize: "1rem",
-          border: "none",
-          padding: "0.52rem 1.35rem",
-          boxShadow: `0 1px 8px ${colors.cardShadow}`,
-          marginLeft: 8,
-          cursor: "pointer"
-        }}
-      >
-        {theme === "light" ? "Dark mode" : "Light mode"}
-      </button>
-    </div>
-  );
-
-  const renderIntro = () => (
-    <motion.div
-      className="flex flex-col items-center justify-center min-h-screen p-4"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-      style={{ background: colors.background }}
-    >
-      <motion.div
-        className="p-8 rounded-2xl shadow-2xl text-center max-w-md"
-        style={{
-          background: colors.card,
-          boxShadow: `0 18px 30px -10px ${colors.cardShadow}`
-        }}
-        initial={{ scale: 0.93, y: 10 }}
-        animate={{ scale: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.15 }}
-      >
-        <motion.h1
-          className="text-5xl font-bold mb-6"
-          style={{
-            color: colors.primary,
-            fontFamily: "Playfair Display, serif"
-          }}
-        >
-          Lights Out
-        </motion.h1>
-        <motion.p
-          className="text-lg mb-7"
-          style={{
-            color: colors.secondaryText,
-            fontFamily: "Montserrat, sans-serif"
-          }}
-        >
-          Turn off all the lights in as few moves as possible. Can you top the leaderboard?
-        </motion.p>
-        <motion.button
-          onClick={handleStartGame}
-          className="font-bold py-3 px-8 rounded-xl"
-          style={{
-            background: `linear-gradient(90deg, ${colors.primary}, ${colors.accentSoft})`,
-            color: colors.buttonText,
-            fontFamily: "Montserrat, sans-serif",
-            fontSize: "1.18rem",
-            boxShadow: `0 2px 8px ${colors.cardShadow}`,
-            border: "none",
-            cursor: "pointer"
-          }}
-          whileHover={{ scale: 1.06 }}
-          whileTap={{ scale: 0.94 }}
-        >
-          Start Game
-        </motion.button>
-      </motion.div>
-    </motion.div>
-  );
-
-  const renderLevelTransition = () => (
-    <motion.div
-      className="flex flex-col items-center justify-center min-h-screen p-4"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-      style={{ background: colors.background }}
-    >
-      <motion.div
-        className="p-8 rounded-2xl shadow-2xl text-center max-w-md"
-        style={{
-          background: colors.card,
-          boxShadow: `0 18px 30px -10px ${colors.cardShadow}`
-        }}
-        initial={{ scale: 0.93, y: 10 }}
-        animate={{ scale: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        <motion.h2
-          className="text-3xl font-bold mb-5"
-          style={{
-            color: colors.primary,
-            fontFamily: "Playfair Display, serif"
-          }}
-        >
-          {newHighScore ? "New Record" : "Level Complete"}
-        </motion.h2>
-        <motion.div className="mb-5">
-          <p
-            className="text-lg"
-            style={{
-              color: colors.secondaryText,
-              fontFamily: "Montserrat, sans-serif"
-            }}
-          >
-            Level {level} Complete
-          </p>
-          <p
-            className="text-2xl font-bold mb-3"
-            style={{
-              color: colors.primary,
-              fontFamily: "Playfair Display, serif"
-            }}
-          >
-            Score: {score}
-          </p>
-          <p
-            className="text-lg"
-            style={{
-              color: colors.secondaryText,
-              fontFamily: "Montserrat, sans-serif"
-            }}
-          >
-            You solved it in {moves} moves and earned {levelScore} points
-          </p>
-        </motion.div>
-        <motion.button
-          onClick={handleNextLevel}
-          className="font-bold py-3 px-8 rounded-xl"
-          style={{
-            background: `linear-gradient(90deg, ${colors.primary}, ${colors.accentSoft})`,
-            color: colors.buttonText,
-            fontFamily: "Montserrat, sans-serif",
-            fontSize: "1.18rem",
-            boxShadow: `0 2px 8px ${colors.cardShadow}`,
-            border: "none",
-            cursor: "pointer"
-          }}
-          whileHover={{ scale: 1.06 }}
-          whileTap={{ scale: 0.94 }}
-        >
-          {level === LEVELS.length ? "Finish" : "Next Level"}
-        </motion.button>
-      </motion.div>
-    </motion.div>
-  );
-
-  const renderNameInput = () => (
-    <motion.div
-      className="flex flex-col items-center justify-center min-h-screen p-4"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-      style={{ background: colors.background }}
-    >
-      <motion.div
-        className="p-8 rounded-2xl shadow-2xl text-center max-w-md"
-        style={{
-          background: colors.card,
-          boxShadow: `0 18px 30px -10px ${colors.cardShadow}`
-        }}
-        initial={{ scale: 0.93, y: 10 }}
-        animate={{ scale: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        <motion.h2
-          className="text-3xl font-bold mb-6"
-          style={{
-            color: colors.primary,
-            fontFamily: "Playfair Display, serif"
-          }}
-        >
-          New High Score
-        </motion.h2>
-        <motion.div className="mb-6 text-left">
-          <label
-            htmlFor="playerName"
-            className="block text-sm font-medium mb-2"
-            style={{
-              color: colors.primary,
-              fontFamily: "Montserrat, sans-serif"
-            }}
-          >
-            Enter your name for the leaderboard:
-          </label>
-          <input
-            id="playerName"
-            type="text"
-            value={playerName}
-            onChange={(e) => setPlayerName(e.target.value)}
-            className="w-full px-4 py-3 rounded-xl border"
-            style={{
-              background: colors.background,
-              borderColor: colors.accentSoft,
-              color: colors.primary,
-              fontFamily: "Montserrat, sans-serif"
-            }}
-            placeholder="Your name"
-            autoFocus
-          />
-        </motion.div>
-        <motion.button
-          onClick={handleNameSubmit}
-          className="font-bold py-3 px-8 rounded-xl"
-          style={{
-            background: `linear-gradient(90deg, ${colors.primary}, ${colors.accentSoft})`,
-            color: colors.buttonText,
-            fontFamily: "Montserrat, sans-serif",
-            fontSize: "1.18rem",
-            boxShadow: `0 2px 8px ${colors.cardShadow}`,
-            border: "none",
-            cursor: playerName.trim() ? "pointer" : "not-allowed",
-            opacity: playerName.trim() ? 1 : 0.7
-          }}
-          whileHover={{ scale: playerName.trim() ? 1.06 : 1 }}
-          whileTap={{ scale: playerName.trim() ? 0.94 : 1 }}
-          disabled={!playerName.trim()}
-        >
-          Save Score
-        </motion.button>
-      </motion.div>
-    </motion.div>
-  );
-
-  const renderGame = () => (
-    <motion.div
-      className="flex flex-col items-center justify-center min-h-screen p-4"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-      style={{ background: colors.background }}
-    >
-      <motion.div
-        className="p-8 rounded-2xl shadow-2xl text-center max-w-md w-full"
-        style={{
-          background: colors.card,
-          boxShadow: `0 18px 30px -10px ${colors.cardShadow}`,
-        }}
-        initial={{ scale: 0.93, y: 10 }}
-        animate={{ scale: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.1 }}
-      >
-        <div className="flex justify-between items-center mb-5">
-          <div>
-            <p
-              className="text-sm font-medium uppercase"
-              style={{ color: colors.primary, fontFamily: "Montserrat, sans-serif" }}
-            >
-              Level {level}
-            </p>
-            <p
-              className="text-xl font-bold"
-              style={{ color: colors.secondaryText, fontFamily: "Playfair Display, serif" }}
-            >
-              Score: {score}
-            </p>
-          </div>
-          <div>
-            <p
-              className="text-sm font-medium uppercase"
-              style={{ color: colors.primary, fontFamily: "Montserrat, sans-serif" }}
-            >
-              Moves
-            </p>
-            <p
-              className="text-xl font-bold"
-              style={{ color: colors.secondaryText, fontFamily: "Playfair Display, serif" }}
-            >
-              {moves}
-            </p>
-          </div>
-        </div>
-        <div className="mb-6">{renderGrid()}</div>
-        <div className="flex justify-between items-center">
-          <motion.button
-            aria-label="Quit"
-            onClick={() => setShowIntro(true)}
-            className="py-2 px-4 rounded-xl font-medium"
-            style={{
-              background: "none",
-              color: colors.primary,
-              fontFamily: "Montserrat, sans-serif",
-              border: "none",
-              cursor: "pointer"
-            }}
-            whileHover={{ scale: 1.07, color: colors.accent }}
-          >
-            Quit
-          </motion.button>
-          <div
-            className="px-4 py-2 rounded-xl text-sm font-medium"
-            style={{
-              background: colors.solutionBg,
-              color: colors.solutionText,
-              fontFamily: "Montserrat, sans-serif"
-            }}
-          >
-            {solved ? "Solved" : "Find a solution"}
-          </div>
-          <motion.button
-            aria-label="Reset"
-            onClick={initializeGrid}
-            className="py-2 px-4 rounded-xl font-medium"
-            style={{
-              background: "none",
-              color: colors.primary,
-              fontFamily: "Montserrat, sans-serif",
-              border: "none",
-              cursor: "pointer"
-            }}
-            whileHover={{ scale: 1.07, color: colors.accent }}
-          >
-            Reset
-          </motion.button>
-        </div>
-      </motion.div>
-    </motion.div>
-  );
-
-  const renderLeaderboard = () => {
-    const leaderboardToShow = leaderboard.length === 0 ? MOCK_LEADERBOARD : leaderboard;
-    return (
-      <motion.div
-        className="p-6 rounded-2xl shadow-xl mb-8 w-full"
-        style={{
-          background: colors.card,
-          boxShadow: `0 10px 25px -5px ${colors.cardShadow}`
-        }}
-        initial={{ opacity: 0, x: -20 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        <h2
-          className="text-2xl font-bold mb-4"
-          style={{
-            color: colors.primary,
-            fontFamily: "Playfair Display, serif"
-          }}
-        >
-          Top 10 Scores
-        </h2>
-        <div className="space-y-2">
-          {leaderboardToShow.map((entry, index) => (
-            <motion.div
-              key={entry.id || index}
-              className="flex justify-between items-center p-3 rounded-xl"
-              style={{
-                background: `${colors.accentSoft}50`
-              }}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: index * 0.05 }}
-              whileHover={{ scale: 1.02 }}
-            >
-              <div className="flex items-center">
-                <span
-                  className="w-8 h-8 rounded-full flex items-center justify-center font-bold mr-3"
-                  style={{
-                    background: colors.background,
-                    color: colors.primary,
-                    fontFamily: "Montserrat, sans-serif"
-                  }}
-                >
-                  {index + 1}
-                </span>
-                <span
-                  className="font-medium truncate max-w-[100px]"
-                  style={{
-                    color: colors.text,
-                    fontFamily: "Montserrat, sans-serif"
-                  }}
-                >
-                  {entry.name}
-                </span>
-              </div>
-              <div className="text-right">
-                <p
-                  className="text-lg font-bold"
-                  style={{
-                    color: colors.primary,
-                    fontFamily: "Playfair Display, serif"
-                  }}
-                >
-                  {entry.score}
-                </p>
-                <p
-                  className="text-xs"
-                  style={{
-                    color: colors.secondaryText,
-                    fontFamily: "Montserrat, sans-serif"
-                  }}
-                >
-                  Level {entry.level}
-                </p>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </motion.div>
+  const toggleComments = (postId: number) => {
+    setPosts(
+        posts.map((post) =>
+            post.id === postId
+                ? { ...post, commentOpen: !post.commentOpen }
+                : post
+        )
     );
   };
 
-  const renderInfoPanel = () => (
-    <motion.div
-      className="p-6 rounded-2xl shadow-xl w-full"
-      style={{
-        background: colors.card,
-        boxShadow: `0 10px 25px -5px ${colors.cardShadow}`
-      }}
-      initial={{ opacity: 0, x: 20 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.5, delay: 0.2 }}
-    >
-      <h2
-        className="text-2xl font-bold mb-4"
-        style={{
-          color: colors.primary,
-          fontFamily: "Playfair Display, serif"
-        }}
-      >
-        How to Play
-      </h2>
-      <div className="space-y-4">
-        {[ // Steps as array for DRY code
-          "Click any light to toggle it and its adjacent lights.",
-          "Try to turn off all lights in as few moves as possible.",
-          "Complete levels to earn points and climb the leaderboard."
-        ].map((text, i) => (
-          <motion.div
-            className="flex items-center"
-            key={i}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.3 + i * 0.1 }}
-          >
-            <div
-              className="w-8 h-8 rounded-full flex items-center justify-center font-bold mr-3"
-              style={{
-                background: colors.background,
-                color: colors.primary,
-                fontFamily: "Montserrat, sans-serif"
-              }}
-            >
-              {i + 1}
-            </div>
-            <p
-              className="leading-relaxed"
-              style={{
-                color: colors.secondaryText,
-                fontFamily: "Montserrat, sans-serif"
-              }}
-            >
-              {text}
-            </p>
-          </motion.div>
-        ))}
-      </div>
-    </motion.div>
-  );
-
-  const renderBottomNav = () => (
-    <motion.div
-      className="fixed bottom-4 left-1/2 transform -translate-x-1/2 backdrop-blur-md p-2 rounded-full shadow-lg flex gap-2 z-50"
-      style={{
-        background: `${colors.card}a0`,
-        boxShadow: `0 10px 25px -5px ${colors.cardShadow}`
-      }}
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0.7 }}
-    >
-      <motion.button
-        aria-label="Home"
-        onClick={() => setShowIntro(true)}
-        className="w-12 h-12 rounded-full flex items-center justify-center"
-        style={{
-          background: colors.primary,
-          color: colors.buttonText
-        }}
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="none" viewBox="0 0 24 24">
-          <path d="M3 12l9-9 9 9v7a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2v-3H9v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7z" stroke={colors.buttonText} strokeWidth={2} strokeLinejoin="round" />
-        </svg>
-      </motion.button>
-      <motion.button
-        aria-label="Theme"
-        onClick={() => setTheme(theme === "light" ? "dark" : "light")}
-        className="w-12 h-12 rounded-full flex items-center justify-center"
-        style={{
-          background: theme === "dark" ? colors.button : colors.primary,
-          color: colors.buttonText
-        }}
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
-      >
-        {theme === "light" ? "🌙" : "☀️"}
-      </motion.button>
-    </motion.div>
-  );
-
-  const renderGameScreen = () => {
-    if (showIntro) return renderIntro();
-    if (showLevelTransition) return renderLevelTransition();
-    if (showNameInput) return renderNameInput();
-    return renderGame();
+  const addComment = (postId: number) => {
+    setPosts(
+        posts.map((post) =>
+            post.id === postId && post.newComment.trim() !== ""
+                ? {
+                  ...post,
+                  commentsList: [
+                    ...post.commentsList,
+                    {
+                      id: post.commentsList.length + 1,
+                      author: "You",
+                      content: post.newComment,
+                      timestamp: "Just now",
+                    },
+                  ],
+                  comments: post.comments + 1,
+                  newComment: "",
+                }
+                : post
+        )
+    );
   };
 
-  // --- Layouts for Desktop and Mobile ---
-  const renderDesktopView = () => (
-    <div className="flex flex-col items-center justify-center min-h-screen p-4" style={{ background: colors.background }}>
-      <div className="w-full max-w-7xl">
-        <div className="grid grid-cols-3 gap-6">
-          <div className="col-span-1">{renderLeaderboard()}</div>
-          <div className="col-span-1 flex flex-col items-center">{renderGameScreen()}</div>
-          <div className="col-span-1">{renderInfoPanel()}</div>
-        </div>
-      </div>
-      {renderThemeToggle()}
-    </div>
-  );
+  const handlePostSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newPost.trim() === "") return;
 
-  const renderMobileView = () => (
-    <div className="flex flex-col items-center justify-center min-h-screen p-4" style={{ background: colors.background }}>
-      <div className="w-full max-w-md">
-        {renderGameScreen()}
-        <div className="mt-6 space-y-6">
-          {renderLeaderboard()}
-          {renderInfoPanel()}
-        </div>
-      </div>
-      {renderThemeToggle()}
-      {renderBottomNav()}
-    </div>
-  );
+    setPosts([
+      {
+        id: posts.length + 1,
+        author: "You",
+        content: newPost,
+        timestamp: "Just now",
+        likes: 0,
+        comments: 0,
+        liked: false,
+        commentOpen: false,
+        commentsList: [],
+        newComment: "",
+      },
+      ...posts,
+    ]);
+    setNewPost("");
+  };
 
-  // --- Main render ---
   return (
-    <main style={{ background: colors.background, minHeight: "100vh" }}>
-      <style jsx global>{`
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;700&family=Montserrat:wght@300;400;500;700&display=swap');
-        body { font-family: 'Montserrat', sans-serif; margin: 0; padding: 0; }
-        h1, h2, h3, h4, h5, h6 { font-family: 'Playfair Display', serif; }
-      `}</style>
-      {isMobile ? renderMobileView() : renderDesktopView()}
-      {/* Simple confetti effect */}
-      {showConfetti && (
-        <div
-          style={{
-            position: "fixed",
-            pointerEvents: "none",
-            left: 0,
-            right: 0,
-            top: 0,
-            bottom: 0,
-            zIndex: 100,
-            background: "transparent",
-            animation: "fadeout 2.2s linear"
-          }}
-        >
-          <div style={{
-            width: "100%",
-            height: "100%",
-            display: "flex",
-            flexWrap: "wrap",
-            alignItems: "flex-start",
-            justifyContent: "center",
-            pointerEvents: "none"
-          }}>
-            {[...Array(60)].map((_, i) => (
-              <div key={i}
-                   style={{
-                     width: 12,
-                     height: 12,
-                     borderRadius: "50%",
-                     margin: 2,
-                     background: [colors.primary, colors.accent, colors.accentSoft, colors.gridOn, colors.gridOff][i % 5],
-                     opacity: 0.65 + Math.random() * 0.35,
-                     animation: `fall 2s linear ${(i * 0.02)}s`
-                   }}
-              />
-            ))}
+      <div className={`min-h-screen py-8 px-2 sm:px-0 transition-colors duration-300 ${dark ? "bg-gray-950" : "bg-gray-100"}`}>
+        <div className="max-w-2xl mx-auto">
+          {/* Header + Dark/Light Toggle */}
+          <div className="flex items-center justify-between mb-6">
+            <h1 className={`text-2xl font-bold ${dark ? "text-white" : "text-gray-800"}`}>Social Wall</h1>
+            <button
+                className="rounded-full p-2 border bg-white dark:bg-gray-800 dark:border-gray-700 border-gray-200 shadow-sm hover:shadow-md transition"
+                onClick={() => setDark((v) => !v)}
+                title="Toggle dark mode"
+            >
+              {dark ? <FaSun className="h-5 w-5 text-yellow-400" /> : <FaMoon className="h-5 w-5 text-blue-600" />}
+            </button>
           </div>
-          <style>{`
-            @keyframes fall {
-              0% { transform: translateY(-60px) scale(1) rotate(0deg); }
-              80% { transform: translateY(60vh) scale(1.4) rotate(120deg);}
-              100% { transform: translateY(100vh) scale(0.85) rotate(200deg);}
-            }
-            @keyframes fadeout {
-              0% { opacity: 1; }
-              100% { opacity: 0; }
-            }
-          `}</style>
+
+          {/* Create Post */}
+          <div className={`mb-6 p-4 rounded-lg shadow-sm ${dark ? "bg-gray-900" : "bg-white"}`}>
+            <form onSubmit={handlePostSubmit}>
+            <textarea
+                className={`w-full p-3 border rounded-lg mb-3 resize-none bg-transparent ${
+                    dark
+                        ? "border-gray-700 focus:ring-blue-900 focus:border-blue-900 text-white placeholder-gray-400"
+                        : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                }`}
+                rows={3}
+                placeholder="What's on your mind?"
+                value={newPost}
+                onChange={(e) => setNewPost(e.target.value)}
+            />
+              <div className="flex justify-end">
+                <button
+                    type="submit"
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Post
+                </button>
+              </div>
+            </form>
+          </div>
+
+          {/* Empty State */}
+          {posts.length === 0 && (
+              <motion.div
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className={`flex flex-col items-center py-16 ${dark ? "text-gray-400" : "text-gray-500"}`}
+              >
+                <span className="text-5xl mb-4">🪴</span>
+                <div className="font-semibold mb-1">No posts yet</div>
+                <div className="text-sm">Be the first to start the conversation!</div>
+              </motion.div>
+          )}
+
+          {/* Posts */}
+          <div className="space-y-4">
+            <AnimatePresence>
+              {posts.map((post) => (
+                  <motion.div
+                      key={post.id}
+                      initial={{ opacity: 0, y: 24 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 24 }}
+                      transition={{ type: "spring", duration: 0.3 }}
+                      className={`border rounded-lg p-4 hover:shadow transition-shadow duration-200 ${
+                          dark
+                              ? "border-gray-800 bg-gray-900 text-gray-100"
+                              : "border-gray-200 bg-white text-gray-900"
+                      }`}
+                  >
+                    {/* Post Header */}
+                    <div className="flex items-center mb-3">
+                      <div
+                          className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold text-white shadow-sm ring-2 ring-white ${getAvatarColor(
+                              post.author
+                          )}`}
+                      >
+                        {getInitials(post.author)}
+                      </div>
+                      <div className="ml-3">
+                        <h3 className="font-bold">{post.author}</h3>
+                        <p className="text-xs text-gray-400">{post.timestamp}</p>
+                      </div>
+                    </div>
+                    {/* Post Content */}
+                    <p className="mb-4 text-base">{post.content}</p>
+                    {/* Post Actions */}
+                    <div className="flex items-center justify-between text-sm border-t border-b py-2 mb-3 border-gray-200 dark:border-gray-800">
+                      <button
+                          className="flex items-center space-x-1 group"
+                          onClick={() => handleLike(post.id)}
+                          aria-label={post.liked ? "Unlike" : "Like"}
+                      >
+                        {post.liked ? (
+                            <FaHeart className="h-5 w-5 text-red-500 group-hover:scale-110 transition" />
+                        ) : (
+                            <FaRegHeart className="h-5 w-5 group-hover:text-red-500 transition" />
+                        )}
+                        <span>{post.likes}</span>
+                      </button>
+                      <button
+                          className="flex items-center space-x-1 group"
+                          onClick={() => toggleComments(post.id)}
+                          aria-label="Comment"
+                      >
+                        <FaRegCommentDots className="h-5 w-5 group-hover:text-blue-600 transition" />
+                        <span>{post.comments}</span>
+                      </button>
+                      <button className="flex items-center space-x-1 group" aria-label="Share">
+                        <FaShare className="h-5 w-5 group-hover:text-green-600 transition" />
+                        <span>Share</span>
+                      </button>
+                    </div>
+                    {/* Comments Section */}
+                    <AnimatePresence>
+                      {post.commentOpen && (
+                          <motion.div
+                              initial={{ opacity: 0, y: 10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: 10 }}
+                              transition={{ type: "spring", duration: 0.25 }}
+                              className="mt-2"
+                          >
+                            <div className="space-y-3 mb-3">
+                              {post.commentsList.map((comment) => (
+                                  <motion.div
+                                      key={comment.id}
+                                      initial={{ opacity: 0, x: -16 }}
+                                      animate={{ opacity: 1, x: 0 }}
+                                      transition={{ delay: 0.07 * comment.id }}
+                                      className="flex items-start"
+                                  >
+                                    <div
+                                        className={`w-7 h-7 rounded-full flex items-center justify-center font-semibold text-white mr-2 mt-1 shadow-sm ${getAvatarColor(
+                                            comment.author
+                                        )}`}
+                                    >
+                                      {getInitials(comment.author)}
+                                    </div>
+                                    <div className="flex-1">
+                                      <div className={`p-3 rounded-lg ${dark ? "bg-gray-800" : "bg-gray-100"}`}>
+                                        <div className="text-sm font-medium">{comment.author}</div>
+                                        <p className="text-sm">{comment.content}</p>
+                                      </div>
+                                      <p className="text-xs text-gray-400 mt-1">{comment.timestamp}</p>
+                                    </div>
+                                  </motion.div>
+                              ))}
+                            </div>
+                            {/* Add Comment */}
+                            <div className="flex items-center">
+                              <div
+                                  className={`w-7 h-7 rounded-full flex items-center justify-center font-semibold text-white mr-2 ${getAvatarColor(
+                                      "You"
+                                  )}`}
+                              >
+                                Y
+                              </div>
+                              <div className="flex-1 flex">
+                                <input
+                                    type="text"
+                                    className={`flex-1 border rounded-l-lg px-3 py-2 text-sm bg-transparent ${
+                                        dark
+                                            ? "border-gray-700 text-white placeholder-gray-400 focus:ring-blue-900 focus:border-blue-900"
+                                            : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                                    }`}
+                                    placeholder="Add a comment..."
+                                    value={post.newComment}
+                                    onChange={(e) =>
+                                        setPosts(
+                                            posts.map((p) =>
+                                                p.id === post.id ? { ...p, newComment: e.target.value } : p
+                                            )
+                                        )
+                                    }
+                                    onKeyDown={(e) => e.key === "Enter" && addComment(post.id)}
+                                />
+                                <button
+                                    onClick={() => addComment(post.id)}
+                                    className="bg-blue-600 text-white px-3 py-2 rounded-r-lg hover:bg-blue-700 transition"
+                                    aria-label="Send"
+                                >
+                                  <FaPaperPlane className="h-4 w-4" />
+                                </button>
+                              </div>
+                            </div>
+                          </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </motion.div>
+              ))}
+            </AnimatePresence>
+          </div>
         </div>
-      )}
-    </main>
+      </div>
   );
 }
