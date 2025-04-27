@@ -1,352 +1,263 @@
 "use client";
-
 import {useEffect, useState} from "react";
-import {AnimatePresence, motion} from "framer-motion";
-import {FaHeart, FaMoon, FaPaperPlane, FaRegCommentDots, FaRegHeart, FaShare, FaSun} from "react-icons/fa";
+import {CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis} from "recharts";
+import {animate, AnimatePresence, motion, useMotionValue, useSpring, useTransform} from "framer-motion";
+import {FaDollarSign, FaSync} from "react-icons/fa";
+import {BsMoonStars, BsSun} from "react-icons/bs";
 
-const avatarColors = [
-  "bg-blue-500",
-  "bg-green-500",
-  "bg-pink-500",
-  "bg-yellow-500",
-  "bg-indigo-500",
-  "bg-purple-500",
-  "bg-red-500",
+// --- Mock Data (90 days) ---
+const mockRates = Array.from({ length: 90 }, (_, i) => {
+  const date = new Date();
+  date.setDate(date.getDate() - (89 - i));
+  return {
+    date: date.toISOString().slice(0, 10),
+    rate: +(3.65 + Math.sin(i / 9) * 0.025 + Math.random() * 0.01).toFixed(4),
+  };
+});
+
+const rangeOptions = [
+  { label: "7D", days: 7 },
+  { label: "30D", days: 30 },
+  { label: "90D", days: 90 },
 ];
 
-function getAvatarColor(name: string) {
-  const idx = name
-      .split("")
-      .reduce((acc, char) => acc + char.charCodeAt(0), 0) % avatarColors.length;
-  return avatarColors[idx];
-}
+// --- Animated Number using Framer Motion ---
+function AnimatedNumber({ value }: { value: number }) {
+  const motionValue = useMotionValue(0);
+  const spring = useSpring(motionValue, { stiffness: 120, damping: 14 });
+  const rounded = useTransform(spring, (latest) => Number(latest).toFixed(2));
 
-function getInitials(name: string) {
-  return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase();
-}
-
-export default function SocialWall() {
-  const [dark, setDark] = useState(false);
-  const [posts, setPosts] = useState([
-    {
-      id: 1,
-      author: "Jane Cooper",
-      content:
-          "Just finished reading Atomic Habits. Highly recommend for anyone looking to build better habits! What are you all reading lately?",
-      timestamp: "2h ago",
-      likes: 24,
-      comments: 2,
-      liked: false,
-      commentOpen: false,
-      commentsList: [
-        {
-          id: 1,
-          author: "Alex Morgan",
-          content: "I just started this too! So insightful.",
-          timestamp: "1h ago",
-        },
-        {
-          id: 2,
-          author: "Sam Wilson",
-          content: "The power of tiny changes is game-changing.",
-          timestamp: "45m ago",
-        },
-      ],
-      newComment: "",
-    },
-    {
-      id: 2,
-      author: "Michael Scott",
-      content: "Beach day with the team! 🏖️ Who else is enjoying the summer?",
-      timestamp: "5h ago",
-      likes: 42,
-      comments: 1,
-      liked: false,
-      commentOpen: false,
-      commentsList: [
-        {
-          id: 1,
-          author: "Jim Halpert",
-          content: "Looks amazing! What beach is that?",
-          timestamp: "4h ago",
-        },
-      ],
-      newComment: "",
-    },
-  ]);
-  const [newPost, setNewPost] = useState("");
-
-  // Light/dark mode toggle
   useEffect(() => {
-    document.documentElement.classList.toggle("dark", dark);
-  }, [dark]);
+    animate(motionValue, value, { duration: 0.6 });
+  }, [value, motionValue]);
 
-  const handleLike = (postId: number) => {
-    setPosts(
-        posts.map((post) =>
-            post.id === postId
-                ? {
-                  ...post,
-                  liked: !post.liked,
-                  likes: post.liked ? post.likes - 1 : post.likes + 1,
-                }
-                : post
-        )
-    );
+  return <motion.span>{rounded}</motion.span>;
+}
+
+export default function Home() {
+  const [theme, setTheme] = useState<"light" | "dark">("light");
+  const [range, setRange] = useState(rangeOptions[1]);
+  const [amount, setAmount] = useState("");
+  const [from, setFrom] = useState<"USD" | "AED">("USD");
+  const [converted, setConverted] = useState<number | null>(null);
+
+  // Mobile header sticky
+  useEffect(() => {
+    document.documentElement.className = theme === "dark" ? "dark" : "";
+  }, [theme]);
+
+  // Chart data based on range
+  const chartData = mockRates.slice(-range.days);
+  const latestRate = chartData[chartData.length - 1]?.rate || 3.6725;
+
+  // Conversion handler
+  const handleConvert = () => {
+    if (!amount || isNaN(Number(amount))) return setConverted(null);
+    if (from === "USD") setConverted(Number(amount) * latestRate);
+    else setConverted(Number(amount) / latestRate);
   };
 
-  const toggleComments = (postId: number) => {
-    setPosts(
-        posts.map((post) =>
-            post.id === postId
-                ? { ...post, commentOpen: !post.commentOpen }
-                : post
-        )
-    );
-  };
+  // Theme handler
+  const isDark = theme === "dark";
+  const toggleTheme = () => setTheme(isDark ? "light" : "dark");
 
-  const addComment = (postId: number) => {
-    setPosts(
-        posts.map((post) =>
-            post.id === postId && post.newComment.trim() !== ""
-                ? {
-                  ...post,
-                  commentsList: [
-                    ...post.commentsList,
-                    {
-                      id: post.commentsList.length + 1,
-                      author: "You",
-                      content: post.newComment,
-                      timestamp: "Just now",
-                    },
-                  ],
-                  comments: post.comments + 1,
-                  newComment: "",
-                }
-                : post
-        )
-    );
-  };
-
-  const handlePostSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (newPost.trim() === "") return;
-
-    setPosts([
-      {
-        id: posts.length + 1,
-        author: "You",
-        content: newPost,
-        timestamp: "Just now",
-        likes: 0,
-        comments: 0,
-        liked: false,
-        commentOpen: false,
-        commentsList: [],
-        newComment: "",
-      },
-      ...posts,
-    ]);
-    setNewPost("");
-  };
+  // For glassmorphism background
+  const cardStyle = `rounded-3xl px-5 py-8 md:p-10 shadow-2xl border border-gray-100 dark:border-gray-700 
+    bg-white/60 dark:bg-[#23263a]/80 backdrop-blur-2xl transition-all`;
 
   return (
-      <div className={`min-h-screen py-8 px-2 sm:px-0 transition-colors duration-300 ${dark ? "bg-gray-950" : "bg-gray-100"}`}>
-        <div className="max-w-2xl mx-auto">
-          {/* Header + Dark/Light Toggle */}
-          <div className="flex items-center justify-between mb-6">
-            <h1 className={`text-2xl font-bold ${dark ? "text-white" : "text-gray-800"}`}>Social Wall</h1>
-            <button
-                className="rounded-full p-2 border bg-white dark:bg-gray-800 dark:border-gray-700 border-gray-200 shadow-sm hover:shadow-md transition"
-                onClick={() => setDark((v) => !v)}
-                title="Toggle dark mode"
-            >
-              {dark ? <FaSun className="h-5 w-5 text-yellow-400" /> : <FaMoon className="h-5 w-5 text-blue-600" />}
-            </button>
+      <div className={`${isDark ? "bg-gradient-to-bl from-[#16182a] via-[#20294f] to-[#222932] text-white" : "bg-gradient-to-bl from-[#f8fafc] via-[#e9f3fd] to-[#f6fff8] text-slate-900"} min-h-screen font-poppins transition-colors duration-300`}>
+        {/* Sticky Header */}
+        <motion.header
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, type: "spring" }}
+            className="sticky top-0 z-40 bg-transparent px-4 py-5 md:px-10 flex justify-between items-center"
+        >
+          <div className="flex items-center gap-2 text-2xl font-black tracking-tight">
+            <FaDollarSign className="text-lime-400 drop-shadow-lg" />
+            <span>USD/AED Explorer</span>
           </div>
+          <button
+              aria-label="Toggle theme"
+              onClick={toggleTheme}
+              className="rounded-full border border-gray-200 dark:border-gray-700 p-3 transition hover:scale-110 bg-white/60 dark:bg-[#20283a]/70"
+          >
+            {isDark ? <BsSun className="text-yellow-300 text-xl" /> : <BsMoonStars className="text-indigo-700 text-xl" />}
+          </button>
+        </motion.header>
 
-          {/* Create Post */}
-          <div className={`mb-6 p-4 rounded-lg shadow-sm ${dark ? "bg-gray-900" : "bg-white"}`}>
-            <form onSubmit={handlePostSubmit}>
-            <textarea
-                className={`w-full p-3 border rounded-lg mb-3 resize-none bg-transparent ${
-                    dark
-                        ? "border-gray-700 focus:ring-blue-900 focus:border-blue-900 text-white placeholder-gray-400"
-                        : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                }`}
-                rows={3}
-                placeholder="What's on your mind?"
-                value={newPost}
-                onChange={(e) => setNewPost(e.target.value)}
-            />
-              <div className="flex justify-end">
-                <button
-                    type="submit"
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  Post
-                </button>
-              </div>
-            </form>
-          </div>
-
-          {/* Empty State */}
-          {posts.length === 0 && (
-              <motion.div
-                  initial={{ opacity: 0, y: 15 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className={`flex flex-col items-center py-16 ${dark ? "text-gray-400" : "text-gray-500"}`}
-              >
-                <span className="text-5xl mb-4">🪴</span>
-                <div className="font-semibold mb-1">No posts yet</div>
-                <div className="text-sm">Be the first to start the conversation!</div>
-              </motion.div>
-          )}
-
-          {/* Posts */}
-          <div className="space-y-4">
-            <AnimatePresence>
-              {posts.map((post) => (
-                  <motion.div
-                      key={post.id}
-                      initial={{ opacity: 0, y: 24 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 24 }}
-                      transition={{ type: "spring", duration: 0.3 }}
-                      className={`border rounded-lg p-4 hover:shadow transition-shadow duration-200 ${
-                          dark
-                              ? "border-gray-800 bg-gray-900 text-gray-100"
-                              : "border-gray-200 bg-white text-gray-900"
-                      }`}
+        {/* Chart Card */}
+        <motion.section
+            initial={{ opacity: 0, y: 32 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15, duration: 0.75, type: "spring" }}
+            className={`max-w-xl mx-auto mt-3 md:mt-10 ${cardStyle}`}
+        >
+          {/* Chart Header + Tabs */}
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between mb-3 gap-2 md:gap-6">
+            <div>
+              <h2 className="text-2xl md:text-3xl font-extrabold mb-1 tracking-tight bg-gradient-to-r from-sky-500 via-cyan-400 to-lime-400 bg-clip-text text-transparent drop-shadow-lg">
+                USD to AED Exchange Rate
+              </h2>
+              <span className="text-sm opacity-80 font-semibold">Animated time-series chart</span>
+            </div>
+            <div className="flex gap-2 justify-center mt-2">
+              {rangeOptions.map(opt => (
+                  <motion.button
+                      key={opt.label}
+                      className={`px-5 py-2 rounded-full font-bold text-base transition-all shadow-sm
+                  ${range.label === opt.label
+                          ? "bg-gradient-to-r from-blue-400 via-cyan-400 to-lime-400 text-white shadow-xl scale-110"
+                          : "bg-gray-100 dark:bg-[#2a3045] text-gray-700 dark:text-gray-100 hover:bg-blue-400 hover:text-white"}
+                `}
+                      style={{ minWidth: 64 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => setRange(opt)}
                   >
-                    {/* Post Header */}
-                    <div className="flex items-center mb-3">
-                      <div
-                          className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold text-white shadow-sm ring-2 ring-white ${getAvatarColor(
-                              post.author
-                          )}`}
-                      >
-                        {getInitials(post.author)}
-                      </div>
-                      <div className="ml-3">
-                        <h3 className="font-bold">{post.author}</h3>
-                        <p className="text-xs text-gray-400">{post.timestamp}</p>
-                      </div>
-                    </div>
-                    {/* Post Content */}
-                    <p className="mb-4 text-base">{post.content}</p>
-                    {/* Post Actions */}
-                    <div className="flex items-center justify-between text-sm border-t border-b py-2 mb-3 border-gray-200 dark:border-gray-800">
-                      <button
-                          className="flex items-center space-x-1 group"
-                          onClick={() => handleLike(post.id)}
-                          aria-label={post.liked ? "Unlike" : "Like"}
-                      >
-                        {post.liked ? (
-                            <FaHeart className="h-5 w-5 text-red-500 group-hover:scale-110 transition" />
-                        ) : (
-                            <FaRegHeart className="h-5 w-5 group-hover:text-red-500 transition" />
-                        )}
-                        <span>{post.likes}</span>
-                      </button>
-                      <button
-                          className="flex items-center space-x-1 group"
-                          onClick={() => toggleComments(post.id)}
-                          aria-label="Comment"
-                      >
-                        <FaRegCommentDots className="h-5 w-5 group-hover:text-blue-600 transition" />
-                        <span>{post.comments}</span>
-                      </button>
-                      <button className="flex items-center space-x-1 group" aria-label="Share">
-                        <FaShare className="h-5 w-5 group-hover:text-green-600 transition" />
-                        <span>Share</span>
-                      </button>
-                    </div>
-                    {/* Comments Section */}
-                    <AnimatePresence>
-                      {post.commentOpen && (
-                          <motion.div
-                              initial={{ opacity: 0, y: 10 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              exit={{ opacity: 0, y: 10 }}
-                              transition={{ type: "spring", duration: 0.25 }}
-                              className="mt-2"
-                          >
-                            <div className="space-y-3 mb-3">
-                              {post.commentsList.map((comment) => (
-                                  <motion.div
-                                      key={comment.id}
-                                      initial={{ opacity: 0, x: -16 }}
-                                      animate={{ opacity: 1, x: 0 }}
-                                      transition={{ delay: 0.07 * comment.id }}
-                                      className="flex items-start"
-                                  >
-                                    <div
-                                        className={`w-7 h-7 rounded-full flex items-center justify-center font-semibold text-white mr-2 mt-1 shadow-sm ${getAvatarColor(
-                                            comment.author
-                                        )}`}
-                                    >
-                                      {getInitials(comment.author)}
-                                    </div>
-                                    <div className="flex-1">
-                                      <div className={`p-3 rounded-lg ${dark ? "bg-gray-800" : "bg-gray-100"}`}>
-                                        <div className="text-sm font-medium">{comment.author}</div>
-                                        <p className="text-sm">{comment.content}</p>
-                                      </div>
-                                      <p className="text-xs text-gray-400 mt-1">{comment.timestamp}</p>
-                                    </div>
-                                  </motion.div>
-                              ))}
-                            </div>
-                            {/* Add Comment */}
-                            <div className="flex items-center">
-                              <div
-                                  className={`w-7 h-7 rounded-full flex items-center justify-center font-semibold text-white mr-2 ${getAvatarColor(
-                                      "You"
-                                  )}`}
-                              >
-                                Y
-                              </div>
-                              <div className="flex-1 flex">
-                                <input
-                                    type="text"
-                                    className={`flex-1 border rounded-l-lg px-3 py-2 text-sm bg-transparent ${
-                                        dark
-                                            ? "border-gray-700 text-white placeholder-gray-400 focus:ring-blue-900 focus:border-blue-900"
-                                            : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                                    }`}
-                                    placeholder="Add a comment..."
-                                    value={post.newComment}
-                                    onChange={(e) =>
-                                        setPosts(
-                                            posts.map((p) =>
-                                                p.id === post.id ? { ...p, newComment: e.target.value } : p
-                                            )
-                                        )
-                                    }
-                                    onKeyDown={(e) => e.key === "Enter" && addComment(post.id)}
-                                />
-                                <button
-                                    onClick={() => addComment(post.id)}
-                                    className="bg-blue-600 text-white px-3 py-2 rounded-r-lg hover:bg-blue-700 transition"
-                                    aria-label="Send"
-                                >
-                                  <FaPaperPlane className="h-4 w-4" />
-                                </button>
-                              </div>
-                            </div>
-                          </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </motion.div>
+                    {opt.label}
+                  </motion.button>
               ))}
-            </AnimatePresence>
+            </div>
           </div>
-        </div>
+
+          {/* Chart Area */}
+          <AnimatePresence mode="wait">
+            <motion.div
+                key={range.label}
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -24 }}
+                transition={{ duration: 0.6, type: "spring" }}
+                className="h-72 md:h-80"
+            >
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={chartData}>
+                  <defs>
+                    <linearGradient id="usdChart" x1="0" y1="0" x2="1" y2="0">
+                      <stop offset="5%" stopColor="#0ea5e9" />
+                      <stop offset="60%" stopColor="#3b82f6" />
+                      <stop offset="100%" stopColor="#10b981" />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 6" stroke={isDark ? "#334155" : "#e5e7eb"} />
+                  <XAxis
+                      dataKey="date"
+                      tick={{ fontSize: 13, fontWeight: 700 }}
+                      tickFormatter={d => d.slice(5)}
+                      axisLine={false}
+                      tickLine={false}
+                  />
+                  <YAxis
+                      dataKey="rate"
+                      domain={["dataMin-0.01", "dataMax+0.01"]}
+                      tick={{ fontSize: 13, fontWeight: 700 }}
+                      axisLine={false}
+                      tickLine={false}
+                  />
+                  <Tooltip
+                      contentStyle={{
+                        background: isDark ? "#23263a" : "#fff",
+                        borderRadius: 12,
+                        border: isDark ? "1px solid #334155" : "1px solid #e5e7eb",
+                        color: isDark ? "#fff" : "#1e293b",
+                        fontSize: 15,
+                        boxShadow: "0 8px 24px #0ea5e980",
+                      }}
+                      formatter={value => [`${value} AED`, "Rate"]}
+                      labelFormatter={label => `Date: ${label}`}
+                      cursor={{ stroke: "#3b82f6", strokeWidth: 1 }}
+                  />
+                  <Line
+                      type="monotone"
+                      dataKey="rate"
+                      stroke="url(#usdChart)"
+                      strokeWidth={4}
+                      dot={{ r: 5, fill: "#ffe156", stroke: "#0ea5e9", strokeWidth: 3, filter: "drop-shadow(0 2px 8px #67e8f9)" }}
+                      activeDot={{ r: 10, fill: "#fff", stroke: "#0ea5e9", strokeWidth: 6, filter: "drop-shadow(0 4px 16px #3b82f6)" }}
+                      isAnimationActive={true}
+                      animationDuration={900}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </motion.div>
+          </AnimatePresence>
+        </motion.section>
+
+        {/* Currency Converter Card */}
+        <motion.section
+            initial={{ opacity: 0, y: 48 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.8, type: "spring" }}
+            className={`max-w-xl mx-auto mt-7 md:mt-12 mb-4 md:mb-8 ${cardStyle}`}
+        >
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-3">
+            <h3 className="text-xl md:text-2xl font-extrabold flex items-center gap-2 bg-gradient-to-r from-blue-400 via-cyan-400 to-lime-400 bg-clip-text text-transparent drop-shadow-lg">
+              <FaSync className="inline text-blue-400" /> Currency Converter
+            </h3>
+            <span className="text-xs text-gray-600 dark:text-gray-400 font-semibold">
+            Latest rate: <span className="font-mono text-lg">{latestRate}</span> <span className="opacity-60">AED/USD</span>
+          </span>
+          </div>
+          <form
+              onSubmit={e => {
+                e.preventDefault();
+                handleConvert();
+              }}
+              className="flex flex-col md:flex-row gap-3 md:gap-4"
+          >
+            <input
+                type="number"
+                min="0"
+                inputMode="decimal"
+                step="0.01"
+                required
+                placeholder={from === "USD" ? "USD Amount" : "AED Amount"}
+                className="flex-1 px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#23263a] focus:outline-none focus:ring-2 focus:ring-cyan-400 text-lg font-semibold shadow-inner"
+                value={amount}
+                onChange={e => setAmount(e.target.value)}
+            />
+            <select
+                value={from}
+                onChange={e => {
+                  setFrom(e.target.value as "USD" | "AED");
+                  setConverted(null);
+                  setAmount("");
+                }}
+                className="rounded-xl px-3 py-3 border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-[#181b26] text-base font-semibold shadow"
+            >
+              <option value="USD">USD to AED</option>
+              <option value="AED">AED to USD</option>
+            </select>
+            <motion.button
+                type="submit"
+                className="w-full md:w-auto px-6 py-3 mt-2 md:mt-0 rounded-2xl bg-gradient-to-r from-blue-500 via-green-400 to-cyan-400 shadow-lg hover:from-blue-700 hover:to-green-600 font-bold text-lg text-white transition-all"
+                whileHover={{ scale: 1.05, boxShadow: "0px 6px 16px 0px #0ea5e9b0" }}
+                whileTap={{ scale: 0.98 }}
+            >
+              Convert
+            </motion.button>
+          </form>
+          <AnimatePresence>
+            {converted !== null && (
+                <motion.div
+                    initial={{ opacity: 0, y: 24 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -24 }}
+                    transition={{ duration: 0.4 }}
+                    className="mt-5 text-xl font-extrabold text-blue-700 dark:text-cyan-300 text-center"
+                >
+                  <AnimatedNumber value={Number(converted)} /> {from === "USD" ? "AED" : "USD"}
+                  <div className="mt-2 font-medium text-base text-gray-700 dark:text-gray-200">{amount} {from} = <AnimatedNumber value={Number(converted)} /> {from === "USD" ? "AED" : "USD"}</div>
+                </motion.div>
+            )}
+          </AnimatePresence>
+        </motion.section>
+
+        {/* Footer */}
+        <footer className="mt-10 pb-7 text-center text-xs text-gray-400 dark:text-gray-500">
+          © {new Date().getFullYear()} USD/AED Explorer — Demo with Mock Data
+        </footer>
       </div>
   );
 }
