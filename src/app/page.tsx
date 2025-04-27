@@ -1,263 +1,350 @@
 "use client";
-import {useEffect, useState} from "react";
-import {CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis} from "recharts";
-import {animate, AnimatePresence, motion, useMotionValue, useSpring, useTransform} from "framer-motion";
-import {FaDollarSign, FaSync} from "react-icons/fa";
-import {BsMoonStars, BsSun} from "react-icons/bs";
 
-// --- Mock Data (90 days) ---
-const mockRates = Array.from({ length: 90 }, (_, i) => {
-  const date = new Date();
-  date.setDate(date.getDate() - (89 - i));
-  return {
-    date: date.toISOString().slice(0, 10),
-    rate: +(3.65 + Math.sin(i / 9) * 0.025 + Math.random() * 0.01).toFixed(4),
-  };
-});
+import React, {useMemo, useState} from "react";
 
-const rangeOptions = [
-  { label: "7D", days: 7 },
-  { label: "30D", days: 30 },
-  { label: "90D", days: 90 },
+// Mock Data
+const TEAMS = [
+    {
+        id: 1,
+        name: "Engineering",
+        employees: [
+            { id: 101, name: "Sarah Lin", kpi: 78, salary: 120000 },
+            { id: 102, name: "Alex Kim", kpi: 52, salary: 90000 },
+            { id: 103, name: "Ravi Patel", kpi: 43, salary: 110000 },
+            { id: 104, name: "Jade Lee", kpi: 90, salary: 95000 },
+        ],
+    },
+    {
+        id: 2,
+        name: "Sales",
+        employees: [
+            { id: 201, name: "Maria Garcia", kpi: 66, salary: 80000 },
+            { id: 202, name: "Ben Turner", kpi: 39, salary: 85000 },
+            { id: 203, name: "Lena Wang", kpi: 88, salary: 97000 },
+            { id: 204, name: "Ella Novak", kpi: 49, salary: 83000 },
+        ],
+    },
+    {
+        id: 3,
+        name: "Customer Support",
+        employees: [
+            { id: 301, name: "Chris Evans", kpi: 72, salary: 60000 },
+            { id: 302, name: "Ana Souza", kpi: 61, salary: 62000 },
+            { id: 303, name: "Tom Reed", kpi: 34, salary: 58000 },
+            { id: 304, name: "Pooja Kumar", kpi: 83, salary: 63000 },
+        ],
+    },
 ];
 
-// --- Animated Number using Framer Motion ---
-function AnimatedNumber({ value }: { value: number }) {
-  const motionValue = useMotionValue(0);
-  const spring = useSpring(motionValue, { stiffness: 120, damping: 14 });
-  const rounded = useTransform(spring, (latest) => Number(latest).toFixed(2));
-
-  useEffect(() => {
-    animate(motionValue, value, { duration: 0.6 });
-  }, [value, motionValue]);
-
-  return <motion.span>{rounded}</motion.span>;
+// Helper functions
+function getAllEmployees(filterTeam: string, filterRole: string) {
+    let emps: any[] = [];
+    TEAMS.forEach((team) => {
+        if (!filterTeam || team.name === filterTeam) {
+            team.employees.forEach((emp) => {
+                emps.push({ ...emp, team: team.name });
+            });
+        }
+    });
+    if (filterRole) {
+        emps = emps.filter((e) =>
+            e.name.toLowerCase().includes(filterRole.toLowerCase())
+        );
+    }
+    return emps;
 }
 
-export default function Home() {
-  const [theme, setTheme] = useState<"light" | "dark">("light");
-  const [range, setRange] = useState(rangeOptions[1]);
-  const [amount, setAmount] = useState("");
-  const [from, setFrom] = useState<"USD" | "AED">("USD");
-  const [converted, setConverted] = useState<number | null>(null);
+export default function WorkforceKPIDashboard() {
+    const [dark, setDark] = useState(false);
+    const [filterTeam, setFilterTeam] = useState("");
+    const [filterRole, setFilterRole] = useState("");
+    const [layoffPct, setLayoffPct] = useState(10); // bottom X% performers
 
-  // Mobile header sticky
-  useEffect(() => {
-    document.documentElement.className = theme === "dark" ? "dark" : "";
-  }, [theme]);
+    // Get filtered employees
+    const employees = useMemo(
+        () => getAllEmployees(filterTeam, filterRole),
+        [filterTeam, filterRole]
+    );
 
-  // Chart data based on range
-  const chartData = mockRates.slice(-range.days);
-  const latestRate = chartData[chartData.length - 1]?.rate || 3.6725;
+    // Determine who gets laid off
+    const layoffCount = Math.floor((layoffPct / 100) * employees.length);
+    const sortedByKPI = [...employees].sort((a, b) => a.kpi - b.kpi);
+    const laidOff = sortedByKPI.slice(0, layoffCount);
+    const remaining = sortedByKPI.slice(layoffCount);
 
-  // Conversion handler
-  const handleConvert = () => {
-    if (!amount || isNaN(Number(amount))) return setConverted(null);
-    if (from === "USD") setConverted(Number(amount) * latestRate);
-    else setConverted(Number(amount) / latestRate);
-  };
+    // Stats
+    const totalSalaries = employees.reduce((sum, e) => sum + e.salary, 0);
+    const layoffSavings = laidOff.reduce((sum, e) => sum + e.salary, 0);
+    const remainingSalaries = remaining.reduce((sum, e) => sum + e.salary, 0);
 
-  // Theme handler
-  const isDark = theme === "dark";
-  const toggleTheme = () => setTheme(isDark ? "light" : "dark");
+    // Colors for dark/light
+    const bg = dark ? "bg-gray-900" : "bg-gray-100";
+    const card = dark ? "bg-gray-800 text-gray-100" : "bg-white text-gray-900";
+    const border = dark ? "border-gray-700" : "border-gray-200";
+    const accent = dark ? "bg-pink-600" : "bg-blue-600";
+    const label = dark ? "text-gray-300" : "text-gray-600";
+    const chip = dark
+        ? "bg-gray-700 text-gray-100"
+        : "bg-gray-200 text-gray-800";
 
-  // For glassmorphism background
-  const cardStyle = `rounded-3xl px-5 py-8 md:p-10 shadow-2xl border border-gray-100 dark:border-gray-700 
-    bg-white/60 dark:bg-[#23263a]/80 backdrop-blur-2xl transition-all`;
-
-  return (
-      <div className={`${isDark ? "bg-gradient-to-bl from-[#16182a] via-[#20294f] to-[#222932] text-white" : "bg-gradient-to-bl from-[#f8fafc] via-[#e9f3fd] to-[#f6fff8] text-slate-900"} min-h-screen font-poppins transition-colors duration-300`}>
-        {/* Sticky Header */}
-        <motion.header
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, type: "spring" }}
-            className="sticky top-0 z-40 bg-transparent px-4 py-5 md:px-10 flex justify-between items-center"
-        >
-          <div className="flex items-center gap-2 text-2xl font-black tracking-tight">
-            <FaDollarSign className="text-lime-400 drop-shadow-lg" />
-            <span>USD/AED Explorer</span>
-          </div>
-          <button
-              aria-label="Toggle theme"
-              onClick={toggleTheme}
-              className="rounded-full border border-gray-200 dark:border-gray-700 p-3 transition hover:scale-110 bg-white/60 dark:bg-[#20283a]/70"
-          >
-            {isDark ? <BsSun className="text-yellow-300 text-xl" /> : <BsMoonStars className="text-indigo-700 text-xl" />}
-          </button>
-        </motion.header>
-
-        {/* Chart Card */}
-        <motion.section
-            initial={{ opacity: 0, y: 32 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.15, duration: 0.75, type: "spring" }}
-            className={`max-w-xl mx-auto mt-3 md:mt-10 ${cardStyle}`}
-        >
-          {/* Chart Header + Tabs */}
-          <div className="flex flex-col md:flex-row md:items-end md:justify-between mb-3 gap-2 md:gap-6">
-            <div>
-              <h2 className="text-2xl md:text-3xl font-extrabold mb-1 tracking-tight bg-gradient-to-r from-sky-500 via-cyan-400 to-lime-400 bg-clip-text text-transparent drop-shadow-lg">
-                USD to AED Exchange Rate
-              </h2>
-              <span className="text-sm opacity-80 font-semibold">Animated time-series chart</span>
+    // KPI chart bars
+    function KPIBar({ value }: { value: number }) {
+        const color =
+            value < 40
+                ? "bg-red-500"
+                : value < 60
+                    ? "bg-yellow-400"
+                    : value < 80
+                        ? "bg-blue-400"
+                        : "bg-green-500";
+        return (
+            <div className="flex items-center">
+                <div
+                    className={`${color} h-3 rounded transition-all`}
+                    style={{ width: `${value}%`, minWidth: 20 }}
+                ></div>
+                <span className="ml-2 text-xs font-mono">{value}</span>
             </div>
-            <div className="flex gap-2 justify-center mt-2">
-              {rangeOptions.map(opt => (
-                  <motion.button
-                      key={opt.label}
-                      className={`px-5 py-2 rounded-full font-bold text-base transition-all shadow-sm
-                  ${range.label === opt.label
-                          ? "bg-gradient-to-r from-blue-400 via-cyan-400 to-lime-400 text-white shadow-xl scale-110"
-                          : "bg-gray-100 dark:bg-[#2a3045] text-gray-700 dark:text-gray-100 hover:bg-blue-400 hover:text-white"}
-                `}
-                      style={{ minWidth: 64 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={() => setRange(opt)}
-                  >
-                    {opt.label}
-                  </motion.button>
-              ))}
-            </div>
-          </div>
+        );
+    }
 
-          {/* Chart Area */}
-          <AnimatePresence mode="wait">
-            <motion.div
-                key={range.label}
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -24 }}
-                transition={{ duration: 0.6, type: "spring" }}
-                className="h-72 md:h-80"
+    // Recommendations
+    const riskWarn =
+        layoffCount > 0 && laidOff.some((e) => e.kpi > 50)
+            ? "Warning: Laying off these employees may impact overall team performance."
+            : "";
+
+    // Responsive
+    const gridCols =
+        employees.length < 8
+            ? "grid-cols-1 md:grid-cols-2"
+            : "grid-cols-1 md:grid-cols-2 lg:grid-cols-3";
+
+    return (
+        <div className={`${bg} min-h-screen transition-colors duration-300`}>
+            {/* Header */}
+            <header
+                className={`flex items-center justify-between px-6 py-4 shadow-sm ${card}`}
             >
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={chartData}>
-                  <defs>
-                    <linearGradient id="usdChart" x1="0" y1="0" x2="1" y2="0">
-                      <stop offset="5%" stopColor="#0ea5e9" />
-                      <stop offset="60%" stopColor="#3b82f6" />
-                      <stop offset="100%" stopColor="#10b981" />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 6" stroke={isDark ? "#334155" : "#e5e7eb"} />
-                  <XAxis
-                      dataKey="date"
-                      tick={{ fontSize: 13, fontWeight: 700 }}
-                      tickFormatter={d => d.slice(5)}
-                      axisLine={false}
-                      tickLine={false}
-                  />
-                  <YAxis
-                      dataKey="rate"
-                      domain={["dataMin-0.01", "dataMax+0.01"]}
-                      tick={{ fontSize: 13, fontWeight: 700 }}
-                      axisLine={false}
-                      tickLine={false}
-                  />
-                  <Tooltip
-                      contentStyle={{
-                        background: isDark ? "#23263a" : "#fff",
-                        borderRadius: 12,
-                        border: isDark ? "1px solid #334155" : "1px solid #e5e7eb",
-                        color: isDark ? "#fff" : "#1e293b",
-                        fontSize: 15,
-                        boxShadow: "0 8px 24px #0ea5e980",
-                      }}
-                      formatter={value => [`${value} AED`, "Rate"]}
-                      labelFormatter={label => `Date: ${label}`}
-                      cursor={{ stroke: "#3b82f6", strokeWidth: 1 }}
-                  />
-                  <Line
-                      type="monotone"
-                      dataKey="rate"
-                      stroke="url(#usdChart)"
-                      strokeWidth={4}
-                      dot={{ r: 5, fill: "#ffe156", stroke: "#0ea5e9", strokeWidth: 3, filter: "drop-shadow(0 2px 8px #67e8f9)" }}
-                      activeDot={{ r: 10, fill: "#fff", stroke: "#0ea5e9", strokeWidth: 6, filter: "drop-shadow(0 4px 16px #3b82f6)" }}
-                      isAnimationActive={true}
-                      animationDuration={900}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </motion.div>
-          </AnimatePresence>
-        </motion.section>
-
-        {/* Currency Converter Card */}
-        <motion.section
-            initial={{ opacity: 0, y: 48 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.8, type: "spring" }}
-            className={`max-w-xl mx-auto mt-7 md:mt-12 mb-4 md:mb-8 ${cardStyle}`}
-        >
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-3">
-            <h3 className="text-xl md:text-2xl font-extrabold flex items-center gap-2 bg-gradient-to-r from-blue-400 via-cyan-400 to-lime-400 bg-clip-text text-transparent drop-shadow-lg">
-              <FaSync className="inline text-blue-400" /> Currency Converter
-            </h3>
-            <span className="text-xs text-gray-600 dark:text-gray-400 font-semibold">
-            Latest rate: <span className="font-mono text-lg">{latestRate}</span> <span className="opacity-60">AED/USD</span>
+                <div className="flex items-center space-x-2">
+          <span className="font-extrabold text-lg tracking-tight">
+            Workforce KPI Dashboard
           </span>
-          </div>
-          <form
-              onSubmit={e => {
-                e.preventDefault();
-                handleConvert();
-              }}
-              className="flex flex-col md:flex-row gap-3 md:gap-4"
-          >
-            <input
-                type="number"
-                min="0"
-                inputMode="decimal"
-                step="0.01"
-                required
-                placeholder={from === "USD" ? "USD Amount" : "AED Amount"}
-                className="flex-1 px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#23263a] focus:outline-none focus:ring-2 focus:ring-cyan-400 text-lg font-semibold shadow-inner"
-                value={amount}
-                onChange={e => setAmount(e.target.value)}
-            />
-            <select
-                value={from}
-                onChange={e => {
-                  setFrom(e.target.value as "USD" | "AED");
-                  setConverted(null);
-                  setAmount("");
-                }}
-                className="rounded-xl px-3 py-3 border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-[#181b26] text-base font-semibold shadow"
-            >
-              <option value="USD">USD to AED</option>
-              <option value="AED">AED to USD</option>
-            </select>
-            <motion.button
-                type="submit"
-                className="w-full md:w-auto px-6 py-3 mt-2 md:mt-0 rounded-2xl bg-gradient-to-r from-blue-500 via-green-400 to-cyan-400 shadow-lg hover:from-blue-700 hover:to-green-600 font-bold text-lg text-white transition-all"
-                whileHover={{ scale: 1.05, boxShadow: "0px 6px 16px 0px #0ea5e9b0" }}
-                whileTap={{ scale: 0.98 }}
-            >
-              Convert
-            </motion.button>
-          </form>
-          <AnimatePresence>
-            {converted !== null && (
-                <motion.div
-                    initial={{ opacity: 0, y: 24 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -24 }}
-                    transition={{ duration: 0.4 }}
-                    className="mt-5 text-xl font-extrabold text-blue-700 dark:text-cyan-300 text-center"
+                    <span className={`${chip} rounded-full px-2 py-0.5 text-xs ml-2`}>
+            Layoff Simulation
+          </span>
+                </div>
+                <button
+                    className={`rounded-full px-3 py-1 border ${border} ${
+                        dark ? "hover:bg-gray-700" : "hover:bg-gray-200"
+                    } transition`}
+                    onClick={() => setDark((d) => !d)}
+                    aria-label="Toggle dark mode"
                 >
-                  <AnimatedNumber value={Number(converted)} /> {from === "USD" ? "AED" : "USD"}
-                  <div className="mt-2 font-medium text-base text-gray-700 dark:text-gray-200">{amount} {from} = <AnimatedNumber value={Number(converted)} /> {from === "USD" ? "AED" : "USD"}</div>
-                </motion.div>
-            )}
-          </AnimatePresence>
-        </motion.section>
+                    {dark ? "🌞" : "🌙"}
+                </button>
+            </header>
 
-        {/* Footer */}
-        <footer className="mt-10 pb-7 text-center text-xs text-gray-400 dark:text-gray-500">
-          © {new Date().getFullYear()} USD/AED Explorer — Demo with Mock Data
-        </footer>
-      </div>
-  );
+            {/* Controls */}
+            <div className="flex flex-col md:flex-row gap-4 p-6">
+                <div className="flex flex-col md:flex-row gap-4 flex-1">
+                    <select
+                        value={filterTeam}
+                        onChange={(e) => setFilterTeam(e.target.value)}
+                        className={`rounded border ${border} px-3 py-2 ${card}`}
+                    >
+                        <option value="">All Teams</option>
+                        {TEAMS.map((t) => (
+                            <option key={t.id} value={t.name}>
+                                {t.name}
+                            </option>
+                        ))}
+                    </select>
+                    <input
+                        type="text"
+                        placeholder="Filter by name or role"
+                        value={filterRole}
+                        onChange={(e) => setFilterRole(e.target.value)}
+                        className={`rounded border ${border} px-3 py-2 ${card}`}
+                    />
+                </div>
+                <div className="flex flex-col items-start md:items-end">
+                    <label className={`${label} text-xs`}>Layoff: bottom {layoffPct}%</label>
+                    <input
+                        type="range"
+                        min={0}
+                        max={50}
+                        step={5}
+                        value={layoffPct}
+                        onChange={(e) => setLayoffPct(Number(e.target.value))}
+                        className="w-40 accent-pink-500 mt-1"
+                    />
+                </div>
+            </div>
+
+            {/* Main content */}
+            <div className={`px-6 py-2 grid gap-6 ${gridCols}`}>
+                {/* KPI Table */}
+                <section
+                    className={`col-span-2 ${card} rounded-2xl p-6 shadow border ${border}`}
+                >
+                    <h2 className="font-bold text-lg mb-4">Employee Performance</h2>
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-sm">
+                            <thead>
+                            <tr className={`${label}`}>
+                                <th className="text-left py-2">Name</th>
+                                <th className="text-left py-2">Team</th>
+                                <th className="text-left py-2">KPI</th>
+                                <th className="text-left py-2">Salary</th>
+                                <th className="text-left py-2">Status</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {sortedByKPI.map((emp) => {
+                                const isLaidOff = laidOff.some((e) => e.id === emp.id);
+                                return (
+                                    <tr
+                                        key={emp.id}
+                                        className={
+                                            isLaidOff
+                                                ? "bg-red-50 dark:bg-red-900/30"
+                                                : "hover:bg-blue-50 dark:hover:bg-gray-700/40 transition"
+                                        }
+                                    >
+                                        <td className="py-2 font-semibold">{emp.name}</td>
+                                        <td>{emp.team}</td>
+                                        <td>
+                                            <KPIBar value={emp.kpi} />
+                                        </td>
+                                        <td>
+                                            ${emp.salary.toLocaleString("en-US", {
+                                            maximumFractionDigits: 0,
+                                        })}
+                                        </td>
+                                        <td>
+                                            {isLaidOff ? (
+                                                <span className="bg-red-500 text-white rounded px-2 py-1 text-xs font-bold">
+                            Laid Off
+                          </span>
+                                            ) : (
+                                                <span className="bg-green-500 text-white rounded px-2 py-1 text-xs font-bold">
+                            Retained
+                          </span>
+                                            )}
+                                        </td>
+                                    </tr>
+                                );
+                            })}
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                {/* Impact + Visualization */}
+                <section
+                    className={`col-span-1 flex flex-col gap-4 ${card} rounded-2xl p-6 shadow border ${border}`}
+                >
+                    <h2 className="font-bold text-lg mb-2">Impact Overview</h2>
+                    <div className="space-y-2">
+                        <div>
+                            <span className={label}>Total Employees:</span>{" "}
+                            <span className="font-bold">{employees.length}</span>
+                        </div>
+                        <div>
+                            <span className={label}>Laid Off:</span>{" "}
+                            <span className="font-bold text-red-500">{layoffCount}</span>
+                        </div>
+                        <div>
+                            <span className={label}>Cost Savings:</span>{" "}
+                            <span className="font-bold text-blue-600 dark:text-pink-400">
+                ${layoffSavings.toLocaleString("en-US")}
+              </span>
+                        </div>
+                        <div>
+                            <span className={label}>Remaining Salary Cost:</span>{" "}
+                            <span className="font-bold">
+                ${remainingSalaries.toLocaleString("en-US")}
+              </span>
+                        </div>
+                        <div>
+                            <span className={label}>Average KPI (Remaining):</span>{" "}
+                            <span className="font-bold">
+                {remaining.length
+                    ? (
+                        remaining.reduce((sum, e) => sum + e.kpi, 0) /
+                        remaining.length
+                    ).toFixed(1)
+                    : "-"}
+              </span>
+                        </div>
+                    </div>
+                    <hr className={border} />
+                    {/* Mini KPI Histogram */}
+                    <div>
+                        <span className={label}>Performance Distribution</span>
+                        <div className="flex space-x-1 mt-2 h-14">
+                            {[0, 20, 40, 60, 80].map((low, i) => {
+                                const high = low + 20;
+                                const count = employees.filter(
+                                    (e) => e.kpi >= low && e.kpi < high
+                                ).length;
+                                const isActive =
+                                    layoffCount > 0 &&
+                                    laidOff.some((e) => e.kpi >= low && e.kpi < high);
+                                return (
+                                    <div
+                                        key={i}
+                                        className={`flex-1 flex flex-col items-center ${
+                                            isActive
+                                                ? "bg-red-400/60 dark:bg-red-700/60"
+                                                : "bg-gray-400/20 dark:bg-gray-700/40"
+                                        } rounded`}
+                                    >
+                                        <div
+                                            className="w-4"
+                                            style={{ height: 10 + count * 10 }}
+                                            title={`KPI ${low}-${high - 1}: ${count}`}
+                                        ></div>
+                                        <span className="text-xs">{low}</span>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                    {/* Warnings */}
+                    {riskWarn && (
+                        <div className="mt-2 text-sm text-yellow-600 bg-yellow-100 dark:bg-yellow-800/40 rounded p-2">
+                            {riskWarn}
+                        </div>
+                    )}
+                </section>
+            </div>
+            {/* Recommendations */}
+            <div className="p-6 pt-0 max-w-2xl mx-auto">
+                <div
+                    className={`${card} border ${border} rounded-2xl px-6 py-4 shadow-sm mt-8`}
+                >
+                    <div className="font-bold mb-2">Smart Recommendations</div>
+                    <ul className="list-disc pl-6 text-sm space-y-1">
+                        <li>
+                            Consider upskilling or transferring employees before finalizing layoffs.
+                        </li>
+                        <li>
+                            Review at-risk teams with high layoff impact to avoid critical skill loss.
+                        </li>
+                        <li>
+                            Aim for balanced retention across departments for business stability.
+                        </li>
+                        <li>
+                            If KPIs drop below a threshold, project delivery may be at risk.
+                        </li>
+                    </ul>
+                </div>
+                <footer className="mt-10 text-xs text-center text-gray-500 dark:text-gray-400">
+                    © {new Date().getFullYear()} Workforce KPI Dashboard | Demo
+                </footer>
+            </div>
+        </div>
+    );
 }
