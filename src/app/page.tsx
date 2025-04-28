@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { FiMoon, FiSun } from "react-icons/fi";
 
 const plans = [
@@ -67,15 +67,47 @@ const faqs = [
 export default function PricingPage() {
   const [billingCycle, setBillingCycle] = useState("monthly");
   const [theme, setTheme] = useState("dark");
+  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
+  const [showTooltip, setShowTooltip] = useState(false);
+
+  useEffect(() => {
+    if (selectedPlan) {
+      setShowTooltip(true);
+      const timer = setTimeout(() => setShowTooltip(false), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [selectedPlan]);
 
   return (
-    <div className={theme === "light" ? "min-h-screen bg-gray-100 text-black" : "min-h-screen bg-gradient-to-tr from-gray-900 via-blue-900 to-gray-800 text-white"}>
+    <div className={theme === "light" ? "min-h-screen bg-gradient-to-b from-gray-50 to-white text-black" : "min-h-screen bg-gradient-to-tr from-gray-900 via-blue-900 to-gray-800 text-white"}>
+
+      {/* Tooltip */}
+      {showTooltip && (
+        <AnimatePresence>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            className="fixed bottom-8 right-8 bg-purple-600 text-white text-sm px-5 py-2 rounded-full shadow-lg z-50"
+          >
+            Selected Plan: {selectedPlan}
+          </motion.div>
+        </AnimatePresence>
+      )}
 
       {/* Header */}
       <header className={`sticky top-0 z-50 backdrop-blur-md ${
-        theme === "light" ? "bg-white/70 border-b border-gray-300" : "bg-gray-900/70 border-b border-gray-700"
-      } flex items-center justify-between px-6 py-4 shadow-sm`}>
-        <div className="font-bold text-2xl">Flowly</div>
+        theme === "light" ? "bg-white/80 border-b border-gray-300" : "bg-gray-900/70 border-b border-gray-700"
+      } flex items-center justify-between px-6 py-5 shadow-sm`}>
+        <div className="flex flex-col text-left leading-tight">
+          <span className="font-bold text-2xl">Flowly</span>
+          <span className={`text-sm mt-1 ${
+            theme === "light" ? "text-gray-600 font-medium" : "text-gray-400"
+          }`}>
+    The future of work is here
+  </span>
+        </div>
+
         <button
           onClick={() => setTheme(theme === "light" ? "dark" : "light")}
           className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition"
@@ -90,25 +122,50 @@ export default function PricingPage() {
 
       <main className="py-16 px-6">
         <div className="max-w-7xl mx-auto text-center">
-          <h1 className="text-4xl font-bold mb-4">Flexible plans that grow with your business</h1>
-          <p className="text-gray-400 mb-10">Start free. Upgrade anytime. No credit card needed.</p>
+          <motion.h1 initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="text-4xl font-bold mb-4">Flexible plans that grow with your business</motion.h1>
+          <p className={`mb-10 ${
+            theme === "light" ? "text-gray-600 font-medium" : "text-gray-400"
+          }`}>
+            Start free. Upgrade anytime. No credit card needed.
+          </p>
 
+
+          {/* Billing Toggle */}
           <div className="flex justify-center mb-12">
-            <button
-              onClick={() => setBillingCycle(billingCycle === "monthly" ? "yearly" : "monthly")}
-              className="bg-gradient-to-r from-blue-500 to-purple-500 text-white font-semibold px-6 py-2 rounded-full shadow-lg hover:scale-105 transition"
-            >
-              {billingCycle === "monthly" ? "Switch to Yearly Billing" : "Switch to Monthly Billing"}
-            </button>
+            <div className="flex items-center bg-gray-200 dark:bg-gray-700 p-1 rounded-full shadow-inner">
+              <button
+                onClick={() => setBillingCycle("monthly")}
+                className={`px-6 py-2 rounded-full text-sm font-semibold transition ${
+                  billingCycle === "monthly" ? "bg-gradient-to-r from-blue-400 to-purple-400 text-white" : "text-gray-600 dark:text-gray-300"
+                }`}
+              >
+                Monthly
+              </button>
+              <button
+                onClick={() => setBillingCycle("yearly")}
+                className={`px-6 py-2 rounded-full text-sm font-semibold transition ${
+                  billingCycle === "yearly" ? "bg-gradient-to-r from-blue-400 to-purple-400 text-white" : "text-gray-600 dark:text-gray-300"
+                }`}
+              >
+                Yearly
+              </button>
+            </div>
           </div>
 
+          {/* Pricing Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {plans.map((plan) => (
               <motion.div
                 key={plan.title}
-                whileHover={{ scale: 1.05 }}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: plan.popular ? 0.2 : 0 }}
                 className={`relative rounded-3xl p-8 shadow-xl transition backdrop-blur-md ${
-                  theme === "light" ? "bg-white/80 border border-gray-300" : "bg-white/10 border border-blue-700"
+                  theme === "light" ? "bg-white/90 border border-gray-200" : "bg-white/10 border border-blue-700"
+                } ${
+                  plan.popular ? "ring-2 ring-blue-400" : ""
+                } ${
+                  selectedPlan === plan.title ? "ring-4 ring-purple-500 scale-105" : ""
                 }`}
               >
                 {plan.popular && (
@@ -129,12 +186,13 @@ export default function PricingPage() {
                     </li>
                   ))}
                 </ul>
-                <button className={`w-full ${
-                  theme === "light"
-                    ? "bg-gradient-to-r from-blue-400 to-purple-400"
-                    : "bg-gradient-to-r from-purple-600 to-blue-600"
-                } hover:from-purple-700 hover:to-blue-700 text-white py-3 rounded-xl font-semibold transition`}>
-                  Start Free Trial
+                <button
+                  onClick={() => setSelectedPlan(plan.title)}
+                  className={`w-full py-3 rounded-xl font-semibold transition ${
+                    theme === "light" ? "bg-gradient-to-r from-blue-400 to-purple-400" : "bg-gradient-to-r from-purple-600 to-blue-600"
+                  } hover:shadow-lg hover:shadow-purple-400/50 text-white`}
+                >
+                  {selectedPlan === plan.title ? "Selected" : "Start Free Trial"}
                 </button>
               </motion.div>
             ))}
@@ -142,15 +200,21 @@ export default function PricingPage() {
 
           {/* FAQ Section */}
           <div className="mt-20 text-left max-w-4xl mx-auto">
-            <h2 className="text-3xl font-bold mb-6 text-center">Frequently Asked Questions</h2>
+            <motion.h2 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="text-3xl font-bold mb-6 text-center">Frequently Asked Questions</motion.h2>
             <div className="space-y-6">
               {faqs.map((faq) => (
-                <div key={faq.question} className={`p-6 rounded-xl ${
-                  theme === "light" ? "bg-white/70" : "bg-white/10"
-                } backdrop-blur-md`}>
+                <motion.div
+                  key={faq.question}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5 }}
+                  className={`p-6 rounded-xl ${
+                    theme === "light" ? "bg-white/80" : "bg-white/10"
+                  } backdrop-blur-md`}
+                >
                   <h3 className="text-xl font-semibold mb-2">{faq.question}</h3>
                   <p className="text-gray-400">{faq.answer}</p>
-                </div>
+                </motion.div>
               ))}
             </div>
           </div>
