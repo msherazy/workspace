@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { FiMoon, FiSun } from "react-icons/fi";
 
 const plans = [
   {
@@ -68,78 +69,93 @@ export default function PricingPage() {
   const [theme, setTheme] = useState("dark");
 
   return (
-    <div className={theme === "light" ? "min-h-screen bg-gray-100 text-black py-12 px-6" : "min-h-screen bg-gradient-to-tr from-gray-900 via-blue-900 to-gray-800 text-white py-12 px-6"}>
-      <div className="max-w-7xl mx-auto text-center">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-4xl font-bold">Flexible plans that grow with your business</h1>
-          <button
-            onClick={() => setTheme(theme === "light" ? "dark" : "light")}
-            className="border rounded-full px-4 py-2 text-sm font-semibold hover:scale-105 transition"
-          >
-            {theme === "light" ? "Dark Mode" : "Light Mode"}
-          </button>
-        </div>
+    <div className={theme === "light" ? "min-h-screen bg-gray-100 text-black" : "min-h-screen bg-gradient-to-tr from-gray-900 via-blue-900 to-gray-800 text-white"}>
 
-        <p className="text-gray-400 mb-10">Start free. Upgrade anytime. No credit card needed.</p>
+      {/* Header */}
+      <header className={`sticky top-0 z-50 backdrop-blur-md ${
+        theme === "light" ? "bg-white/70 border-b border-gray-300" : "bg-gray-900/70 border-b border-gray-700"
+      } flex items-center justify-between px-6 py-4 shadow-sm`}>
+        <div className="font-bold text-2xl">Flowly</div>
+        <button
+          onClick={() => setTheme(theme === "light" ? "dark" : "light")}
+          className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition"
+        >
+          {theme === "light" ? (
+            <FiMoon className="h-6 w-6 text-gray-800" />
+          ) : (
+            <FiSun className="h-6 w-6 text-yellow-400" />
+          )}
+        </button>
+      </header>
 
-        <div className="flex justify-center mb-12">
-          <button
-            onClick={() => setBillingCycle(billingCycle === "monthly" ? "yearly" : "monthly")}
-            className="bg-gradient-to-r from-blue-500 to-purple-500 text-white font-semibold px-6 py-2 rounded-full shadow-lg hover:scale-105 transition"
-          >
-            {billingCycle === "monthly" ? "Switch to Yearly Billing" : "Switch to Monthly Billing"}
-          </button>
-        </div>
+      <main className="py-16 px-6">
+        <div className="max-w-7xl mx-auto text-center">
+          <h1 className="text-4xl font-bold mb-4">Flexible plans that grow with your business</h1>
+          <p className="text-gray-400 mb-10">Start free. Upgrade anytime. No credit card needed.</p>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {plans.map((plan) => (
-            <motion.div
-              key={plan.title}
-              whileHover={{ scale: 1.05 }}
-              className={`relative rounded-3xl p-8 shadow-xl transition backdrop-blur-md ${
-                theme === "light" ? "bg-white/80 border border-gray-300" : "bg-white/10 border border-blue-700"
-              }`}
+          <div className="flex justify-center mb-12">
+            <button
+              onClick={() => setBillingCycle(billingCycle === "monthly" ? "yearly" : "monthly")}
+              className="bg-gradient-to-r from-blue-500 to-purple-500 text-white font-semibold px-6 py-2 rounded-full shadow-lg hover:scale-105 transition"
             >
-              {plan.popular && (
-                <div className="absolute -top-4 right-4 bg-blue-600 text-white text-xs px-3 py-1 rounded-full">
-                  Most Popular
-                </div>
-              )}
-              <h2 className="text-2xl font-bold mb-2">{plan.title}</h2>
-              <p className="text-gray-400 mb-4">{plan.description}</p>
-              <p className="text-3xl font-extrabold mb-6">
-                {billingCycle === "monthly" ? plan.monthly : plan.yearly}
-              </p>
-              <ul className="space-y-3 mb-6 text-left">
-                {plan.features.map((feature) => (
-                  <li key={feature} className="flex items-center space-x-2">
-                    <span className="text-green-400">✓</span>
-                    <span>{feature}</span>
-                  </li>
-                ))}
-              </ul>
-              <button className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 py-3 rounded-xl font-semibold">
-                Start Free Trial
-              </button>
-            </motion.div>
-          ))}
-        </div>
+              {billingCycle === "monthly" ? "Switch to Yearly Billing" : "Switch to Monthly Billing"}
+            </button>
+          </div>
 
-        {/* FAQ Section */}
-        <div className="mt-20 text-left max-w-4xl mx-auto">
-          <h2 className="text-3xl font-bold mb-6 text-center">Frequently Asked Questions</h2>
-          <div className="space-y-6">
-            {faqs.map((faq) => (
-              <div key={faq.question} className={`p-6 rounded-xl ${
-                theme === "light" ? "bg-white/70" : "bg-white/10"
-              } backdrop-blur-md`}>
-                <h3 className="text-xl font-semibold mb-2">{faq.question}</h3>
-                <p className="text-gray-400">{faq.answer}</p>
-              </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {plans.map((plan) => (
+              <motion.div
+                key={plan.title}
+                whileHover={{ scale: 1.05 }}
+                className={`relative rounded-3xl p-8 shadow-xl transition backdrop-blur-md ${
+                  theme === "light" ? "bg-white/80 border border-gray-300" : "bg-white/10 border border-blue-700"
+                }`}
+              >
+                {plan.popular && (
+                  <div className="absolute -top-4 right-4 bg-blue-600 text-white text-xs px-3 py-1 rounded-full">
+                    Most Popular
+                  </div>
+                )}
+                <h2 className="text-2xl font-bold mb-2">{plan.title}</h2>
+                <p className="text-gray-400 mb-4">{plan.description}</p>
+                <p className="text-3xl font-extrabold mb-6">
+                  {billingCycle === "monthly" ? plan.monthly : plan.yearly}
+                </p>
+                <ul className="space-y-3 mb-6 text-left">
+                  {plan.features.map((feature) => (
+                    <li key={feature} className="flex items-center space-x-2">
+                      <span className="text-green-400">✓</span>
+                      <span>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+                <button className={`w-full ${
+                  theme === "light"
+                    ? "bg-gradient-to-r from-blue-400 to-purple-400"
+                    : "bg-gradient-to-r from-purple-600 to-blue-600"
+                } hover:from-purple-700 hover:to-blue-700 text-white py-3 rounded-xl font-semibold transition`}>
+                  Start Free Trial
+                </button>
+              </motion.div>
             ))}
           </div>
+
+          {/* FAQ Section */}
+          <div className="mt-20 text-left max-w-4xl mx-auto">
+            <h2 className="text-3xl font-bold mb-6 text-center">Frequently Asked Questions</h2>
+            <div className="space-y-6">
+              {faqs.map((faq) => (
+                <div key={faq.question} className={`p-6 rounded-xl ${
+                  theme === "light" ? "bg-white/70" : "bg-white/10"
+                } backdrop-blur-md`}>
+                  <h3 className="text-xl font-semibold mb-2">{faq.question}</h3>
+                  <p className="text-gray-400">{faq.answer}</p>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 }
