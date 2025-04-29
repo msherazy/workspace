@@ -1,5 +1,3 @@
-// Final full fixed version
-
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -19,7 +17,6 @@ import {
 } from "recharts";
 import { Poppins } from "next/font/google";
 
-// Set up Poppins font
 const poppins = Poppins({
   weight: ["400", "500", "600", "700"],
   subsets: ["latin"],
@@ -47,6 +44,13 @@ const salesDistribution = [
   { name: 'Wholesale', value: 150, color: '#ffc658' },
 ];
 
+const statMeta = [
+  { icon: <FiShoppingCart className="text-2xl" />, label: "Total Sales", value: "$28,450", diff: "+12%", diffColor: "green" },
+  { icon: <FiUsers className="text-2xl" />, label: "Active Customers", value: "1,245", diff: "+8%", diffColor: "green" },
+  { icon: <FiDollarSign className="text-2xl" />, label: "Avg. Order Value", value: "$2,150", diff: "-5%", diffColor: "red" },
+  { icon: <FiActivity className="text-2xl" />, label: "Conversion Rate", value: "4.2%", diff: "+15%", diffColor: "green" },
+];
+
 const Dashboard = () => {
   const [dark, setDark] = useState(false);
 
@@ -63,40 +67,38 @@ const Dashboard = () => {
       <div className="max-w-7xl mx-auto p-6">
         <div className="flex flex-col md:flex-row items-center justify-between mb-8">
           <div className="mb-4 md:mb-0">
-            <h1 className="text-3xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-600 dark:from-indigo-400 dark:to-violet-400">Sales Analytics Dashboard</h1>
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-600 dark:from-indigo-400 dark:to-violet-400">Sales Analytics Dashboard</h1>
             <p className="text-gray-600 dark:text-gray-300 mt-1 text-sm md:text-base">Comprehensive overview of sales performance and customer metrics</p>
           </div>
           <div className="flex items-center space-x-2">
             <button
               onClick={() => setDark(!dark)}
-              className="bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 p-2 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700"
+              className="h-10 px-4 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700"
             >
               {dark ? <FiSun /> : <FiMoon />}
             </button>
-            <button className="bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 shadow-sm transition-colors">
+            <button className="h-10 px-4 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 shadow-sm transition-colors">
               Share Report
             </button>
-            <button className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg shadow-md transition-colors">
+            <button className="h-10 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-md transition-colors">
               Download PDF
             </button>
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {[
-            { icon: <FiShoppingCart />, label: "Total Sales", value: "$28,450", colorFrom: "indigo-600", colorTo: "violet-600" },
-            { icon: <FiUsers />, label: "Active Customers", value: "1,245", colorFrom: "teal-600", colorTo: "emerald-600" },
-            { icon: <FiDollarSign />, label: "Avg. Order Value", value: "$2,150", colorFrom: "amber-600", colorTo: "orange-600" },
-            { icon: <FiActivity />, label: "Conversion Rate", value: "4.2%", colorFrom: "rose-600", colorTo: "pink-600" }
-          ].map((card, idx) => (
+          {statMeta.map((card, idx) => (
             <div key={idx} className="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-xl transition-shadow">
               <div className="flex justify-between items-center mb-4">
                 <div className="p-3 rounded-full bg-opacity-20 bg-indigo-100 dark:bg-indigo-900">
                   {card.icon}
                 </div>
+                <span className={`text-xs font-semibold px-2 py-1 rounded-full bg-${card.diffColor}-100 dark:bg-${card.diffColor}-900/30 text-${card.diffColor}-600 dark:text-${card.diffColor}-400`}>
+                  {card.diff}
+                </span>
               </div>
               <h3 className="text-gray-500 dark:text-gray-400 text-sm mb-1">{card.label}</h3>
-              <p className={`text-3xl font-bold bg-gradient-to-r from-${card.colorFrom} to-${card.colorTo} bg-clip-text text-transparent`}>{card.value}</p>
+              <p className={`text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-violet-600 dark:from-indigo-400 dark:to-violet-400`}>{card.value}</p>
             </div>
           ))}
         </div>
