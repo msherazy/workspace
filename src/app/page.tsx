@@ -1,205 +1,160 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { FiActivity, FiDollarSign, FiMoon, FiShoppingCart, FiSun, FiUsers } from "react-icons/fi";
-import {
-  CartesianGrid,
-  Cell,
-  Legend,
-  Line,
-  LineChart,
-  Pie,
-  PieChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis
-} from "recharts";
-import { Poppins } from "next/font/google";
+import {useState} from "react";
+import {CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis} from "recharts";
+import {FiActivity, FiCloud, FiMapPin, FiMoon, FiSun} from "react-icons/fi";
+import {AnimatePresence, motion} from "framer-motion";
 
-const poppins = Poppins({
-  weight: ["400", "500", "600", "700"],
-  subsets: ["latin"],
-  display: "swap",
-});
+const simulateTemperature = (distance: number, atmosphere: number, surface: string) => {
+  const surfaceFactors = {
+    ocean: 0.8,
+    forest: 0.9,
+    desert: 1.1,
+  };
+  const baseTemp = 300 / distance;
+  const adjusted = baseTemp * (1 + atmosphere * 0.05) * surfaceFactors[surface];
+  return Math.round(adjusted);
+};
 
-const salesData = [
-  { name: 'Jan', sales: 4000, target: 3500 },
-  { name: 'Feb', sales: 3000, target: 3200 },
-  { name: 'Mar', sales: 5000, target: 4800 },
-  { name: 'Apr', sales: 4500, target: 4200 },
-  { name: 'May', sales: 6000, target: 5500 },
-  { name: 'Jun', sales: 5500, target: 5800 },
-];
+const PlanetSim = () => {
+  const [distance, setDistance] = useState(1);
+  const [atmosphere, setAtmosphere] = useState(1);
+  const [surface, setSurface] = useState("ocean");
+  const [darkMode, setDarkMode] = useState(true);
+  const [simulate, setSimulate] = useState(false);
+  const [runCount, setRunCount] = useState(1);
 
-const customerData = [
-  { name: 'New', value: 400, color: '#8884d8' },
-  { name: 'Returning', value: 300, color: '#82ca9d' },
-  { name: 'Inactive', value: 300, color: '#ffc658' },
-];
+  const temperature = simulateTemperature(distance, atmosphere, surface);
+  const data = Array.from({ length: 10 }, (_, i) => ({
+    time: `T+${i}s`,
+    temp: temperature + Math.sin(i) * 1.2,
+  }));
 
-const salesDistribution = [
-  { name: 'Online', value: 350, color: '#8884d8' },
-  { name: 'In-Store', value: 250, color: '#82ca9d' },
-  { name: 'Wholesale', value: 150, color: '#ffc658' },
-];
-
-const statMeta = [
-  { icon: <FiShoppingCart className="text-2xl" />, label: "Total Sales", value: "$28,450", diff: "+12%", diffColor: "green" },
-  { icon: <FiUsers className="text-2xl" />, label: "Active Customers", value: "1,245", diff: "+8%", diffColor: "green" },
-  { icon: <FiDollarSign className="text-2xl" />, label: "Avg. Order Value", value: "$2,150", diff: "-5%", diffColor: "red" },
-  { icon: <FiActivity className="text-2xl" />, label: "Conversion Rate", value: "4.2%", diff: "+15%", diffColor: "green" },
-];
-
-const Dashboard = () => {
-  const [dark, setDark] = useState(false);
-
-  useEffect(() => {
-    if (dark) {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-  }, [dark]);
+  const handleSimulation = () => {
+    setSimulate(true);
+    setRunCount(runCount + 1);
+  };
 
   return (
-    <div className={`${poppins.className} bg-gradient-to-br from-indigo-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 min-h-screen text-gray-900 dark:text-gray-100`}>
-      <div className="max-w-7xl mx-auto p-6">
-        <div className="flex flex-col md:flex-row items-center justify-between mb-8">
-          <div className="mb-4 md:mb-0">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-600 dark:from-indigo-400 dark:to-violet-400">Sales Analytics Dashboard</h1>
-            <p className="text-gray-600 dark:text-gray-300 mt-1 text-sm md:text-base">Comprehensive overview of sales performance and customer metrics</p>
-          </div>
-          <div className="flex items-center space-x-2">
+      <div className={`${darkMode ? "dark bg-black text-gray-200" : "bg-white text-gray-900"} font-mono min-h-screen transition-all`}>
+        <div className="flex justify-between items-center px-6 py-4 border-b border-gray-700">
+          <h1 className="text-2xl font-bold tracking-widest">NASA Planet Sim Console</h1>
+          <button
+              onClick={() => setDarkMode(!darkMode)}
+              className="p-2 border border-gray-600 rounded-full hover:bg-gray-800"
+          >
+            {darkMode ? <FiSun /> : <FiMoon />}
+          </button>
+        </div>
+
+        <div className="grid md:grid-cols-5 gap-8 px-6 py-8">
+          {/* Control Panel */}
+          <div className="md:col-span-2 bg-zinc-900 border border-zinc-700 p-6 rounded-lg shadow-lg">
+            <h2 className="text-lg font-bold mb-6 uppercase text-teal-400 tracking-wide">Control Interface</h2>
+
+            <div className="mb-6">
+              <label className="block mb-2 text-sm text-gray-300 flex items-center gap-2"><FiMapPin /> Distance from Star (AU)</label>
+              <input
+                  type="range"
+                  min="0.5"
+                  max="2"
+                  step="0.1"
+                  value={distance}
+                  onChange={(e) => setDistance(Number(e.target.value))}
+                  className="w-full accent-teal-400"
+              />
+              <p className="mt-1 text-xs text-teal-300">Current: {distance} AU</p>
+            </div>
+
+            <div className="mb-6">
+              <label className="block mb-2 text-sm text-gray-300 flex items-center gap-2"><FiCloud /> Atmosphere Thickness</label>
+              <input
+                  type="range"
+                  min="0"
+                  max="5"
+                  step="0.1"
+                  value={atmosphere}
+                  onChange={(e) => setAtmosphere(Number(e.target.value))}
+                  className="w-full accent-teal-400"
+              />
+              <p className="mt-1 text-xs text-teal-300">Current: {atmosphere}</p>
+            </div>
+
+            <div className="mb-8">
+              <label className="block mb-2 text-sm text-gray-300 flex items-center gap-2"><FiActivity /> Surface Type</label>
+              <select
+                  value={surface}
+                  onChange={(e) => setSurface(e.target.value)}
+                  className="w-full bg-zinc-800 border border-zinc-600 text-teal-200 p-2 rounded shadow"
+              >
+                <option value="ocean">Ocean</option>
+                <option value="forest">Forest</option>
+                <option value="desert">Desert</option>
+              </select>
+            </div>
+
             <button
-              onClick={() => setDark(!dark)}
-              className="h-10 px-4 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700"
+                onClick={handleSimulation}
+                className="w-full bg-teal-500 hover:bg-teal-600 text-black font-bold py-2 rounded"
             >
-              {dark ? <FiSun /> : <FiMoon />}
-            </button>
-            <button className="h-10 px-4 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 shadow-sm transition-colors">
-              Share Report
-            </button>
-            <button className="h-10 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-md transition-colors">
-              Download PDF
+              Run Simulation
             </button>
           </div>
-        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {statMeta.map((card, idx) => (
-            <div key={idx} className="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-xl transition-shadow">
-              <div className="flex justify-between items-center mb-4">
-                <div className="p-3 rounded-full bg-opacity-20 bg-indigo-100 dark:bg-indigo-900">
-                  {card.icon}
-                </div>
-                <span className={`text-xs font-semibold px-2 py-1 rounded-full bg-${card.diffColor}-100 dark:bg-${card.diffColor}-900/30 text-${card.diffColor}-600 dark:text-${card.diffColor}-400`}>
-                  {card.diff}
-                </span>
-              </div>
-              <h3 className="text-gray-500 dark:text-gray-400 text-sm mb-1">{card.label}</h3>
-              <p className={`text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-violet-600 dark:from-indigo-400 dark:to-violet-400`}>{card.value}</p>
+          {/* Output Panel */}
+          <div className="md:col-span-3 bg-zinc-900 border border-zinc-700 p-6 rounded-lg shadow-lg">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-lg font-bold uppercase text-teal-400 tracking-wide">Telemetry Feed</h2>
+              {simulate && (
+                  <span className="text-sm text-teal-200">Simulation #{runCount}</span>
+              )}
             </div>
-          ))}
-        </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-          <div className="lg:col-span-2 bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-xl">
-            <h2 className="text-lg font-semibold mb-6">Sales Performance</h2>
-            <div className="h-72">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={salesData} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.2} />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Line type="monotone" dataKey="sales" stroke="#8884d8" strokeWidth={3} activeDot={{ r: 8 }} />
-                  <Line type="monotone" dataKey="target" stroke="#82ca9d" strokeWidth={2} strokeDasharray="5 5" />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
+            <AnimatePresence>
+              {simulate ? (
+                  <motion.div
+                      key="telemetry"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      transition={{ duration: 0.6 }}
+                  >
+                    <motion.div
+                        className="text-5xl font-bold text-center mb-6 text-teal-300"
+                        initial={{ scale: 0.9 }}
+                        animate={{ scale: 1 }}
+                        transition={{ duration: 0.4 }}
+                    >
+                      {temperature} °K
+                    </motion.div>
 
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-xl">
-            <h2 className="text-lg font-semibold mb-6">Customer Distribution</h2>
-            <ResponsiveContainer width="100%" height="80%">
-              <PieChart>
-                <Pie
-                  data={customerData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={40}
-                  outerRadius={80}
-                  label
-                  dataKey="value"
-                  nameKey="name"
-                >
-                  {customerData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip />
-                <Legend layout="horizontal" verticalAlign="bottom" align="center" />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-xl">
-            <h2 className="text-lg font-semibold mb-6">Sales Channel Distribution</h2>
-            <ResponsiveContainer width="100%" height="80%">
-              <PieChart>
-                <Pie
-                  data={salesDistribution}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={40}
-                  outerRadius={80}
-                  label
-                  dataKey="value"
-                  nameKey="name"
-                >
-                  {salesDistribution.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip />
-                <Legend layout="horizontal" verticalAlign="bottom" align="center" />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-xl">
-            <h2 className="text-lg font-semibold mb-6">Regional Sales Performance</h2>
-            <div className="space-y-6">
-              {[
-                { region: 'North America', value: 55 },
-                { region: 'Europe', value: 40 },
-                { region: 'Asia Pacific', value: 30 },
-                { region: 'Other Regions', value: 10 }
-              ].map((region, idx) => (
-                <div key={idx} className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600 dark:text-gray-400">{region.region}</span>
-                    <span className="font-semibold">{region.value}%</span>
-                  </div>
-                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                    <div
-                      className="bg-gradient-to-r from-indigo-500 to-indigo-700 dark:from-indigo-400 dark:to-indigo-600 h-2 rounded-full"
-                      style={{ width: `${region.value}%` }}
-                    ></div>
-                  </div>
-                </div>
-              ))}
-            </div>
+                    <ResponsiveContainer width="100%" height={300}>
+                      <LineChart data={data}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#333" />
+                        <XAxis dataKey="time" stroke="#ccc" />
+                        <YAxis stroke="#ccc" />
+                        <Tooltip
+                            contentStyle={{ backgroundColor: '#1f1f1f', color: '#fff', border: '1px solid #444' }}
+                        />
+                        <Line type="monotone" dataKey="temp" stroke="#00f2ff" strokeWidth={2} dot={{ r: 3 }} />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </motion.div>
+              ) : (
+                  <motion.p
+                      key="waiting"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="text-center text-gray-500"
+                  >
+                    Awaiting simulation input...
+                  </motion.p>
+              )}
+            </AnimatePresence>
           </div>
         </div>
-
       </div>
-    </div>
   );
 };
 
-export default Dashboard;
+export default PlanetSim;
