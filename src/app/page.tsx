@@ -1,10 +1,24 @@
 "use client";
 
 import {useState} from "react";
-import {CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis} from "recharts";
+import {CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis,} from "recharts";
 import {FiActivity, FiCloud, FiMapPin, FiMoon, FiSun} from "react-icons/fi";
 import {AnimatePresence, motion} from "framer-motion";
 
+// Custom Tooltip Component
+const CustomTooltip = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    return (
+        <div className="bg-zinc-800 text-teal-200 p-2 rounded shadow">
+          <p className="text-sm">{`Time: ${label}`}</p>
+          <p className="text-sm">{`Temperature: ${payload[0].value} °K`}</p>
+        </div>
+    );
+  }
+  return null;
+};
+
+// Temperature Simulation Function
 const simulateTemperature = (distance: number, atmosphere: number, surface: string) => {
   const surfaceFactors = {
     ocean: 0.8,
@@ -27,7 +41,7 @@ const PlanetSim = () => {
   const temperature = simulateTemperature(distance, atmosphere, surface);
   const data = Array.from({ length: 10 }, (_, i) => ({
     time: `T+${i}s`,
-    temp: temperature + Math.sin(i) * 1.2,
+    temperature: Number((temperature + Math.sin(i) * 1.2).toFixed(2)),
   }));
 
   const handleSimulation = () => {
@@ -36,24 +50,38 @@ const PlanetSim = () => {
   };
 
   return (
-      <div className={`${darkMode ? "dark bg-black text-gray-200" : "bg-white text-gray-900"} font-mono min-h-screen transition-all`}>
+      <div
+          className={`${
+              darkMode ? "dark bg-black text-gray-200" : "bg-white text-gray-900"
+          } font-mono min-h-screen transition-all`}
+      >
         <div className="flex justify-between items-center px-6 py-4 border-b border-gray-700">
-          <h1 className="text-2xl font-bold tracking-widest">NASA Planet Sim Console</h1>
+          <h1 className="text-2xl font-bold tracking-widest">NASA Planet simulating Console</h1>
           <button
               onClick={() => setDarkMode(!darkMode)}
-              className="p-2 border border-gray-600 rounded-full hover:bg-gray-800"
+              className={`p-2 border rounded-full transition ${
+                  darkMode
+                      ? "border-gray-600 hover:bg-gray-800 hover:ring-2 hover:ring-teal-400 text-yellow-300"
+                      : "border-gray-300 hover:bg-gray-100 hover:ring-2 hover:ring-teal-400 text-gray-700"
+              }`}
           >
             {darkMode ? <FiSun /> : <FiMoon />}
           </button>
+
         </div>
 
         <div className="grid md:grid-cols-5 gap-8 px-6 py-8">
           {/* Control Panel */}
           <div className="md:col-span-2 bg-zinc-900 border border-zinc-700 p-6 rounded-lg shadow-lg">
-            <h2 className="text-lg font-bold mb-6 uppercase text-teal-400 tracking-wide">Control Interface</h2>
+            <h2 className="text-lg font-bold mb-6 uppercase text-teal-400 tracking-wide">
+              Control Interface
+            </h2>
 
             <div className="mb-6">
-              <label className="block mb-2 text-sm text-gray-300 flex items-center gap-2"><FiMapPin /> Distance from Star (AU)</label>
+              <label className="block mb-2 text-sm text-gray-300 flex items-center gap-2">
+                <FiMapPin /> Distance from Star (AU)
+                <span className="ml-2 text-xs text-gray-400">(closer = hotter)</span>
+              </label>
               <input
                   type="range"
                   min="0.5"
@@ -67,7 +95,10 @@ const PlanetSim = () => {
             </div>
 
             <div className="mb-6">
-              <label className="block mb-2 text-sm text-gray-300 flex items-center gap-2"><FiCloud /> Atmosphere Thickness</label>
+              <label className="block mb-2 text-sm text-gray-300 flex items-center gap-2">
+                <FiCloud /> Atmosphere Thickness
+                <span className="ml-2 text-xs text-gray-400">(more = higher greenhouse effect)</span>
+              </label>
               <input
                   type="range"
                   min="0"
@@ -81,7 +112,10 @@ const PlanetSim = () => {
             </div>
 
             <div className="mb-8">
-              <label className="block mb-2 text-sm text-gray-300 flex items-center gap-2"><FiActivity /> Surface Type</label>
+              <label className="block mb-2 text-sm text-gray-300 flex items-center gap-2">
+                <FiActivity /> Surface Type
+                <span className="ml-2 text-xs text-gray-400">(affects heat absorption)</span>
+              </label>
               <select
                   value={surface}
                   onChange={(e) => setSurface(e.target.value)}
@@ -104,7 +138,9 @@ const PlanetSim = () => {
           {/* Output Panel */}
           <div className="md:col-span-3 bg-zinc-900 border border-zinc-700 p-6 rounded-lg shadow-lg">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-lg font-bold uppercase text-teal-400 tracking-wide">Telemetry Feed</h2>
+              <h2 className="text-lg font-bold uppercase text-teal-400 tracking-wide">
+                Telemetry Feed
+              </h2>
               {simulate && (
                   <span className="text-sm text-teal-200">Simulation #{runCount}</span>
               )}
@@ -133,10 +169,14 @@ const PlanetSim = () => {
                         <CartesianGrid strokeDasharray="3 3" stroke="#333" />
                         <XAxis dataKey="time" stroke="#ccc" />
                         <YAxis stroke="#ccc" />
-                        <Tooltip
-                            contentStyle={{ backgroundColor: '#1f1f1f', color: '#fff', border: '1px solid #444' }}
+                        <Tooltip content={<CustomTooltip />} />
+                        <Line
+                            type="monotone"
+                            dataKey="temperature"
+                            stroke="#00f2ff"
+                            strokeWidth={2}
+                            dot={{ r: 3 }}
                         />
-                        <Line type="monotone" dataKey="temp" stroke="#00f2ff" strokeWidth={2} dot={{ r: 3 }} />
                       </LineChart>
                     </ResponsiveContainer>
                   </motion.div>
