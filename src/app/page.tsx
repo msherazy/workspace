@@ -1,253 +1,162 @@
 "use client";
 
-import { useState } from "react";
-import {
-  closestCenter,
-  DndContext,
-  DragEndEvent,
-  DragOverEvent,
-  DragOverlay,
-  DragStartEvent,
-  PointerSensor,
-  useDroppable,
-  useSensor,
-  useSensors
-} from "@dnd-kit/core";
-import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
-import { FiMoon, FiSun } from "react-icons/fi";
+import React, { useEffect, useState } from "react";
+import { FiCopy, FiLock, FiMoon, FiRefreshCw, FiSun, FiUnlock } from "react-icons/fi";
+import { AnimatePresence, motion } from "framer-motion";
 import { Inter } from "next/font/google";
 
 const inter = Inter({ subsets: ["latin"] });
 
-const initialTasks = [
-  { id: "1", title: "Design wireframes", status: "todo", priority: "high", project: "Client A" },
-  { id: "2", title: "Fix API bug", status: "inprogress", priority: "medium", project: "Client B" },
-  { id: "3", title: "Deploy landing page", status: "done", priority: "low", project: "Client A" },
-];
+const generateColor = () => `#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, "0")}`;
 
-const statuses = ["todo", "inprogress", "done"];
-
-const statusLabels = {
-  todo: "📝 To Do",
-  inprogress: "🚧 In Progress",
-  done: "✅ Done",
-};
-
-const priorities = {
-  high: "border-l-4 border-red-500",
-  medium: "border-l-4 border-amber-400",
-  low: "border-l-4 border-green-500",
-};
-
-function TaskCard({ task, isDragging = false }: { task: any, isDragging?: boolean }) {
-  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: task.id });
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-  };
-  const isUrgent = task.priority === "high";
+const ColorBlock = ({ color, locked, onToggleLock, onCopy }) => {
   return (
-    <div
-      ref={setNodeRef}
-      {...attributes}
-      {...listeners}
-      style={isDragging ? undefined : style}
-      className={`rounded-md px-4 py-3 shadow bg-white text-black flex flex-col gap-1 ${priorities[task.priority]} transition-transform duration-200 ease-in-out ${isDragging ? "opacity-70 scale-[1.01]" : "hover:scale-[1.01] cursor-pointer"}`}
+    <motion.div
+      className="relative group rounded-2xl p-6 flex flex-col items-center justify-between 
+                 shadow-lg w-full sm:w-48 h-48 transition-all duration-300 hover:scale-105"
+      style={{ 
+        backgroundColor: color,
+        boxShadow: `0 8px 32px ${color}40`
+      }}
+      layout
+      whileHover={{ y: -5 }}
     >
-      <div className="flex justify-between items-center">
-        <h3 className="font-semibold text-sm flex items-center gap-1">
-          {isUrgent && <span className="text-red-500">⚠️</span>}
-          {task.title}
-        </h3>
-        <span className="text-xs text-zinc-500">{task.project}</span>
-      </div>
-    </div>
-  );
-}
-
-function TaskCardPreview({ task }: { task: any }) {
-  return (
-    <div
-      className={`rounded-md px-4 py-3 shadow bg-white text-black flex flex-col gap-1 ${priorities[task.priority]}`}
-      style={{ width: "100%" }}
-    >
-      <div className="flex justify-between items-center">
-        <h3 className="font-semibold text-sm flex items-center gap-1">
-          {task.priority === "high" && <span className="text-red-500">⚠️</span>}
-          {task.title}
-        </h3>
-        <span className="text-xs text-zinc-500">{task.project}</span>
-      </div>
-    </div>
-  );
-}
-
-function TaskColumnDroppable({ status, children, isTargetColumn, darkMode }: { status: string, children: React.ReactNode, isTargetColumn: boolean, darkMode: boolean }) {
-  const { setNodeRef } = useDroppable({
-    id: status
-  });
-
-  return (
-    <div
-      ref={setNodeRef}
-      id={status}
-      className={`rounded-xl border p-5 transition-all duration-200 shadow-sm
-        ${darkMode ? 'bg-zinc-800 border-zinc-700' : 'bg-white border-gray-200'}
-        ${isTargetColumn ? 'ring-2 ring-blue-500 ring-opacity-70' : ''}`}
-    >
-      {children}
-    </div>
-  );
-}
-
-export default function Dashboard() {
-  const [tasks, setTasks] = useState(initialTasks);
-  const [darkMode, setDarkMode] = useState(true);
-  const [projectFilter, setProjectFilter] = useState("All");
-  const [activeStatus, setActiveStatus] = useState<string | null>(null);
-  const [activeTask, setActiveTask] = useState<any>(null);
-  const [targetColumn, setTargetColumn] = useState<string | null>(null);
-
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 5,
-      },
-    })
-  );
-
-  const filteredTasks = tasks.filter((t) => projectFilter === "All" || t.project === projectFilter);
-
-  const onDragStart = (event: DragStartEvent) => {
-    const { active } = event;
-    const taskId = String(active.id);
-    const task = tasks.find(t => t.id === taskId);
-    if (task) setActiveTask(task);
-  };
-
-  const onDragOver = (event: DragOverEvent) => {
-    const { active, over } = event;
-    if (!active || !over) return;
-    
-    const overId = String(over.id);
-    
-    // Check if we're directly over a column/status
-    if (statuses.includes(overId)) {
-      setActiveStatus(overId);
-      setTargetColumn(overId);
-      return;
-    }
-    
-    // Otherwise, we're over a task
-    const overTask = tasks.find(t => t.id === overId);
-    if (overTask) {
-      setActiveStatus(overTask.status);
-      setTargetColumn(overTask.status);
-    }
-  };
-
-  const onDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-    if (!active || !over) return;
-    
-    const taskId = String(active.id);
-    const task = tasks.find(t => t.id === taskId);
-    if (!task) return;
-
-    const overId = String(over.id);
-    let newStatus = task.status;
-    
-    // If dropped directly on a status column
-    if (statuses.includes(overId)) {
-      newStatus = overId;
-    } 
-    // If dropped on another task
-    else {
-      const overTask = tasks.find(t => t.id === overId);
-      if (overTask) {
-        newStatus = overTask.status;
-      }
-    }
-
-    if (task.status !== newStatus) {
-      setTasks(tasks.map(t => t.id === taskId ? { ...t, status: newStatus } : t));
-    }
-
-    setActiveStatus(null);
-    setActiveTask(null);
-    setTargetColumn(null);
-  };
-
-  const onDragCancel = () => {
-    setActiveTask(null);
-    setActiveStatus(null);
-    setTargetColumn(null);
-  };
-
-  return (
-    <div className={`${darkMode ? "dark bg-zinc-900 text-white" : "bg-zinc-100 text-black"} min-h-screen transition-colors p-6 ${inter.className}`}>
-      <div className="max-w-6xl mx-auto">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold">Workflow Dashboard</h1>
-          <button
-            onClick={() => setDarkMode(!darkMode)}
-            title={darkMode ? "Switch to light mode" : "Switch to dark mode"}
-            className={`px-3 py-2 border rounded-full text-sm font-medium transition ${darkMode ? 'border-zinc-700' : 'border-gray-300'} hover:bg-zinc-200 dark:hover:bg-zinc-800`}
-          >
-            {darkMode ? <FiSun className="inline-block" /> : <FiMoon className="inline-block" />}
-          </button>
-        </div>
-
-        <div className="mb-6 flex justify-between items-center">
-          <label className="font-medium">Filter by Project:</label>
-          <select
-            onChange={(e) => setProjectFilter(e.target.value)}
-            className={`ml-2 border px-3 py-2 rounded-md text-sm ${darkMode ? 'bg-zinc-800 border-zinc-700 text-white' : 'bg-white border-gray-300 text-black'}`}
-            value={projectFilter}
-          >
-            <option>All</option>
-            <option>Client A</option>
-            <option>Client B</option>
-          </select>
-        </div>
-
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragStart={onDragStart}
-          onDragOver={onDragOver}
-          onDragEnd={onDragEnd}
-          onDragCancel={onDragCancel}
+      <div className="absolute top-0 left-0 w-full h-full bg-black/10 rounded-2xl opacity-0 
+                    group-hover:opacity-100 transition-opacity duration-300" />
+      
+      <p className="text-white font-mono text-lg tracking-wider mb-4 z-10">{color}</p>
+      
+      <div className="flex gap-6 z-10">
+        <motion.button
+          onClick={onToggleLock}
+          className="text-white/90 hover:text-white hover:scale-110 transition-all duration-200"
+          whileTap={{ scale: 0.9 }}
+          aria-label={locked ? "Unlock color" : "Lock color"}
         >
-          <div className="grid gap-6 grid-cols-1 md:grid-cols-3">
-            {statuses.map((status) => {
-              const columnTasks = filteredTasks.filter((task) => task.status === status);
-              const isTargetColumn = targetColumn === status;
-              
-              return (
-                <TaskColumnDroppable 
-                  key={status} 
-                  status={status}
-                  isTargetColumn={isTargetColumn}
-                  darkMode={darkMode}
-                >
-                  <h2 className="font-semibold text-lg mb-3 flex justify-between items-center">
-                    {statusLabels[status]} <span className="text-xs font-normal text-zinc-500">{columnTasks.length} tasks</span>
-                  </h2>
-                  <SortableContext items={columnTasks.map((t) => t.id)} strategy={verticalListSortingStrategy}>
-                    <div className="space-y-4 min-h-[120px]">
-                      {columnTasks.map((task) => (
-                        <TaskCard key={task.id} task={task} />
-                      ))}
-                    </div>
-                  </SortableContext>
-                </TaskColumnDroppable>
-              );
-            })}
+          {locked ? <FiLock size={20} /> : <FiUnlock size={20} />}
+        </motion.button>
+        <motion.button
+          onClick={() => onCopy(color)}
+          className="text-white/90 hover:text-white hover:scale-110 transition-all duration-200"
+          whileTap={{ scale: 0.9 }}
+          aria-label="Copy color code"
+        >
+          <FiCopy size={20} />
+        </motion.button>
+      </div>
+    </motion.div>
+  );
+};
+
+export default function PaletteApp() {
+  const [darkMode, setDarkMode] = useState(false);
+  const [toast, setToast] = useState("");
+  const [colors, setColors] = useState(
+    Array.from({ length: 5 }, () => ({ color: generateColor(), locked: false }))
+  );
+
+  const handleRefresh = () => {
+    setColors((prev) =>
+      prev.map((c) => (c.locked ? c : { ...c, color: generateColor() }))
+    );
+  };
+
+  const handleToggleLock = (index) => {
+    setColors((prev) =>
+      prev.map((c, i) => (i === index ? { ...c, locked: !c.locked } : c))
+    );
+  };
+
+  const handleCopy = async (hex) => {
+    try {
+      await navigator.clipboard.writeText(hex);
+      setToast(`Copied ${hex}`);
+      setTimeout(() => setToast(""), 1500);
+    } catch (err) {
+      setToast("Failed to copy");
+      setTimeout(() => setToast(""), 1500);
+    }
+  };
+
+  useEffect(() => {
+    const handleSpacebar = (e) => {
+      if (e.code === "Space") {
+        e.preventDefault();
+        handleRefresh();
+      }
+    };
+    window.addEventListener("keydown", handleSpacebar);
+    return () => window.removeEventListener("keydown", handleSpacebar);
+  }, []);
+
+  return (
+    <div className={`${darkMode ? "dark" : ""} ${inter.className}`}>
+      <div className="min-h-screen px-6 py-8 bg-gray-50 dark:bg-gray-900 
+                    text-gray-900 dark:text-white transition-colors">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex justify-between items-center mb-12">
+            <div>
+              <h1 className="text-3xl font-bold mb-2">Color Palette Generator</h1>
+              <p className="text-gray-600 dark:text-gray-400">
+                Press spacebar to generate new colors
+              </p>
+            </div>
+            <motion.button
+              onClick={() => setDarkMode(!darkMode)}
+              className="p-3 rounded-full bg-white dark:bg-gray-800 shadow-md 
+                       hover:shadow-lg transition-all duration-300"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              aria-label="Toggle dark mode"
+            >
+              {darkMode ? <FiSun size={22} /> : <FiMoon size={22} />}
+            </motion.button>
           </div>
-          <DragOverlay>{activeTask ? <TaskCardPreview task={activeTask} /> : null}</DragOverlay>
-        </DndContext>
+
+          <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 
+                        lg:grid-cols-5 mb-12">
+            <AnimatePresence>
+              {colors.map((c, i) => (
+                <ColorBlock
+                  key={i}
+                  color={c.color}
+                  locked={c.locked}
+                  onToggleLock={() => handleToggleLock(i)}
+                  onCopy={handleCopy}
+                />
+              ))}
+            </AnimatePresence>
+          </div>
+
+          <div className="text-center">
+            <motion.button
+              onClick={handleRefresh}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 
+                       rounded-full text-sm font-medium flex items-center gap-2 
+                       mx-auto shadow-lg hover:shadow-xl transition-all duration-300"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              aria-label="Generate new palette"
+            >
+              <FiRefreshCw /> Generate New Palette
+            </motion.button>
+          </div>
+        </div>
+
+        <AnimatePresence>
+          {toast && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
+              className="fixed bottom-8 left-1/2 transform -translate-x-1/2 
+                       bg-gray-900 text-white px-6 py-3 rounded-lg shadow-xl 
+                       text-sm font-medium"
+            >
+              {toast}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );
