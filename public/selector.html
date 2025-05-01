@@ -164,8 +164,9 @@
 
         .palette-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            grid-template-columns: repeat(4, minmax(240px, 1fr));
             gap: 32px;
+            padding-right: 272px;
         }
 
         .palette-card {
@@ -266,6 +267,7 @@
             <li data-category="random" onclick="setFilter('random')">Random</li>
             <li data-category="collection" onclick="setFilter('collection')">Collection</li>
         </ul>
+        <hr>
         <ul class="tag-list">
             <li onclick="setFilter('Pastel')">Pastel</li>
             <li onclick="setFilter('Vintage')">Vintage</li>
