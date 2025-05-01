@@ -25,12 +25,16 @@
             align-items: center;
             justify-content: space-between;
             border-bottom: 1px solid #eee;
+            margin: 0 auto;
+            width: 100%;
         }
 
         .header-left {
             display: flex;
             align-items: center;
             gap: 12px;
+            padding-left: 24px;
+            padding-right: 24px;
         }
 
         .logo-container {
@@ -52,22 +56,35 @@
             flex: 1;
             display: flex;
             align-items: center;
-            margin: 0 24px;
+            margin: 0;
+            position: relative;
+            max-width: calc(100% - 580px);
         }
 
         .search-bar {
             width: 100%;
-            padding: 10px 16px;
+            padding: 10px 16px 10px 40px;
             border: 1px solid #ddd;
             border-radius: 999px;
             font-size: 14px;
             background: #fafafa;
         }
 
+        .search-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #777;
+            width: 16px;
+            height: 16px;
+        }
+
         .header-right {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 30px;
+            padding-right: 55px;
         }
 
         .chrome-button {
@@ -81,16 +98,32 @@
             font-size: 14px;
             cursor: pointer;
         }
+        
+        .menu-button {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .menu-button:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
 
         .layout {
             display: flex;
+            max-width: 1600px;
+            margin: 0 auto;
+            width: 100%;
         }
 
         .sidebar {
             width: 240px;
             padding: 20px;
-            background: #fff;
-            border-right: 1px solid #eee;
         }
 
         .filter-list {
@@ -160,21 +193,31 @@
         .main-content {
             flex: 1;
             padding: 32px;
+            display: flex;
+            gap: 32px;
+            justify-content: space-between;
         }
 
         .palette-grid {
             display: grid;
             grid-template-columns: repeat(4, minmax(240px, 1fr));
             gap: 32px;
-            padding-right: 272px;
+            flex: 1;
+            padding-right: 0;
+            max-width: calc(100% - 280px); /* Account for ad section */
         }
 
         .palette-card {
+            overflow: hidden;
+            transition: transform 0.2s;
+            border-radius: 14px;
+        }
+
+        .palette-sample {
             background: #fff;
-            border-radius: 16px;
+            border-radius: 4px;
             overflow: hidden;
             box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
-            transition: transform 0.2s;
         }
 
         .palette-card:hover {
@@ -209,33 +252,65 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 12px 16px;
+            padding: 12px 0;
+            margin-top: 8px;
         }
 
         .like-button {
             display: flex;
             align-items: center;
-            padding: 4px 10px;
+            padding: 8px 14px;
             border: 1px solid #ddd;
-            border-radius: 999px;
-            background: #fff;
+            border-radius: 10px;
+            background: transparent; /* Change from #fff to transparent */
             font-size: 14px;
             cursor: pointer;
             gap: 6px;
-            transition: border-color 0.2s;
+            transition: border-color 0.2s, background-color 0.2s;
         }
 
         .like-button:hover {
             border-color: #aaa;
+            background-color: rgba(0, 0, 0, 0.03); /* Add a subtle hover effect */
         }
 
         .like-button.liked {
             color: #e63946;
         }
 
+        .like-button svg {
+            width: 16px;
+            height: 16px;
+            transition: fill 0.2s;
+        }
+
+        .like-button.liked svg {
+            fill: #e63946;
+        }
+
+        .like-button:not(.liked) svg {
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+        }
+
         .timestamp {
             font-size: 13px;
-            color: #999;
+            color: #000000e6;
+        }
+
+        .ad-section {
+            width: 240px;
+            margin-left: 0; /* Remove margin that was adding extra space */
+        }
+
+        .ad-card {
+            padding: 16px;
+        }
+
+        .ad-card img {
+            width: 100%;
+            margin-top: 12px;
         }
     </style>
 </head>
@@ -249,12 +324,23 @@
         <span style="font-size: 20px; font-weight: 500;">Color Hunt</span>
     </div>
     <div class="search-wrapper">
-        <input type="text" class="search-bar" placeholder="Search palettes..." onkeyup="filterPalettes()">
+        <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input type="text" class="search-bar" placeholder="Search palettes" onkeyup="filterPalettes()">
     </div>
     <div class="header-right">
-        <div class="chrome-button">
+        <div class="chrome-button" onclick="window.open('https://chromewebstore.google.com/detail/color-tab/hchlgfaicmddilenlflajnmomalehbom', '_blank')">
             <img src="https://www.google.com/chrome/static/images/chrome-logo.svg" alt="Chrome" width="16">
             Add to Chrome
+        </div>
+        <div class="menu-button">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="5" cy="12" r="2" fill="currentColor"/>
+                <circle cx="12" cy="12" r="2" fill="currentColor"/>
+                <circle cx="19" cy="12" r="2" fill="currentColor"/>
+            </svg>
         </div>
     </div>
 </header>
@@ -283,18 +369,30 @@
             <li onclick="setFilter('Winter')">Winter</li>
         </ul>
     </div>
+
     <div class="main-content">
         <div class="palette-grid" id="paletteGrid"></div>
+        <!-- Ad section -->
+        <div class="ad-section">
+            <div class="ad-card">
+                <h3 style="font-size: 15px; font-weight: 600; margin-bottom: 6px;">Color Palettes for Designers and Artists</h3>
+                <p style="font-size: 13px; color: #666;">Discover the newest hand-picked palettes of Color Hunt</p>
+                <img src="https://cdn.flashtalking.com/189813/5062297/FY25Q1_CC_Individual_Illustrator_AE_EN_MaxOct2024-ImageTrace-V1_ST_300x250_ImageTrace_Release-Ai-MAXOct.jpg?673117358" alt="Ad">
+            </div>
+        </div>
     </div>
 </div>
 
 <script>
     const palettes = [
-        { id: 1, category: "Warm", colors: ["#4A2C2A", "#7A3E3E", "#D4A017", "#F5D6BA"], timestamp: Date.now() - 15 * 3600 * 1000 },
-        { id: 2, category: "Pastel", colors: ["#F5F5DC", "#FFB6C1", "#98FF98", "#D2B48C"], timestamp: Date.now() - 24 * 3600 * 1000 },
-        { id: 3, category: "Dark", colors: ["#2F4F4F", "#4A2C2A", "#5C4033", "#8A7F47"], timestamp: Date.now() - 2 * 24 * 3600 * 1000 },
-        { id: 4, category: "Cold", colors: ["#4682B4", "#ADD8E6", "#B0E0E6", "#E0FFFF"], timestamp: Date.now() - 3 * 24 * 3600 * 1000 },
-        { id: 5, category: "Retro", colors: ["#FF4500", "#FFA500", "#FFD700", "#9ACD32"], timestamp: Date.now() - 4 * 24 * 3600 * 1000 },
+        { id: 1, category: "Warm", colors: ["#4A2C2A", "#7A3E3E", "#D4A017", "#F5D6BA", "#C87533", "#E2A76F"], timestamp: Date.now() - 15 * 3600 * 1000 },
+        { id: 3, category: "Dark", colors: ["#2F4F4F", "#4A2C2A", "#5C4033", "#8A7F47", "#483D8B", "#36454F"], timestamp: Date.now() - 2 * 24 * 3600 * 1000 },
+        { id: 4, category: "Cold", colors: ["#4682B4", "#ADD8E6", "#B0E0E6", "#E0FFFF", "#87CEFA", "#5F9EA0"], timestamp: Date.now() - 3 * 24 * 3600 * 1000 },
+        { id: 7, category: "Vintage", colors: ["#D4B483", "#C1A3A3", "#886F68", "#694E4E", "#9F8170", "#A67B5B"], timestamp: Date.now() - 8 * 3600 * 1000 },
+        { id: 9, category: "Fall", colors: ["#8B4513", "#A0522D", "#CD853F", "#DEB887", "#DAA520", "#B8860B"], timestamp: Date.now() - 32 * 3600 * 1000 },
+        { id: 10, category: "Winter", colors: ["#708090", "#B0C4DE", "#F0F8FF", "#FFFAFA", "#E0FFFF", "#F0FFF0"], timestamp: Date.now() - 40 * 3600 * 1000 },
+        { id: 14, category: "Dark", colors: ["#1A1A1A", "#333333", "#4D4D4D", "#666666", "#2F4F4F", "#556B2F"], timestamp: Date.now() - 22 * 3600 * 1000 },
+        { id: 15, category: "Warm", colors: ["#FF7F50", "#FF6347", "#FF4500", "#FF8C00", "#FFA07A", "#FA8072"], timestamp: Date.now() - 30 * 3600 * 1000 }
     ];
 
     let likes = JSON.parse(localStorage.getItem('paletteLikes')) || {};
@@ -312,7 +410,7 @@
         ];
         for (const interval of intervals) {
             const count = Math.floor(seconds / interval.seconds);
-            if (count >= 1) return `${count} ${interval.label}${count > 1 ? 's' : ''} ago`;
+            if (count >= 1) return `${count} ${interval.label}${count > 1 ? 's' : ''}`;
         }
         return 'Just now';
     }
@@ -326,6 +424,8 @@
             return matchCategory && matchSearch;
         });
         filteredPalettes.forEach(palette => {
+            const container = document.createElement('div');
+            
             const card = document.createElement('div');
             card.className = 'palette-card';
             palette.colors.forEach(color => {
@@ -338,20 +438,31 @@
                 swatch.appendChild(tooltip);
                 card.appendChild(swatch);
             });
+            container.appendChild(card);
+            
             const info = document.createElement('div');
             info.className = 'palette-info';
             const likeBtn = document.createElement('button');
             likeBtn.className = 'like-button';
             if (likes[palette.id]) likeBtn.classList.add('liked');
-            likeBtn.innerHTML = `❤ ${likes[palette.id] || 0}`;
+            
+            // Replace text heart with SVG
+            likeBtn.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                </svg>
+                ${likes[palette.id] || 0}
+            `;
+            
             likeBtn.onclick = () => toggleLike(palette.id);
             const time = document.createElement('span');
             time.className = 'timestamp';
             time.textContent = timeAgo(palette.timestamp);
             info.appendChild(likeBtn);
             info.appendChild(time);
-            card.appendChild(info);
-            grid.appendChild(card);
+            container.appendChild(info);
+            
+            grid.appendChild(container);
         });
     }
 
@@ -364,9 +475,14 @@
 
     function setFilter(category) {
         currentFilter = category;
-        document.querySelectorAll('.filter-list li').forEach(li =>
-            li.classList.toggle('active', li.dataset.category === category)
-        );
+        document.querySelectorAll('.filter-list li, .tag-list li').forEach(li => {
+            if ((li.dataset.category === category) ||
+                (li.textContent === category && !li.dataset.category)) {
+                li.classList.add('active');
+            } else {
+                li.classList.remove('active');
+            }
+        });
         renderPalettes();
     }
 
