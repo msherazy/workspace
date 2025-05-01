@@ -23,7 +23,7 @@ interface ProductivityData {
 const DAILY_GOAL = 120;
 
 // Mock weekly data for productivity chart
-const MOCK_WEEKLY_DATA: ProductivityData[] = [
+const initialMockWeeklyData: ProductivityData[] = [
   { day: "Mon", minutes: 80 },
   { day: "Tue", minutes: 40 },
   { day: "Wed", minutes: 60 },
@@ -41,9 +41,17 @@ const MOCK_WEEKLY_DATA: ProductivityData[] = [
  */
 async function fetchWeeklyProductivity(): Promise<ProductivityData[]> {
   // Simulate API call with a delay
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     setTimeout(() => {
-      resolve(MOCK_WEEKLY_DATA);
+      // Simulate success with dynamic data
+      const dynamicMockWeeklyData = initialMockWeeklyData.map(item => ({
+        ...item,
+        minutes: Math.floor(Math.random() * 120) // Random minutes for each day
+      }));
+      resolve(dynamicMockWeeklyData);
+      
+      // Simulate error (uncomment to test error handling)
+      // reject(new Error("Failed to fetch data"));
     }, 1000);
   });
 }
@@ -125,12 +133,19 @@ interface GoalTrackerProps {
 function GoalTracker({ theme }: GoalTrackerProps) {
   const [goals, setGoals] = useState<string[]>([]);
   const [newGoal, setNewGoal] = useState("");
+  const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
 
   // Add a new goal to the list
   const addGoal = () => {
     if (newGoal.trim()) {
       setGoals(prev => [...prev, newGoal.trim()]);
       setNewGoal("");
+      // Provide feedback to the user
+      setFeedbackMessage("Goal added successfully!");
+      // Clear feedback message after 3 seconds
+      setTimeout(() => {
+        setFeedbackMessage(null);
+      }, 3000);
     }
   };
 
@@ -168,6 +183,10 @@ function GoalTracker({ theme }: GoalTrackerProps) {
           <li className="text-gray-500 italic p-2">No goals added yet. Add some to track your progress!</li>
         )}
       </ul>
+      {/* Display feedback message */}
+      {feedbackMessage && (
+        <div className="mt-4 text-sm text-green-600 dark:text-green-400">{feedbackMessage}</div>
+      )}
     </section>
   );
 }
@@ -186,7 +205,7 @@ interface ProductivityChartProps {
  */
 function ProductivityChart({ weeklyData, loading, theme }: ProductivityChartProps) {
   // Use real data if available, otherwise fall back to mock data
-  const chartData = weeklyData.length > 0 ? weeklyData : MOCK_WEEKLY_DATA;
+  const chartData = weeklyData.length > 0 ? weeklyData : initialMockWeeklyData;
 
   return (
     <section className="bg-purple-50 dark:bg-purple-900/40 rounded-2xl p-6 shadow-lg transition-all duration-300 hover:shadow-xl border border-purple-100 dark:border-purple-800">
@@ -240,6 +259,35 @@ function ProductivityChart({ weeklyData, loading, theme }: ProductivityChartProp
   );
 }
 
+// ===== THEME PROVIDER COMPONENT =====
+
+/**
+ * Providers component for theme management
+ */
+function Providers({ children }: { children: React.ReactNode }) {
+  const [mounted, setMounted] = useState(false);
+
+  // After mounting, we can render the children
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return null;
+  }
+
+  return (
+    <ThemeProvider 
+      attribute="class" 
+      defaultTheme="light" 
+      enableSystem={true} 
+      enableColorScheme={true}
+    >
+      {children}
+    </ThemeProvider>
+  );
+}
+
 // ===== MAIN DASHBOARD COMPONENT =====
 
 /**
@@ -287,7 +335,13 @@ function DashboardContent() {
   }, []);
 
   // Toggle theme between light and dark
-  const toggleTheme = () => setTheme(theme === "light" ? "dark" : "light");
+  const toggleTheme = () => {
+    if (theme === "light") {
+      setTheme("dark");
+    } else {
+      setTheme("light");
+    }
+  };
 
   // Don't render until component is mounted (prevents hydration issues with theme)
   if (!mounted) return null;
@@ -305,7 +359,7 @@ function DashboardContent() {
             onClick={toggleTheme}
             className="text-2xl p-2 rounded-full border border-gray-400 dark:border-gray-600 transition-all duration-200 hover:scale-110 hover:shadow-md"
           >
-            {theme === "light" ? <FiMoon /> : <FiSun />}
+            {theme === "dark" ? <FiSun /> : <FiMoon />}
           </button>
         </div>
 
@@ -337,8 +391,8 @@ function DashboardContent() {
  */
 export default function FocusDashboard() {
   return (
-    <ThemeProvider attribute="class" defaultTheme="light">
+    <Providers>
       <DashboardContent />
-    </ThemeProvider>
+    </Providers>
   );
 }

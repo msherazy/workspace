@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Color Palette Browser</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background: #f9f9f9;
+            font-family: 'Inter', system-ui, sans-serif;
+            color: #333;
+        }
+
+        header {
+            background: #fff;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #eee;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-container {
+            position: relative;
+            width: 32px;
+            height: 32px;
+        }
+
+        .logo-face,
+        .logo-tongue {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 32px;
+            height: 32px;
+        }
+
+        .search-wrapper {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            margin: 0 24px;
+        }
+
+        .search-bar {
+            width: 100%;
+            padding: 10px 16px;
+            border: 1px solid #ddd;
+            border-radius: 999px;
+            font-size: 14px;
+            background: #fafafa;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .chrome-button {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: #fff;
+            border: 1px solid #ddd;
+            padding: 6px 14px;
+            border-radius: 10px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .layout {
+            display: flex;
+        }
+
+        .sidebar {
+            width: 240px;
+            padding: 20px;
+            background: #fff;
+            border-right: 1px solid #eee;
+        }
+
+        .filter-list {
+            list-style: none;
+            margin-bottom: 24px;
+        }
+
+        .filter-list li {
+            padding: 10px 12px;
+            font-size: 15px;
+            border-radius: 12px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .filter-list li::before {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            background-size: cover;
+            content: "";
+        }
+
+        .filter-list li[data-category="all"]::before {
+            background-image: url('https://img.icons8.com/ios/50/000000/sparkle.png');
+        }
+        .filter-list li[data-category="popular"]::before {
+            background-image: url('https://img.icons8.com/ios/50/000000/fire-element.png');
+        }
+        .filter-list li[data-category="random"]::before {
+            background-image: url('https://img.icons8.com/ios/50/000000/refresh.png');
+        }
+        .filter-list li[data-category="collection"]::before {
+            background-image: url('https://img.icons8.com/ios/50/000000/like--v1.png');
+        }
+
+        .filter-list li:hover,
+        .filter-list li.active {
+            background: #f2f2f2;
+            font-weight: 500;
+        }
+
+        .tag-list {
+            list-style: none;
+            padding-top: 12px;
+        }
+
+        .tag-list li {
+            padding: 8px 12px;
+            font-size: 14px;
+            margin-bottom: 4px;
+            cursor: pointer;
+            border-radius: 12px;
+            transition: background 0.2s;
+        }
+
+        .tag-list li:hover,
+        .tag-list li.active {
+            background: #f2f2f2;
+            font-weight: 500;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 32px;
+        }
+
+        .palette-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 32px;
+        }
+
+        .palette-card {
+            background: #fff;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+            transition: transform 0.2s;
+        }
+
+        .palette-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .color-swatch {
+            height: 48px;
+            position: relative;
+        }
+
+        .color-swatch:hover .tooltip {
+            display: block;
+        }
+
+        .tooltip {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.75);
+            color: #fff;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            white-space: nowrap;
+            pointer-events: none;
+        }
+
+        .palette-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+        }
+
+        .like-button {
+            display: flex;
+            align-items: center;
+            padding: 4px 10px;
+            border: 1px solid #ddd;
+            border-radius: 999px;
+            background: #fff;
+            font-size: 14px;
+            cursor: pointer;
+            gap: 6px;
+            transition: border-color 0.2s;
+        }
+
+        .like-button:hover {
+            border-color: #aaa;
+        }
+
+        .like-button.liked {
+            color: #e63946;
+        }
+
+        .timestamp {
+            font-size: 13px;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <div class="header-left">
+        <div class="logo-container">
+            <img class="logo-face" src="https://colorhunt.co/img/color-hunt-logo-face.svg" alt="face">
+            <img class="logo-tongue" src="https://colorhunt.co/img/color-hunt-logo-tongue.svg" alt="tongue">
+        </div>
+        <span style="font-size: 20px; font-weight: 500;">Color Hunt</span>
+    </div>
+    <div class="search-wrapper">
+        <input type="text" class="search-bar" placeholder="Search palettes..." onkeyup="filterPalettes()">
+    </div>
+    <div class="header-right">
+        <div class="chrome-button">
+            <img src="https://www.google.com/chrome/static/images/chrome-logo.svg" alt="Chrome" width="16">
+            Add to Chrome
+        </div>
+    </div>
+</header>
+
+<div class="layout">
+    <div class="sidebar">
+        <ul class="filter-list">
+            <li data-category="all" class="active" onclick="setFilter('all')">New</li>
+            <li data-category="popular" onclick="setFilter('popular')">Popular</li>
+            <li data-category="random" onclick="setFilter('random')">Random</li>
+            <li data-category="collection" onclick="setFilter('collection')">Collection</li>
+        </ul>
+        <ul class="tag-list">
+            <li onclick="setFilter('Pastel')">Pastel</li>
+            <li onclick="setFilter('Vintage')">Vintage</li>
+            <li onclick="setFilter('Retro')">Retro</li>
+            <li onclick="setFilter('Neon')">Neon</li>
+            <li onclick="setFilter('Gold')">Gold</li>
+            <li onclick="setFilter('Light')">Light</li>
+            <li onclick="setFilter('Dark')">Dark</li>
+            <li onclick="setFilter('Warm')">Warm</li>
+            <li onclick="setFilter('Cold')">Cold</li>
+            <li onclick="setFilter('Summer')">Summer</li>
+            <li onclick="setFilter('Fall')">Fall</li>
+            <li onclick="setFilter('Winter')">Winter</li>
+        </ul>
+    </div>
+    <div class="main-content">
+        <div class="palette-grid" id="paletteGrid"></div>
+    </div>
+</div>
+
+<script>
+    const palettes = [
+        { id: 1, category: "Warm", colors: ["#4A2C2A", "#7A3E3E", "#D4A017", "#F5D6BA"], timestamp: Date.now() - 15 * 3600 * 1000 },
+        { id: 2, category: "Pastel", colors: ["#F5F5DC", "#FFB6C1", "#98FF98", "#D2B48C"], timestamp: Date.now() - 24 * 3600 * 1000 },
+        { id: 3, category: "Dark", colors: ["#2F4F4F", "#4A2C2A", "#5C4033", "#8A7F47"], timestamp: Date.now() - 2 * 24 * 3600 * 1000 },
+        { id: 4, category: "Cold", colors: ["#4682B4", "#ADD8E6", "#B0E0E6", "#E0FFFF"], timestamp: Date.now() - 3 * 24 * 3600 * 1000 },
+        { id: 5, category: "Retro", colors: ["#FF4500", "#FFA500", "#FFD700", "#9ACD32"], timestamp: Date.now() - 4 * 24 * 3600 * 1000 },
+    ];
+
+    let likes = JSON.parse(localStorage.getItem('paletteLikes')) || {};
+    let currentFilter = 'all';
+    let searchQuery = '';
+
+    function timeAgo(timestamp) {
+        const seconds = Math.floor((Date.now() - timestamp) / 1000);
+        const intervals = [
+            { label: 'year', seconds: 31536000 },
+            { label: 'month', seconds: 2592000 },
+            { label: 'day', seconds: 86400 },
+            { label: 'hour', seconds: 3600 },
+            { label: 'minute', seconds: 60 },
+        ];
+        for (const interval of intervals) {
+            const count = Math.floor(seconds / interval.seconds);
+            if (count >= 1) return `${count} ${interval.label}${count > 1 ? 's' : ''} ago`;
+        }
+        return 'Just now';
+    }
+
+    function renderPalettes() {
+        const grid = document.getElementById('paletteGrid');
+        grid.innerHTML = '';
+        const filteredPalettes = palettes.filter(p => {
+            const matchCategory = currentFilter === 'all' || p.category === currentFilter;
+            const matchSearch = searchQuery === '' || p.colors.some(c => c.toLowerCase().includes(searchQuery.toLowerCase()));
+            return matchCategory && matchSearch;
+        });
+        filteredPalettes.forEach(palette => {
+            const card = document.createElement('div');
+            card.className = 'palette-card';
+            palette.colors.forEach(color => {
+                const swatch = document.createElement('div');
+                swatch.className = 'color-swatch';
+                swatch.style.backgroundColor = color;
+                const tooltip = document.createElement('div');
+                tooltip.className = 'tooltip';
+                tooltip.textContent = color;
+                swatch.appendChild(tooltip);
+                card.appendChild(swatch);
+            });
+            const info = document.createElement('div');
+            info.className = 'palette-info';
+            const likeBtn = document.createElement('button');
+            likeBtn.className = 'like-button';
+            if (likes[palette.id]) likeBtn.classList.add('liked');
+            likeBtn.innerHTML = `❤ ${likes[palette.id] || 0}`;
+            likeBtn.onclick = () => toggleLike(palette.id);
+            const time = document.createElement('span');
+            time.className = 'timestamp';
+            time.textContent = timeAgo(palette.timestamp);
+            info.appendChild(likeBtn);
+            info.appendChild(time);
+            card.appendChild(info);
+            grid.appendChild(card);
+        });
+    }
+
+    function toggleLike(id) {
+        likes[id] = (likes[id] || 0) + (likes[id] ? -1 : 1);
+        if (likes[id] === 0) delete likes[id];
+        localStorage.setItem('paletteLikes', JSON.stringify(likes));
+        renderPalettes();
+    }
+
+    function setFilter(category) {
+        currentFilter = category;
+        document.querySelectorAll('.filter-list li').forEach(li =>
+            li.classList.toggle('active', li.dataset.category === category)
+        );
+        renderPalettes();
+    }
+
+    function filterPalettes() {
+        searchQuery = document.querySelector('.search-bar').value;
+        renderPalettes();
+    }
+
+    renderPalettes();
+</script>
+</body>
+</html>
