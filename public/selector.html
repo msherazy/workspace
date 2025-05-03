@@ -425,7 +425,7 @@
         });
         filteredPalettes.forEach(palette => {
             const container = document.createElement('div');
-            
+
             const card = document.createElement('div');
             card.className = 'palette-card';
             palette.colors.forEach(color => {
@@ -439,13 +439,13 @@
                 card.appendChild(swatch);
             });
             container.appendChild(card);
-            
+
             const info = document.createElement('div');
             info.className = 'palette-info';
             const likeBtn = document.createElement('button');
             likeBtn.className = 'like-button';
             if (likes[palette.id]) likeBtn.classList.add('liked');
-            
+
             // Replace text heart with SVG
             likeBtn.innerHTML = `
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -453,7 +453,7 @@
                 </svg>
                 ${likes[palette.id] || 0}
             `;
-            
+
             likeBtn.onclick = () => toggleLike(palette.id);
             const time = document.createElement('span');
             time.className = 'timestamp';
@@ -461,7 +461,7 @@
             info.appendChild(likeBtn);
             info.appendChild(time);
             container.appendChild(info);
-            
+
             grid.appendChild(container);
         });
     }
