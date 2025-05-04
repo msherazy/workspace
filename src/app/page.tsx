@@ -11,6 +11,11 @@ const GoogleFontStyles = () => (
       0%, 100% { transform: scale(1); }
       50% { transform: scale(1.2); }
     }
+    ::placeholder {
+      font-size: 0.85rem;
+      opacity: 0.6;
+      font-style: italic;
+    }
   `}</style>
 );
 
@@ -202,7 +207,13 @@ const Index = () => {
 
   // Create a new post
   const handleCreatePost = () => {
-    if (currentUser && newPost.description && newPost.image) {
+    if (
+      currentUser && 
+      newPost.description.trim() !== '' && 
+      newPost.image.trim() !== '' &&
+      newPost.projectType.trim() !== '' &&
+      newPost.yarnBrand.trim() !== ''
+    ) {
       const newPostObject: Post = {
         id: posts.length + 1,
         userId: currentUser.id,
@@ -210,8 +221,8 @@ const Index = () => {
         userImage: currentUser.image,
         image: newPost.image,
         description: newPost.description,
-        projectType: newPost.projectType || 'Other',
-        yarnBrand: newPost.yarnBrand || 'Unknown',
+        projectType: newPost.projectType,
+        yarnBrand: newPost.yarnBrand,
         likes: 0,
         liked: false,
         timestamp: 'Just now'
@@ -594,7 +605,7 @@ const Index = () => {
                   <input
                     type="text"
                     placeholder={`Search by ${searchType === 'projectType' ? 'project type' : 'yarn brand'}...`}
-                    className="w-full pl-10 pr-4 py-2 border rounded-md focus:outline-none focus:ring-2"
+                    className="w-full pl-10 pr-4 py-2 border rounded-md focus:outline-none focus:ring-2 text-base"
                     style={{
                       backgroundColor: darkMode ? '#2D3748' : '#FFFFFF',
                       color: darkMode ? '#FFFFFF' : '#3E2723',
@@ -854,12 +865,12 @@ const Index = () => {
                       className="block text-sm font-medium mb-1"
                       style={{ color: darkMode ? '#FFFFFF' : '#3E2723' }}
                     >
-                      Image URL
+                      Image URL <span className="text-rose-500">*</span>
                     </label>
                     <input
                       type="text"
                       placeholder="Paste an image URL"
-                      className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2"
+                      className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 text-base"
                       style={{
                         borderColor: darkMode ? '#4A5568' : '#E2E8F0',
                         backgroundColor: darkMode ? '#2D3748' : '#FFFFFF',
@@ -876,11 +887,11 @@ const Index = () => {
                       className="block text-sm font-medium mb-1"
                       style={{ color: darkMode ? '#FFFFFF' : '#3E2723' }}
                     >
-                      Description
+                      Description <span className="text-rose-500">*</span>
                     </label>
                     <textarea
                       placeholder="Tell us about your project..."
-                      className="w-full px-3 py-2 border rounded-md h-24 resize-none focus:outline-none focus:ring-2"
+                      className="w-full px-3 py-2 border rounded-md h-24 resize-none focus:outline-none focus:ring-2 text-base"
                       style={{
                         borderColor: darkMode ? '#4A5568' : '#E2E8F0',
                         backgroundColor: darkMode ? '#2D3748' : '#FFFFFF',
@@ -898,12 +909,12 @@ const Index = () => {
                         className="block text-sm font-medium mb-1"
                         style={{ color: darkMode ? '#FFFFFF' : '#3E2723' }}
                       >
-                        Project Type
+                        Project Type <span className="text-rose-500">*</span>
                       </label>
                       <input
                         type="text"
                         placeholder="E.g., Sweater, Scarf"
-                        className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2"
+                        className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 text-base"
                         style={{
                           borderColor: darkMode ? '#4A5568' : '#E2E8F0',
                           backgroundColor: darkMode ? '#2D3748' : '#FFFFFF',
@@ -919,12 +930,12 @@ const Index = () => {
                         className="block text-sm font-medium mb-1"
                         style={{ color: darkMode ? '#FFFFFF' : '#3E2723' }}
                       >
-                        Yarn Brand
+                        Yarn Brand <span className="text-rose-500">*</span>
                       </label>
                       <input
                         type="text"
                         placeholder="E.g., Malabrigo, Lion Brand"
-                        className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2"
+                        className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 text-base"
                         style={{
                           borderColor: darkMode ? '#4A5568' : '#E2E8F0',
                           backgroundColor: darkMode ? '#2D3748' : '#FFFFFF',
@@ -937,11 +948,25 @@ const Index = () => {
                     </div>
                   </div>
 
+                  <div className="text-xs" style={{ color: darkMode ? '#CCCCCC' : '#5D4037' }}>
+                    <span className="text-rose-500">*</span> All fields are required
+                  </div>
+
                   <button
                     onClick={handleCreatePost}
-                    disabled={!newPost.image || !newPost.description}
+                    disabled={
+                      !newPost.image.trim() || 
+                      !newPost.description.trim() || 
+                      !newPost.projectType.trim() || 
+                      !newPost.yarnBrand.trim()
+                    }
                     className={`w-full py-2 rounded-md text-white font-medium transition-opacity ${
-                      !newPost.image || !newPost.description ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-90'
+                      !newPost.image.trim() || 
+                      !newPost.description.trim() || 
+                      !newPost.projectType.trim() || 
+                      !newPost.yarnBrand.trim() 
+                        ? 'opacity-50 cursor-not-allowed' 
+                        : 'hover:opacity-90'
                     }`}
                     style={{ backgroundColor: getColor('accent') }}
                   >
@@ -979,7 +1004,8 @@ const Index = () => {
                     </label>
                     <input
                       type="text"
-                      className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2"
+                      placeholder="Your display name"
+                      className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 text-base"
                       style={{
                         borderColor: darkMode ? '#4A5568' : '#E2E8F0',
                         backgroundColor: darkMode ? '#2D3748' : '#FFFFFF',
@@ -1000,7 +1026,8 @@ const Index = () => {
                     </label>
                     <input
                       type="text"
-                      className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2"
+                      placeholder="What yarn do you love to work with?"
+                      className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 text-base"
                       style={{
                         borderColor: darkMode ? '#4A5568' : '#E2E8F0',
                         backgroundColor: darkMode ? '#2D3748' : '#FFFFFF',
@@ -1021,7 +1048,8 @@ const Index = () => {
                     </label>
                     <input
                       type="text"
-                      className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2"
+                      placeholder="Link to your profile picture"
+                      className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 text-base"
                       style={{
                         borderColor: darkMode ? '#4A5568' : '#E2E8F0',
                         backgroundColor: darkMode ? '#2D3748' : '#FFFFFF',
@@ -1061,3 +1089,4 @@ const Index = () => {
 };
 
 export default Index;
+
