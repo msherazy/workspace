@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Facebook, Heart, Home, Instagram, Moon, PlusCircle, Search, Sun, Twitter, User, X } from "lucide-react";
+import { Heart, Home, Moon, PlusCircle, Search, Sun, User, X } from "lucide-react";
 
-// Add Google Fonts directly in the component
+// Google Fonts
 const GoogleFontStyles = () => (
   <style jsx global>{`
     @import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700&family=Nunito:wght@400;500;600;700&display=swap');
@@ -36,48 +36,49 @@ type Post = {
   timestamp: string;
 };
 
+// Craft-inspired color palette
+const COLORS = {
+  primary: {
+    light: '#A78B71', // Warm taupe (undyed wool)
+    dark: '#8D6E63'   // Darker taupe
+  },
+  accent: {
+    light: '#C77D58', // Terracotta (clay)
+    dark: '#B56549'   // Darker terracotta
+  },
+  secondary: {
+    light: '#6B8E7E', // Sage green
+    dark: '#5A7A6D'   // Darker sage
+  },
+  background: {
+    light: '#F8F4F0', // Creamy ivory
+    dark: '#2B2118'   // Dark chocolate
+  },
+  text: {
+    primary: {
+      light: '#3E2723', // Dark chocolate
+      dark: '#F5F5F5'   // Bright white (95% white)
+    },
+    secondary: {
+      light: '#5D4037', // Medium brown
+      dark: '#E0E0E0'   // Light gray (88% white)
+    }
+  },
+  card: {
+    light: '#FFFFFF', // Pure white for cards
+    dark: '#3E2723'   // Dark brown for cards
+  }
+};
+
 const Index = () => {
   // State for the active tab
   const [activeTab, setActiveTab] = useState<'feed' | 'profile' | 'search'>('feed');
   const [darkMode, setDarkMode] = useState(false);
-
-  // Initialize dark mode from localStorage or prefer-color-scheme
-  useEffect(() => {
-    const savedMode = localStorage.getItem('knitConnectDarkMode');
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-
-    if (savedMode !== null) {
-      setDarkMode(savedMode === 'true');
-    } else {
-      setDarkMode(prefersDark);
-    }
-  }, []);
-
-  // Apply dark mode class to document
-  useEffect(() => {
-    if (darkMode) {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('knitConnectDarkMode', 'true');
-    } else {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('knitConnectDarkMode', 'false');
-    }
-  }, [darkMode]);
-
-  // State for posts
   const [posts, setPosts] = useState<Post[]>([]);
-
-  // State for profiles
   const [profiles, setProfiles] = useState<Profile[]>([]);
-
-  // State for current user
   const [currentUser, setCurrentUser] = useState<Profile | null>(null);
-
-  // State for search
   const [searchTerm, setSearchTerm] = useState('');
   const [searchType, setSearchType] = useState<'projectType' | 'yarnBrand'>('projectType');
-
-  // State for new post
   const [isCreatingPost, setIsCreatingPost] = useState(false);
   const [newPost, setNewPost] = useState({
     image: '',
@@ -85,18 +86,22 @@ const Index = () => {
     projectType: '',
     yarnBrand: ''
   });
-
-  // State for profile edit
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [editedProfile, setEditedProfile] = useState({
     name: '',
     favoriteYarn: '',
     image: ''
   });
-
-  // State for modal animations
   const [modalOpen, setModalOpen] = useState(false);
   const [modalClosing, setModalClosing] = useState(false);
+
+  // Get color based on current mode
+  const getColor = (colorType: keyof typeof COLORS, textType: 'primary' | 'secondary' = 'primary') => {
+    if (colorType === 'text') {
+      return darkMode ? COLORS.text[textType].dark : COLORS.text[textType].light;
+    }
+    return darkMode ? COLORS[colorType].dark : COLORS[colorType].light;
+  };
 
   // Initialize with sample data
   useEffect(() => {
@@ -152,9 +157,25 @@ const Index = () => {
     setProfiles(sampleProfiles);
     setPosts(samplePosts);
     setCurrentUser(sampleProfiles[3]);
+
+    // Initialize dark mode from localStorage or system preference
+    const savedMode = localStorage.getItem('knitDarkMode');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    setDarkMode(savedMode ? savedMode === 'true' : prefersDark);
   }, []);
 
-  // Handle like functionality with animation
+  // Apply dark mode class to document
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('knitDarkMode', 'true');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('knitDarkMode', 'false');
+    }
+  }, [darkMode]);
+
+  // Handle like functionality
   const handleLike = (postId: number) => {
     setPosts(posts.map(post => {
       if (post.id === postId) {
@@ -253,36 +274,48 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
+    <div
+      className="min-h-screen flex flex-col transition-colors duration-200"
+      style={{ backgroundColor: getColor('background') }}
+    >
       <GoogleFontStyles />
 
       {/* Header */}
-      <header className="bg-[#F97358] dark:bg-gray-800 text-white p-4 shadow-lg transition-colors duration-200">
+      <header
+        className="p-4 shadow-lg sticky top-0 z-10"
+        style={{ backgroundColor: getColor('primary') }}
+      >
         <div className="container mx-auto flex justify-between items-center">
-          <h1 className="text-2xl font-serif font-merriweather">Knit Connect</h1>
+          <h1 className="text-2xl font-serif font-merriweather text-white">Knit Connect</h1>
           <div className="flex items-center space-x-4">
             <button
               onClick={() => setDarkMode(!darkMode)}
-              className="p-2 rounded-full hover:bg-[#E75137] dark:hover:bg-gray-700 transition-colors"
+              className="p-2 rounded-full text-white hover:bg-black/10 transition-colors"
               aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
             >
               {darkMode ? <Sun size={20} /> : <Moon size={20} />}
             </button>
             <nav className="hidden md:flex space-x-2">
               <button
-                className={`px-4 py-2 rounded-md transition-all ${activeTab === 'feed' ? 'bg-[#8B5CF6] dark:bg-[#7C3AED] text-white' : 'text-white hover:bg-[#E75137] dark:hover:bg-gray-700'}`}
+                className={`px-4 py-2 rounded-md transition-all ${
+                  activeTab === 'feed' ? 'bg-white/20 text-white' : 'text-white hover:bg-black/10'
+                }`}
                 onClick={() => setActiveTab('feed')}
               >
                 Feed
               </button>
               <button
-                className={`px-4 py-2 rounded-md transition-all ${activeTab === 'profile' ? 'bg-[#8B5CF6] dark:bg-[#7C3AED] text-white' : 'text-white hover:bg-[#E75137] dark:hover:bg-gray-700'}`}
+                className={`px-4 py-2 rounded-md transition-all ${
+                  activeTab === 'profile' ? 'bg-white/20 text-white' : 'text-white hover:bg-black/10'
+                }`}
                 onClick={() => setActiveTab('profile')}
               >
                 Profile
               </button>
               <button
-                className={`px-4 py-2 rounded-md transition-all ${activeTab === 'search' ? 'bg-[#8B5CF6] dark:bg-[#7C3AED] text-white' : 'text-white hover:bg-[#E75137] dark:hover:bg-gray-700'}`}
+                className={`px-4 py-2 rounded-md transition-all ${
+                  activeTab === 'search' ? 'bg-white/20 text-white' : 'text-white hover:bg-black/10'
+                }`}
                 onClick={() => setActiveTab('search')}
               >
                 Search
@@ -292,42 +325,22 @@ const Index = () => {
         </div>
       </header>
 
-      {/* Mobile Navigation */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 shadow-[0_-4px_10px_rgba(0,0,0,0.1)] dark:shadow-[0_-4px_10px_rgba(0,0,0,0.3)] flex justify-around z-10 transition-colors duration-200">
-        <button
-          className={`p-4 flex-1 flex flex-col items-center ${activeTab === 'feed' ? 'text-[#8B5CF6] dark:text-[#C6B7F6]' : 'text-gray-700 dark:text-gray-400'}`}
-          onClick={() => setActiveTab('feed')}
-        >
-          <Home size={24} />
-          <span className="text-xs mt-1">Feed</span>
-        </button>
-        <button
-          className={`p-4 flex-1 flex flex-col items-center ${activeTab === 'search' ? 'text-[#8B5CF6] dark:text-[#C6B7F6]' : 'text-gray-700 dark:text-gray-400'}`}
-          onClick={() => setActiveTab('search')}
-        >
-          <Search size={24} />
-          <span className="text-xs mt-1">Search</span>
-        </button>
-        <button
-          className={`p-4 flex-1 flex flex-col items-center ${activeTab === 'profile' ? 'text-[#8B5CF6] dark:text-[#C6B7F6]' : 'text-gray-700 dark:text-gray-400'}`}
-          onClick={() => setActiveTab('profile')}
-        >
-          <User size={24} />
-          <span className="text-xs mt-1">Profile</span>
-        </button>
-      </div>
-
       {/* Main Content */}
-      <main className="flex-grow container mx-auto px-4 py-6 pb-20 md:pb-6 transition-colors duration-200">
+      <main className="flex-grow container mx-auto px-4 py-6 pb-20 md:pb-6">
         {/* Feed Tab */}
         {activeTab === 'feed' && (
           <div>
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-merriweather text-[#7A1D0F] dark:text-[#C6B7F6]">Latest Projects</h2>
+              <h2
+                className="text-xl font-merriweather"
+                style={{ color: getColor('text', 'primary') }}
+              >
+                Latest Projects
+              </h2>
               <button
                 onClick={() => openModal('post')}
-                className="bg-[#8B5CF6] dark:bg-[#7C3AED] text-white p-2 rounded-full shadow-md hover:bg-[#7C3AED] dark:hover:bg-[#6D28D9] transition-all hover:scale-105 active:scale-95"
-                aria-label="Create new post"
+                className="p-2 rounded-full shadow-md text-white transition-all hover:scale-105"
+                style={{ backgroundColor: getColor('accent') }}
               >
                 <PlusCircle size={20} />
               </button>
@@ -338,41 +351,59 @@ const Index = () => {
               {posts.map((post) => (
                 <div
                   key={post.id}
-                  className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
+                  className={`rounded-lg shadow-md overflow-hidden border transition-all duration-300 hover:-translate-y-1 ${
+                    darkMode ? 'border-gray-700' : 'border-gray-200'
+                  }`}
+                  style={{ backgroundColor: darkMode ? COLORS.card.dark : COLORS.card.light }}
                 >
                   {/* Post Header */}
-                  <div className="flex items-center p-3 border-b border-gray-200 dark:border-gray-700">
-                    <img
-                      src={post.userImage}
-                      alt={post.username}
-                      className="w-8 h-8 rounded-full object-cover"
-                    />
+                  <div className={`flex items-center p-3 border-b ${
+                    darkMode ? 'border-gray-700' : 'border-gray-200'
+                  }`}>
+                    <img src={post.userImage} alt={post.username} className="w-8 h-8 rounded-full object-cover" />
                     <div className="ml-2">
-                      <h3 className="font-medium text-[#7A1D0F] dark:text-[#C6B7F6]">{post.username}</h3>
-                      <p className="text-xs text-gray-700 dark:text-gray-400">{post.timestamp}</p>
+                      <h3
+                        className="font-medium"
+                        style={{ color: darkMode ? '#FFFFFF' : '#3E2723' }}
+                      >
+                        {post.username}
+                      </h3>
+                      <p
+                        className="text-xs"
+                        style={{ color: darkMode ? '#CCCCCC' : '#5D4037' }}
+                      >
+                        {post.timestamp}
+                      </p>
                     </div>
                   </div>
 
                   {/* Post Image */}
-                  <img
-                    src={post.image}
-                    alt={post.description}
-                    className="w-full aspect-square object-cover"
-                  />
+                  <img src={post.image} alt={post.description} className="w-full aspect-square object-cover" />
 
                   {/* Post Content */}
                   <div className="p-4">
-                    <p className="text-gray-800 dark:text-gray-200 mb-2 font-nunito">{post.description}</p>
+                    <p
+                      className="mb-2 font-nunito"
+                      style={{ color: darkMode ? '#FFFFFF' : '#3E2723' }}
+                    >
+                      {post.description}
+                    </p>
                     <div className="flex flex-wrap gap-2 mb-3">
                       <button
                         onClick={() => filterByTag('projectType', post.projectType)}
-                        className="bg-[#FFF0EB] dark:bg-gray-700 text-xs px-2 py-1 rounded-full text-[#7A1D0F] dark:text-[#C6B7F6] hover:bg-[#FED7C8] dark:hover:bg-gray-600 transition-colors"
+                        className={`text-xs px-2 py-1 rounded-full ${
+                          darkMode ? 'bg-gray-700 text-teal-300 hover:bg-gray-600' :
+                            'bg-teal-100 text-teal-800 hover:bg-teal-200'
+                        } transition-colors`}
                       >
                         Project: {post.projectType}
                       </button>
                       <button
                         onClick={() => filterByTag('yarnBrand', post.yarnBrand)}
-                        className="bg-[#FFF0EB] dark:bg-gray-700 text-xs px-2 py-1 rounded-full text-[#7A1D0F] dark:text-[#C6B7F6] hover:bg-[#FED7C8] dark:hover:bg-gray-600 transition-colors"
+                        className={`text-xs px-2 py-1 rounded-full ${
+                          darkMode ? 'bg-gray-700 text-amber-300 hover:bg-gray-600' :
+                            'bg-amber-100 text-amber-800 hover:bg-amber-200'
+                        } transition-colors`}
                       >
                         Yarn: {post.yarnBrand}
                       </button>
@@ -385,11 +416,16 @@ const Index = () => {
                     >
                       <Heart
                         size={18}
-                        className={`transition-all duration-300 ${post.liked
-                          ? 'text-rose-500 fill-rose-500 animate-[heartbeat_0.5s_ease-in-out]'
-                          : 'text-gray-500 dark:text-gray-500 group-hover:text-rose-400'}`}
+                        className={`transition-all duration-300 ${
+                          post.liked
+                            ? 'text-rose-500 fill-rose-500 animate-[heartbeat_0.5s_ease-in-out]'
+                            : 'text-gray-400 dark:text-gray-300 group-hover:text-rose-400'
+                        }`}
                       />
-                      <span className="text-sm text-gray-700 dark:text-gray-300 group-hover:text-[#9E2A1D] dark:group-hover:text-[#C6B7F6] transition-colors">
+                      <span
+                        className="text-sm"
+                        style={{ color: darkMode ? '#CCCCCC' : '#5D4037' }}
+                      >
                         {post.likes}
                       </span>
                     </button>
@@ -397,21 +433,23 @@ const Index = () => {
                 </div>
               ))}
             </div>
-
-            {posts.length === 0 && (
-              <div className="text-center py-12">
-                <p className="text-gray-700 dark:text-gray-400">No posts yet. Be the first to share a project!</p>
-              </div>
-            )}
           </div>
         )}
 
         {/* Profile Tab */}
         {activeTab === 'profile' && currentUser && (
           <div className="max-w-2xl mx-auto">
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden border border-gray-200 dark:border-gray-700 transition-colors duration-200">
+            <div
+              className={`rounded-lg shadow-md overflow-hidden border ${
+                darkMode ? 'border-gray-700' : 'border-gray-200'
+              }`}
+              style={{ backgroundColor: darkMode ? COLORS.card.dark : COLORS.card.light }}
+            >
               <div className="relative">
-                <div className="h-32 bg-gradient-to-r from-[#F97358] to-[#8B5CF6] dark:from-gray-700 dark:to-gray-600"></div>
+                <div
+                  className="h-32"
+                  style={{ backgroundColor: getColor('secondary') }}
+                ></div>
                 <div className="absolute left-1/2 transform -translate-x-1/2 -translate-y-1/2">
                   <img
                     src={currentUser.image}
@@ -423,8 +461,15 @@ const Index = () => {
 
               <div className="pt-16 px-6 pb-6">
                 <div className="text-center mb-6">
-                  <h2 className="text-xl font-merriweather text-[#7A1D0F] dark:text-[#C6B7F6]">{currentUser.name}</h2>
-                  <p className="text-gray-700 dark:text-gray-300">Favorite Yarn: {currentUser.favoriteYarn}</p>
+                  <h2
+                    className="text-xl font-merriweather"
+                    style={{ color: darkMode ? '#FFFFFF' : '#3E2723' }}
+                  >
+                    {currentUser.name}
+                  </h2>
+                  <p style={{ color: darkMode ? '#E0E0E0' : '#5D4037' }}>
+                    Favorite Yarn: {currentUser.favoriteYarn}
+                  </p>
                 </div>
 
                 <button
@@ -436,7 +481,8 @@ const Index = () => {
                     });
                     openModal('profile');
                   }}
-                  className="w-full py-2 bg-[#8B5CF6] dark:bg-[#7C3AED] text-white rounded-md font-medium hover:bg-[#7C3AED] dark:hover:bg-[#6D28D9] transition-colors"
+                  className="w-full py-2 text-white rounded-md font-medium hover:opacity-90 transition-opacity"
+                  style={{ backgroundColor: getColor('accent') }}
                 >
                   Edit Profile
                 </button>
@@ -445,14 +491,22 @@ const Index = () => {
 
             {/* My Projects Section */}
             <div className="mt-8">
-              <h3 className="text-lg font-merriweather text-[#7A1D0F] dark:text-[#C6B7F6] mb-4">My Projects</h3>
+              <h3
+                className="text-lg font-merriweather mb-4"
+                style={{ color: getColor('text', 'primary') }}
+              >
+                My Projects
+              </h3>
 
               {posts.filter(post => post.userId === currentUser.id).length > 0 ? (
                 <div className="grid gap-4 md:grid-cols-2">
                   {posts.filter(post => post.userId === currentUser.id).map(post => (
                     <div
                       key={post.id}
-                      className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
+                      className={`rounded-lg shadow-md overflow-hidden border transition-all duration-300 hover:-translate-y-1 ${
+                        darkMode ? 'border-gray-700' : 'border-gray-200'
+                      }`}
+                      style={{ backgroundColor: darkMode ? COLORS.card.dark : COLORS.card.light }}
                     >
                       <img
                         src={post.image}
@@ -460,32 +514,58 @@ const Index = () => {
                         className="w-full h-40 object-cover"
                       />
                       <div className="p-3">
-                        <p className="text-gray-800 dark:text-gray-200 text-sm line-clamp-2 font-nunito">{post.description}</p>
+                        <p
+                          className="text-sm line-clamp-2 font-nunito"
+                          style={{ color: darkMode ? '#FFFFFF' : '#3E2723' }}
+                        >
+                          {post.description}
+                        </p>
                         <div className="flex justify-between items-center mt-2">
                           <div className="flex items-center gap-1">
                             <Heart
                               size={16}
                               className={post.liked
                                 ? 'text-rose-500 fill-rose-500'
-                                : 'text-gray-500 dark:text-gray-500'}
+                                : 'text-gray-400 dark:text-gray-300'}
                             />
-                            <span className="text-xs text-gray-700 dark:text-gray-300">{post.likes}</span>
+                            <span
+                              className="text-xs"
+                              style={{ color: darkMode ? '#CCCCCC' : '#5D4037' }}
+                            >
+                              {post.likes}
+                            </span>
                           </div>
-                          <span className="text-xs text-gray-500 dark:text-gray-400">{post.timestamp}</span>
+                          <span
+                            className="text-xs"
+                            style={{ color: darkMode ? '#CCCCCC' : '#5D4037' }}
+                          >
+                            {post.timestamp}
+                          </span>
                         </div>
                       </div>
                     </div>
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-8 bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700">
-                  <p className="text-gray-700 dark:text-gray-400">You haven't shared any projects yet.</p>
+                <div
+                  className={`text-center py-8 rounded-lg shadow-md border ${
+                    darkMode ? 'border-gray-700' : 'border-gray-200'
+                  }`}
+                  style={{ backgroundColor: darkMode ? COLORS.card.dark : COLORS.card.light }}
+                >
+                  <p
+                    className=""
+                    style={{ color: darkMode ? '#E0E0E0' : '#5D4037' }}
+                  >
+                    You haven't shared any projects yet.
+                  </p>
                   <button
                     onClick={() => {
                       openModal('post');
                       setActiveTab('feed');
                     }}
-                    className="mt-2 px-4 py-2 bg-[#8B5CF6] dark:bg-[#7C3AED] text-white rounded-md text-sm hover:bg-[#7C3AED] dark:hover:bg-[#6D28D9] transition-colors"
+                    className="mt-2 px-4 py-2 text-white rounded-md text-sm hover:opacity-90 transition-opacity"
+                    style={{ backgroundColor: getColor('accent') }}
                   >
                     Share Your First Project
                   </button>
@@ -498,14 +578,28 @@ const Index = () => {
         {/* Search Tab */}
         {activeTab === 'search' && (
           <div>
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 mb-6 border border-gray-200 dark:border-gray-700 transition-colors duration-200">
+            <div
+              className={`rounded-lg shadow-md p-4 mb-6 border ${
+                darkMode ? 'border-gray-700' : 'border-gray-200'
+              }`}
+              style={{ backgroundColor: darkMode ? COLORS.card.dark : COLORS.card.light }}
+            >
               <div className="flex flex-col md:flex-row md:items-center gap-3">
                 <div className="relative flex-grow">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-500" size={18} />
+                  <Search
+                    className="absolute left-3 top-1/2 transform -translate-y-1/2"
+                    size={18}
+                    style={{ color: darkMode ? '#CCCCCC' : '#5D4037' }}
+                  />
                   <input
                     type="text"
                     placeholder={`Search by ${searchType === 'projectType' ? 'project type' : 'yarn brand'}...`}
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-[#8B5CF6] dark:focus:ring-[#7C3AED] bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 transition-colors"
+                    className="w-full pl-10 pr-4 py-2 border rounded-md focus:outline-none focus:ring-2"
+                    style={{
+                      backgroundColor: darkMode ? '#2D3748' : '#FFFFFF',
+                      color: darkMode ? '#FFFFFF' : '#3E2723',
+                      borderColor: darkMode ? '#4A5568' : '#E2E8F0'
+                    }}
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
@@ -513,17 +607,33 @@ const Index = () => {
 
                 <div className="flex">
                   <button
-                    className={`px-4 py-2 rounded-l-md border ${searchType === 'projectType'
-                      ? 'bg-[#8B5CF6] dark:bg-[#7C3AED] text-white border-[#8B5CF6] dark:border-[#7C3AED]'
-                      : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600'} transition-colors`}
+                    className={`px-4 py-2 rounded-l-md border ${
+                      searchType === 'projectType'
+                        ? 'text-white border-transparent'
+                        : 'border-gray-300 dark:border-gray-600'
+                    }`}
+                    style={{
+                      backgroundColor: searchType === 'projectType' ? getColor('accent') :
+                        (darkMode ? '#2D3748' : '#F7FAFC'),
+                      color: searchType === 'projectType' ? '#FFFFFF' : 
+                        (darkMode ? '#FFFFFF' : '#3E2723')
+                    }}
                     onClick={() => setSearchType('projectType')}
                   >
                     Project Type
                   </button>
                   <button
-                    className={`px-4 py-2 rounded-r-md border ${searchType === 'yarnBrand'
-                      ? 'bg-[#8B5CF6] dark:bg-[#7C3AED] text-white border-[#8B5CF6] dark:border-[#7C3AED]'
-                      : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600'} transition-colors`}
+                    className={`px-4 py-2 rounded-r-md border ${
+                      searchType === 'yarnBrand'
+                        ? 'text-white border-transparent'
+                        : 'border-gray-300 dark:border-gray-600'
+                    }`}
+                    style={{
+                      backgroundColor: searchType === 'yarnBrand' ? getColor('accent') :
+                        (darkMode ? '#2D3748' : '#F7FAFC'),
+                      color: searchType === 'yarnBrand' ? '#FFFFFF' : 
+                        (darkMode ? '#FFFFFF' : '#3E2723')
+                    }}
                     onClick={() => setSearchType('yarnBrand')}
                   >
                     Yarn Brand
@@ -534,7 +644,10 @@ const Index = () => {
 
             {/* Search Results */}
             <div>
-              <h2 className="text-lg font-merriweather text-[#7A1D0F] dark:text-[#C6B7F6] mb-4">
+              <h2
+                className="text-lg font-merriweather mb-4"
+                style={{ color: getColor('text', 'primary') }}
+              >
                 {searchTerm ? `Search Results for "${searchTerm}"` : 'All Projects'}
               </h2>
 
@@ -543,14 +656,29 @@ const Index = () => {
                   {filteredPosts.map((post) => (
                     <div
                       key={post.id}
-                      className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
+                      className={`rounded-lg shadow-md overflow-hidden border transition-all duration-300 hover:-translate-y-1 ${
+                        darkMode ? 'border-gray-700' : 'border-gray-200'
+                      }`}
+                      style={{ backgroundColor: darkMode ? COLORS.card.dark : COLORS.card.light }}
                     >
                       {/* Post Header */}
-                      <div className="flex items-center p-3 border-b border-gray-200 dark:border-gray-700">
+                      <div className={`flex items-center p-3 border-b ${
+                        darkMode ? 'border-gray-700' : 'border-gray-200'
+                      }`}>
                         <img src={post.userImage} alt={post.username} className="w-8 h-8 rounded-full object-cover" />
                         <div className="ml-2">
-                          <h3 className="font-medium text-[#7A1D0F] dark:text-[#C6B7F6]">{post.username}</h3>
-                          <p className="text-xs text-gray-700 dark:text-gray-400">{post.timestamp}</p>
+                          <h3
+                            className="font-medium"
+                            style={{ color: darkMode ? '#FFFFFF' : '#3E2723' }}
+                          >
+                            {post.username}
+                          </h3>
+                          <p
+                            className="text-xs"
+                            style={{ color: darkMode ? '#CCCCCC' : '#5D4037' }}
+                          >
+                            {post.timestamp}
+                          </p>
                         </div>
                       </div>
 
@@ -559,17 +687,28 @@ const Index = () => {
 
                       {/* Post Content */}
                       <div className="p-4">
-                        <p className="text-gray-800 dark:text-gray-200 mb-2 font-nunito">{post.description}</p>
+                        <p
+                          className="mb-2 font-nunito"
+                          style={{ color: darkMode ? '#FFFFFF' : '#3E2723' }}
+                        >
+                          {post.description}
+                        </p>
                         <div className="flex flex-wrap gap-2 mb-3">
                           <button
                             onClick={() => filterByTag('projectType', post.projectType)}
-                            className="bg-[#FFF0EB] dark:bg-gray-700 text-xs px-2 py-1 rounded-full text-[#7A1D0F] dark:text-[#C6B7F6] hover:bg-[#FED7C8] dark:hover:bg-gray-600 transition-colors"
+                            className={`text-xs px-2 py-1 rounded-full ${
+                              darkMode ? 'bg-gray-700 text-teal-300 hover:bg-gray-600' :
+                                'bg-teal-100 text-teal-800 hover:bg-teal-200'
+                            } transition-colors`}
                           >
                             Project: {post.projectType}
                           </button>
                           <button
                             onClick={() => filterByTag('yarnBrand', post.yarnBrand)}
-                            className="bg-[#FFF0EB] dark:bg-gray-700 text-xs px-2 py-1 rounded-full text-[#7A1D0F] dark:text-[#C6B7F6] hover:bg-[#FED7C8] dark:hover:bg-gray-600 transition-colors"
+                            className={`text-xs px-2 py-1 rounded-full ${
+                              darkMode ? 'bg-gray-700 text-amber-300 hover:bg-gray-600' :
+                                'bg-amber-100 text-amber-800 hover:bg-amber-200'
+                            } transition-colors`}
                           >
                             Yarn: {post.yarnBrand}
                           </button>
@@ -582,11 +721,16 @@ const Index = () => {
                         >
                           <Heart
                             size={18}
-                            className={`transition-all duration-300 ${post.liked
-                              ? 'text-rose-500 fill-rose-500 animate-[heartbeat_0.5s_ease-in-out]'
-                              : 'text-gray-500 dark:text-gray-500 group-hover:text-rose-400'}`}
+                            className={`transition-all duration-300 ${
+                              post.liked
+                                ? 'text-rose-500 fill-rose-500 animate-[heartbeat_0.5s_ease-in-out]'
+                                : 'text-gray-400 dark:text-gray-300 group-hover:text-rose-400'
+                            }`}
                           />
-                          <span className="text-sm text-gray-700 dark:text-gray-300 group-hover:text-[#9E2A1D] dark:group-hover:text-[#C6B7F6] transition-colors">
+                          <span
+                            className="text-sm"
+                            style={{ color: darkMode ? '#CCCCCC' : '#5D4037' }}
+                          >
                             {post.likes}
                           </span>
                         </button>
@@ -595,8 +739,18 @@ const Index = () => {
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700">
-                  <p className="text-gray-700 dark:text-gray-400">No projects found. Try a different search term.</p>
+                <div
+                  className={`text-center py-12 rounded-lg shadow-md border ${
+                    darkMode ? 'border-gray-700' : 'border-gray-200'
+                  }`}
+                  style={{ backgroundColor: darkMode ? COLORS.card.dark : COLORS.card.light }}
+                >
+                  <p
+                    className=""
+                    style={{ color: darkMode ? '#E0E0E0' : '#5D4037' }}
+                  >
+                    No projects found. Try a different search term.
+                  </p>
                 </div>
               )}
             </div>
@@ -604,43 +758,135 @@ const Index = () => {
         )}
       </main>
 
+      {/* Mobile Navigation */}
+      <div
+        className="md:hidden fixed bottom-0 left-0 right-0 flex justify-around z-10 py-3"
+        style={{
+          backgroundColor: getColor('primary'),
+          borderTop: `1px solid ${darkMode ? '#5D4037' : '#BCAAA4'}`
+        }}
+      >
+        <button
+          className="flex flex-col items-center"
+          onClick={() => setActiveTab('feed')}
+        >
+          <Home
+            size={24}
+            color={activeTab === 'feed' ? '#FFFFFF' : '#D7CCC8'}
+          />
+          <span
+            className="text-xs mt-1"
+            style={{ color: activeTab === 'feed' ? '#FFFFFF' : '#D7CCC8' }}
+          >
+            Feed
+          </span>
+        </button>
+
+        <button
+          className="flex flex-col items-center"
+          onClick={() => setActiveTab('search')}
+        >
+          <Search
+            size={24}
+            color={activeTab === 'search' ? '#FFFFFF' : '#D7CCC8'}
+          />
+          <span
+            className="text-xs mt-1"
+            style={{ color: activeTab === 'search' ? '#FFFFFF' : '#D7CCC8' }}
+          >
+            Search
+          </span>
+        </button>
+
+        <button
+          className="flex flex-col items-center"
+          onClick={() => setActiveTab('profile')}
+        >
+          <User
+            size={24}
+            color={activeTab === 'profile' ? '#FFFFFF' : '#D7CCC8'}
+          />
+          <span
+            className="text-xs mt-1"
+            style={{ color: activeTab === 'profile' ? '#FFFFFF' : '#D7CCC8' }}
+          >
+            Profile
+          </span>
+        </button>
+      </div>
+
       {/* Modal Overlay */}
       {(isCreatingPost || isEditingProfile) && (
         <div
-          className={`fixed inset-0 bg-black/70 flex items-center justify-center z-20 p-4 transition-opacity duration-200 ${modalClosing ? 'opacity-0' : 'opacity-100'}`}
+          className={`fixed inset-0 bg-black/70 flex items-center justify-center z-20 p-4 transition-opacity duration-200 ${
+            modalClosing ? 'opacity-0' : 'opacity-100'
+          }`}
           onClick={closeModal}
         >
           <div
-            className={`bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full p-6 transition-all duration-200 ${modalClosing ? 'scale-95 opacity-0' : 'scale-100 opacity-100'}`}
+            className={`rounded-lg shadow-xl max-w-md w-full p-6 transition-all duration-200 ${
+              modalClosing ? 'scale-95 opacity-0' : 'scale-100 opacity-100'
+            }`}
+            style={{ backgroundColor: darkMode ? COLORS.card.dark : COLORS.card.light }}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Create Post Modal */}
             {isCreatingPost && (
               <>
                 <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-lg font-medium text-[#7A1D0F] dark:text-[#C6B7F6]">Share Your Project</h3>
-                  <button onClick={closeModal} className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
+                  <h3
+                    className="text-lg font-medium"
+                    style={{ color: darkMode ? '#FFFFFF' : '#3E2723' }}
+                  >
+                    Share Your Project
+                  </h3>
+                  <button
+                    onClick={closeModal}
+                    style={{ color: darkMode ? '#CCCCCC' : '#5D4037' }}
+                  >
                     <X size={20} />
                   </button>
                 </div>
 
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-[#7A1D0F] dark:text-[#C6B7F6] mb-1">Image URL</label>
+                    <label
+                      className="block text-sm font-medium mb-1"
+                      style={{ color: darkMode ? '#FFFFFF' : '#3E2723' }}
+                    >
+                      Image URL
+                    </label>
                     <input
                       type="text"
                       placeholder="Paste an image URL"
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-[#8B5CF6] dark:focus:ring-[#7C3AED] bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 transition-colors"
+                      className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2"
+                      style={{
+                        borderColor: darkMode ? '#4A5568' : '#E2E8F0',
+                        backgroundColor: darkMode ? '#2D3748' : '#FFFFFF',
+                        color: darkMode ? '#FFFFFF' : '#3E2723',
+                        focusRingColor: getColor('accent')
+                      }}
                       value={newPost.image}
                       onChange={(e) => setNewPost({...newPost, image: e.target.value})}
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-[#7A1D0F] dark:text-[#C6B7F6] mb-1">Description</label>
+                    <label
+                      className="block text-sm font-medium mb-1"
+                      style={{ color: darkMode ? '#FFFFFF' : '#3E2723' }}
+                    >
+                      Description
+                    </label>
                     <textarea
                       placeholder="Tell us about your project..."
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md h-24 resize-none focus:outline-none focus:ring-2 focus:ring-[#8B5CF6] dark:focus:ring-[#7C3AED] bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 transition-colors"
+                      className="w-full px-3 py-2 border rounded-md h-24 resize-none focus:outline-none focus:ring-2"
+                      style={{
+                        borderColor: darkMode ? '#4A5568' : '#E2E8F0',
+                        backgroundColor: darkMode ? '#2D3748' : '#FFFFFF',
+                        color: darkMode ? '#FFFFFF' : '#3E2723',
+                        focusRingColor: getColor('accent')
+                      }}
                       value={newPost.description}
                       onChange={(e) => setNewPost({...newPost, description: e.target.value})}
                     ></textarea>
@@ -648,21 +894,43 @@ const Index = () => {
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-[#7A1D0F] dark:text-[#C6B7F6] mb-1">Project Type</label>
+                      <label
+                        className="block text-sm font-medium mb-1"
+                        style={{ color: darkMode ? '#FFFFFF' : '#3E2723' }}
+                      >
+                        Project Type
+                      </label>
                       <input
                         type="text"
                         placeholder="E.g., Sweater, Scarf"
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-[#8B5CF6] dark:focus:ring-[#7C3AED] bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 transition-colors"
+                        className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2"
+                        style={{
+                          borderColor: darkMode ? '#4A5568' : '#E2E8F0',
+                          backgroundColor: darkMode ? '#2D3748' : '#FFFFFF',
+                          color: darkMode ? '#FFFFFF' : '#3E2723',
+                          focusRingColor: getColor('accent')
+                        }}
                         value={newPost.projectType}
                         onChange={(e) => setNewPost({...newPost, projectType: e.target.value})}
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-[#7A1D0F] dark:text-[#C6B7F6] mb-1">Yarn Brand</label>
+                      <label
+                        className="block text-sm font-medium mb-1"
+                        style={{ color: darkMode ? '#FFFFFF' : '#3E2723' }}
+                      >
+                        Yarn Brand
+                      </label>
                       <input
                         type="text"
                         placeholder="E.g., Malabrigo, Lion Brand"
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-[#8B5CF6] dark:focus:ring-[#7C3AED] bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 transition-colors"
+                        className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2"
+                        style={{
+                          borderColor: darkMode ? '#4A5568' : '#E2E8F0',
+                          backgroundColor: darkMode ? '#2D3748' : '#FFFFFF',
+                          color: darkMode ? '#FFFFFF' : '#3E2723',
+                          focusRingColor: getColor('accent')
+                        }}
                         value={newPost.yarnBrand}
                         onChange={(e) => setNewPost({...newPost, yarnBrand: e.target.value})}
                       />
@@ -672,9 +940,10 @@ const Index = () => {
                   <button
                     onClick={handleCreatePost}
                     disabled={!newPost.image || !newPost.description}
-                    className={`w-full py-2 rounded-md text-white font-medium transition-colors ${!newPost.image || !newPost.description
-                      ? 'bg-gray-300 dark:bg-gray-600 cursor-not-allowed'
-                      : 'bg-[#8B5CF6] dark:bg-[#7C3AED] hover:bg-[#7C3AED] dark:hover:bg-[#6D28D9]'}`}
+                    className={`w-full py-2 rounded-md text-white font-medium transition-opacity ${
+                      !newPost.image || !newPost.description ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-90'
+                    }`}
+                    style={{ backgroundColor: getColor('accent') }}
                   >
                     Share Project
                   </button>
@@ -686,38 +955,79 @@ const Index = () => {
             {isEditingProfile && currentUser && (
               <>
                 <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-lg font-medium text-[#7A1D0F] dark:text-[#C6B7F6]">Edit Profile</h3>
-                  <button onClick={closeModal} className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
+                  <h3
+                    className="text-lg font-medium"
+                    style={{ color: darkMode ? '#FFFFFF' : '#3E2723' }}
+                  >
+                    Edit Profile
+                  </h3>
+                  <button
+                    onClick={closeModal}
+                    style={{ color: darkMode ? '#CCCCCC' : '#5D4037' }}
+                  >
                     <X size={20} />
                   </button>
                 </div>
 
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-[#7A1D0F] dark:text-[#C6B7F6] mb-1">Name</label>
+                    <label
+                      className="block text-sm font-medium mb-1"
+                      style={{ color: darkMode ? '#FFFFFF' : '#3E2723' }}
+                    >
+                      Name
+                    </label>
                     <input
                       type="text"
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-[#8B5CF6] dark:focus:ring-[#7C3AED] bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 transition-colors"
+                      className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2"
+                      style={{
+                        borderColor: darkMode ? '#4A5568' : '#E2E8F0',
+                        backgroundColor: darkMode ? '#2D3748' : '#FFFFFF',
+                        color: darkMode ? '#FFFFFF' : '#3E2723',
+                        focusRingColor: getColor('accent')
+                      }}
                       value={editedProfile.name}
                       onChange={(e) => setEditedProfile({...editedProfile, name: e.target.value})}
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-[#7A1D0F] dark:text-[#C6B7F6] mb-1">Favorite Yarn</label>
+                    <label
+                      className="block text-sm font-medium mb-1"
+                      style={{ color: darkMode ? '#FFFFFF' : '#3E2723' }}
+                    >
+                      Favorite Yarn
+                    </label>
                     <input
                       type="text"
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-[#8B5CF6] dark:focus:ring-[#7C3AED] bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 transition-colors"
+                      className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2"
+                      style={{
+                        borderColor: darkMode ? '#4A5568' : '#E2E8F0',
+                        backgroundColor: darkMode ? '#2D3748' : '#FFFFFF',
+                        color: darkMode ? '#FFFFFF' : '#3E2723',
+                        focusRingColor: getColor('accent')
+                      }}
                       value={editedProfile.favoriteYarn}
                       onChange={(e) => setEditedProfile({...editedProfile, favoriteYarn: e.target.value})}
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-[#7A1D0F] dark:text-[#C6B7F6] mb-1">Profile Image URL</label>
+                    <label
+                      className="block text-sm font-medium mb-1"
+                      style={{ color: darkMode ? '#FFFFFF' : '#3E2723' }}
+                    >
+                      Profile Image URL
+                    </label>
                     <input
                       type="text"
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-[#8B5CF6] dark:focus:ring-[#7C3AED] bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 transition-colors"
+                      className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2"
+                      style={{
+                        borderColor: darkMode ? '#4A5568' : '#E2E8F0',
+                        backgroundColor: darkMode ? '#2D3748' : '#FFFFFF',
+                        color: darkMode ? '#FFFFFF' : '#3E2723',
+                        focusRingColor: getColor('accent')
+                      }}
                       value={editedProfile.image}
                       onChange={(e) => setEditedProfile({...editedProfile, image: e.target.value})}
                     />
@@ -725,7 +1035,8 @@ const Index = () => {
 
                   <button
                     onClick={handleUpdateProfile}
-                    className="w-full py-2 bg-[#8B5CF6] dark:bg-[#7C3AED] text-white rounded-md font-medium hover:bg-[#7C3AED] dark:hover:bg-[#6D28D9] transition-colors"
+                    className="w-full py-2 text-white rounded-md font-medium hover:opacity-90 transition-opacity"
+                    style={{ backgroundColor: getColor('accent') }}
                   >
                     Save Changes
                   </button>
@@ -737,31 +1048,13 @@ const Index = () => {
       )}
 
       {/* Footer */}
-      <footer className="bg-[#E75137] dark:bg-gray-800 text-white py-6 px-4 transition-colors duration-200">
-        <div className="container mx-auto">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="mb-4 md:mb-0">
-              <h2 className="text-xl font-merriweather">Knit Connect</h2>
-              <p className="text-sm opacity-80 mt-1">Share your knitting journey</p>
-            </div>
-
-            <div className="flex space-x-6">
-              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="hover:text-[#C6B7F6] transition-colors">
-                <Facebook size={24} />
-              </a>
-              <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="hover:text-[#C6B7F6] transition-colors">
-                <Twitter size={24} />
-              </a>
-              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="hover:text-[#C6B7F6] transition-colors">
-                <Instagram size={24} />
-              </a>
-            </div>
-          </div>
-
-          <div className="mt-6 pt-6 border-t border-white/20 text-center text-sm opacity-80">
-            <p>© 2025 Knit Connect. All rights reserved.</p>
-          </div>
-        </div>
+      <footer
+        className="py-6 px-4 text-center"
+        style={{ backgroundColor: getColor('primary') }}
+      >
+        <p className="text-white">
+          © 2025 Knit Connect. All rights reserved.
+        </p>
       </footer>
     </div>
   );
