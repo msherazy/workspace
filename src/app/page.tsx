@@ -1,624 +1,295 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
-import { Code, FolderKanban, MessageSquare, Moon, Send, Star, Sun, X } from "lucide-react";
+
+import React, { useEffect, useState } from "react";
+import { AiOutlineComment, AiOutlineLike } from "react-icons/ai";
+import { FiMoon, FiSun } from "react-icons/fi";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { Inter, Poppins } from "next/font/google";
+
+// Import custom fonts
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
+const poppins = Poppins({ subsets: ['latin'], weight: ['600'], variable: '--font-poppins' })
 
 interface Comment {
-  id: number;
-  author: string;
-  text: string;
-  date: string;
+  id: number
+  text: string
+  author: string
 }
 
-interface Post {
-  id: number;
-  title: string;
-  code: string;
-  description: string;
-  comments: Comment[];
-  stars: number;
-  author: string;
-  date: string;
-  language: string;
+interface Snippet {
+  id: number
+  code: string
+  language: string
+  likes: number
+  comments: Comment[]
+  author: string
 }
 
-interface Message {
-  id: number;
-  sender: string;
-  text: string;
-  date: string;
-  isRead: boolean;
-}
+const DeveloperFeed: React.FC = () => {
+  const [snippets, setSnippets] = useState<Snippet[]>([])
+  const [newComment, setNewComment] = useState<string>('')
+  const [selectedSnippetId, setSelectedSnippetId] = useState<number | null>(null)
+  const [likedSnippets, setLikedSnippets] = useState<number[]>([])
+  const [searchQuery, setSearchQuery] = useState<string>('')
+  const [activeFilter, setActiveFilter] = useState<'all' | string>('all')
+  const [theme, setTheme] = useState<'light' | 'dark'>('light')
 
-interface Chat {
-  id: number;
-  user: string;
-  lastMessage: string;
-  date: string;
-  isOnline: boolean;
-  messages: Message[];
-}
+  // Sample data
+  const sampleSnippets: Snippet[] = [
+    {
+      id: 1,
+      code: "<button className='bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg'>Click Me</button>",
+      language: 'html',
+      likes: 1,
+      comments: [{ id: 1, author: 'You', text: 'Nice work!' }],
+      author: 'john_doe',
+    },
+    {
+      id: 2,
+      code: "console.log('Hello, world!');",
+      language: 'javascript',
+      likes: 0,
+      comments: [],
+      author: 'jane_doe',
+    },
+    {
+      id: 3,
+      code: "<div className='bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg'>Styled Div</div>",
+      language: 'html',
+      likes: 0,
+      comments: [],
+      author: 'css_master',
+    },
+  ]
 
-interface User {
-  id: number;
-  name: string;
-  bio: string;
-  location: string;
-  website: string;
-  joined: string;
-  avatar: string;
-}
-
-const user: User = {
-  id: 1,
-  name: 'Alex Johnson',
-  bio: 'Full-stack developer passionate about building scalable web applications...',
-  location: 'San Francisco, CA',
-  website: 'https://alexjohnson.dev',
-  joined: 'March 2023',
-  avatar: 'https://images.unsplash.com/photo-1599566150163-29194dcaad36?q=80&w=3087&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
-};
-
-const posts: Post[] = [
-  {
-    id: 1,
-    title: 'Building a RESTful API with Node.js and Express',
-    code: `const express = require('express');
-const app = express();
-
-app.get('/api/users', (req, res) => {
-  res.json([{ id: 1, name: 'John Doe' }]);
-});
-
-app.listen(3000, () => console.log('Server running on port 3000'));`,
-    description: 'Learn how to create a simple RESTful API using Node.js and Express framework...',
-    comments: [
-      { id: 1, author: 'Jane Doe', text: 'Great tutorial! Very informative.', date: '2 hours ago' },
-      { id: 2, author: 'John Doe', text: 'Thanks for sharing this. Very helpful for beginners.', date: '1 hour ago' }
-    ],
-    stars: 12,
-    author: 'Alex Johnson',
-    date: '2 days ago',
-    language: 'javascript'
-  },
-  {
-    id: 2,
-    title: 'Introduction to React Hooks',
-    code: `import React, { useState } from 'react';
-
-function Counter() {
-  const [count, setCount] = useState(0);
-
-  return (
-    <div>
-      <p>You clicked {count} times</p>
-      <button onClick={() => setCount(count + 1)}>Click me</button>
-    </div>
-  );
-}`,
-    description: 'Understand the basics of React Hooks and how to use them in your applications...',
-    comments: [
-      { id: 1, author: 'Jane Doe', text: 'Great tutorial! Very informative.', date: '2 hours ago' },
-      { id: 2, author: 'John Doe', text: 'Thanks for sharing this. Very helpful for beginners.', date: '1 hour ago' }
-    ],
-    stars: 8,
-    author: 'Sam Smith',
-    date: '3 days ago',
-    language: 'javascript'
-  },
-  {
-    id: 3,
-    title: 'CSS Grid Layout Guide',
-    code: `.container {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-}
-
-.item {
-  background-color: #f0f0f0;
-  padding: 20px;
-  border-radius: 5px;
-}`,
-    description: 'Master the power of CSS Grid to create complex layouts with ease...',
-    comments: [
-      { id: 1, author: 'Jane Doe', text: 'Great tutorial! Very informative.', date: '2 hours ago' },
-      { id: 2, author: 'John Doe', text: 'Thanks for sharing this. Very helpful for beginners.', date: '1 hour ago' }
-    ],
-    stars: 15,
-    author: 'Taylor Brown',
-    date: '4 days ago',
-    language: 'css'
-  },
-];
-
-const chats: Chat[] = [
-  {
-    id: 1,
-    user: 'Jordan Peterson',
-    lastMessage: 'Hey, need help with your code?',
-    date: '10:00 AM',
-    isOnline: true,
-    messages: [
-      { id: 1, sender: 'Jordan Peterson', text: 'Hey! How are you doing?', date: '10:05 AM', isRead: true },
-      { id: 2, sender: user.name, text: 'I\'m good, thanks! How about you?', date: '10:07 AM', isRead: true },
-      { id: 3, sender: 'Jordan Peterson', text: 'I\'m doing well. Need help with your code?', date: '10:10 AM', isRead: true },
-      { id: 4, sender: user.name, text: 'Sure, what seems to be the problem?', date: '10:12 AM', isRead: true },
-      { id: 5, sender: 'Jordan Peterson', text: 'I\'m getting an error with...', date: '10:15 AM', isRead: false },
-    ]
-  },
-  {
-    id: 2,
-    user: 'Sarah Williams',
-    lastMessage: 'Let\'s catch up soon!',
-    date: 'Yesterday',
-    isOnline: false,
-    messages: [
-      { id: 1, sender: 'Sarah Williams', text: 'Hey! Long time no talk.', date: 'Yesterday 5:30 PM', isRead: true },
-      { id: 2, sender: user.name, text: 'Yeah! How have you been?', date: 'Yesterday 5:35 PM', isRead: true },
-      { id: 3, sender: 'Sarah Williams', text: 'I\'ve been good. Let\'s catch up soon!', date: 'Yesterday 5:40 PM', isRead: true },
-    ]
-  },
-  {
-    id: 3,
-    user: 'Michael Johnson',
-    lastMessage: 'I\'ll send you the details.',
-    date: 'Tuesday',
-    isOnline: true,
-    messages: [
-      { id: 1, sender: 'Michael Johnson', text: 'Hi! I wanted to discuss the project.', date: 'Tuesday 2:45 PM', isRead: true },
-      { id: 2, sender: user.name, text: 'Sure, I\'m interested. Tell me more.', date: 'Tuesday 2:50 PM', isRead: true },
-      { id: 3, sender: 'Michael Johnson', text: 'I\'ll send you the details.', date: 'Tuesday 2:55 PM', isRead: true },
-    ]
-  },
-];
-
-const SyntaxHighlighter = ({ code, language }: { code: string, language: string }) => {
+  // Initialize feed and theme
   useEffect(() => {
-    const highlight = async () => {
-      try {
-        const { default: hljs } = await import('highlight.js');
-        document.querySelectorAll<HTMLElement>('.code-block code').forEach((block) => {
-          hljs.highlightElement(block);
-        });
-      } catch (error) {
-        console.error('Failed to load highlight.js:', error);
-      }
-    };
-    highlight();
-  }, [code]);
+    setSnippets(sampleSnippets);
+    const stored = localStorage.getItem('theme') as 'light' | 'dark' | null;
+    const prefer = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    const initial = stored || prefer;
+    setTheme(initial);
 
-  return (
-    <div className="code-block rounded-md overflow-hidden my-4">
-      <pre className="p-4">
-        <code className={`language-${language}`}>
-          {code.trim()}
-        </code>
-      </pre>
-    </div>
-  );
-};
-
-const PostCard = ({ post }: { post: Post }) => {
-  const [showComments, setShowComments] = useState(false);
-  const [newComment, setNewComment] = useState('');
-  const [commentsList, setCommentsList] = useState(post.comments);
-  const [starsCount, setStarsCount] = useState(post.stars);
-  const [hasStarred, setHasStarred] = useState(false);
-  const [showCode, setShowCode] = useState(false);
-
-  const handleAddComment = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (newComment.trim()) {
-      const comment: Comment = {
-        id: commentsList.length + 1,
-        author: user.name,
-        text: newComment,
-        date: 'Just now'
-      };
-      setCommentsList([...commentsList, comment]);
-      setNewComment('');
-    }
-  };
-
-  const handleStar = () => {
-    if (!hasStarred) {
-      setStarsCount(starsCount + 1);
-      setHasStarred(true);
-    }
-  };
-
-  return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden mb-6 transition-all duration-300 border border-gray-200 dark:border-gray-700 hover:shadow-lg">
-      <div className="p-6">
-        <div className="flex justify-between items-start mb-4">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white">{post.title}</h2>
-          <div className="flex items-center space-x-2">
-            <button
-              onClick={handleStar}
-              className={`flex items-center space-x-1 px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-                hasStarred
-                  ? 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400'
-                  : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300 hover:bg-yellow-50 dark:hover:bg-yellow-900/20'
-              }`}
-            >
-              <Star className={`w-4 h-4 ${hasStarred ? 'fill-current' : ''}`} />
-              <span>{starsCount}</span>
-            </button>
-            <button
-              onClick={() => setShowComments(!showComments)}
-              className="flex items-center space-x-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-3 py-1 rounded-full text-sm font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-            >
-              <MessageSquare className="w-4 h-4" />
-              <span>{commentsList.length}</span>
-            </button>
-          </div>
-        </div>
-
-        <div className="flex items-center mb-4 text-sm text-gray-500 dark:text-gray-400">
-          <img
-            src={user.avatar}
-            alt={post.author}
-            className="w-8 h-8 rounded-full mr-2 object-cover"
-          />
-          <div>
-            <span className="font-medium text-gray-900 dark:text-white">{post.author}</span> • {post.date}
-          </div>
-        </div>
-
-        <p className="text-gray-700 dark:text-gray-300 mb-4">{post.description}</p>
-
-        {showCode && (
-          <SyntaxHighlighter code={post.code} language={post.language} />
-        )}
-
-        <button
-          onClick={() => setShowCode(!showCode)}
-          className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium flex items-center mb-4 transition-colors"
-        >
-          <Code className="w-4 h-4 mr-1" />
-          {showCode ? 'Hide code' : 'View code'}
-        </button>
-
-        {showComments && (
-          <div className="mt-6 space-y-4">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Comments ({commentsList.length})</h3>
-            <div className="max-h-64 overflow-y-auto space-y-3">
-              {commentsList.map((comment) => (
-                <div key={comment.id} className="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">
-                  <div className="flex justify-between items-start mb-1">
-                    <span className="font-medium text-gray-900 dark:text-white">{comment.author}</span>
-                    <span className="text-xs text-gray-500 dark:text-gray-400">{comment.date}</span>
-                  </div>
-                  <p className="text-gray-700 dark:text-gray-300">{comment.text}</p>
-                </div>
-              ))}
-            </div>
-            <form onSubmit={handleAddComment} className="mt-3">
-              <div className="flex space-x-2">
-                <input
-                  type="text"
-                  value={newComment}
-                  onChange={(e) => setNewComment(e.target.value)}
-                  placeholder="Add your comment..."
-                  className="flex-1 px-3 py-2 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg border border-gray-200 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                />
-                <button
-                  type="submit"
-                  className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
-                >
-                  <Send className="w-4 h-4" />
-                </button>
-              </div>
-            </form>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
-
-const ChatPanel = ({ chats, activeChat, onSelectChat, onClose }: { chats: Chat[], activeChat: Chat | null, onSelectChat: (chat: Chat) => void, onClose: () => void }) => {
-  const [newMessage, setNewMessage] = useState('');
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
-    }
-  }, [activeChat?.messages]);
-
-  const handleSendMessage = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (newMessage.trim() && activeChat) {
-      const updatedChats = chats.map((chat) => {
-        if (chat.id === activeChat.id) {
-          const newMsg: Message = {
-            id: chat.messages.length + 1,
-            sender: user.name,
-            text: newMessage,
-            date: 'Just now',
-            isRead: true
-          };
-          return {
-            ...chat,
-            lastMessage: newMsg.text,
-            date: newMsg.date,
-            messages: [...chat.messages, newMsg]
-          };
-        }
-        return chat;
-      });
-      onSelectChat(updatedChats.find((chat) => chat.id === activeChat.id)!);
-      setNewMessage('');
-    }
-  };
-
-  return (
-    <div className="bg-white dark:bg-gray-800 w-full md:w-80 h-full flex flex-col absolute md:static top-0 right-0 z-50 border-l border-gray-200 dark:border-gray-700">
-      <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Messages</h2>
-        <button
-          onClick={onClose}
-          className="md:hidden text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
-        >
-          <X className="w-5 h-5" />
-        </button>
-      </div>
-
-      <div className="flex flex-col flex-1 overflow-hidden">
-        {activeChat ? (
-          <>
-            <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700">
-              <div className="flex justify-between items-center">
-                <div className="flex items-center">
-                  <div className="relative">
-                    <img
-                      src={`https://api.dicebear.com/7.x/miniavars/svg?seed=${activeChat.user}`}
-                      alt={activeChat.user}
-                      className="w-10 h-10 rounded-full mr-3 object-cover"
-                    />
-                    {activeChat.isOnline && (
-                      <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white dark:border-gray-700"></span>
-                    )}
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900 dark:text-white">{activeChat.user}</h3>
-                    {activeChat.isOnline ? (
-                      <span className="text-xs text-green-600 dark:text-green-400">Online</span>
-                    ) : (
-                      <span className="text-xs text-gray-500 dark:text-gray-400">Offline</span>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
-              {activeChat.messages.map((message) => (
-                <div
-                  key={message.id}
-                  className={`flex ${message.sender === user.name ? 'justify-end' : 'justify-start'}`}
-                >
-                  <div className={`max-w-xs p-3 rounded-lg ${
-                    message.sender === user.name
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white'
-                  }`}>
-                    <p className="text-sm">{message.text}</p>
-                    <span className="text-xs mt-1 block">{message.date}</span>
-                  </div>
-                </div>
-              ))}
-              <div ref={messagesEndRef} />
-            </div>
-
-            <form onSubmit={handleSendMessage} className="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700">
-              <div className="flex space-x-2">
-                <input
-                  type="text"
-                  value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  placeholder="Type a message..."
-                  className="flex-1 px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg border border-gray-200 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                />
-                <button
-                  type="submit"
-                  className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
-                >
-                  <Send className="w-4 h-4" />
-                </button>
-              </div>
-            </form>
-          </>
-        ) : (
-          <div className="flex-1 flex flex-col items-center justify-center text-gray-500 dark:text-gray-400 p-4">
-            <MessageSquare className="w-16 h-16 mb-4 opacity-50" />
-            <p className="text-lg font-medium mb-2">Your Messages</p>
-            <p className="text-sm text-center max-w-xs mb-4">Start a conversation by selecting a chat from the list</p>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
-
-const App = () => {
-  const [activeTab, setActiveTab] = useState('feed');
-  const [showChatPanel, setShowChatPanel] = useState(false);
-  const [activeChat, setActiveChat] = useState<Chat | null>(null);
-  const [isDarkMode, setIsDarkMode] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
-  const [isChatPanelOpen, setIsChatPanelOpen] = useState(false);
-
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-      if (window.innerWidth >= 768) {
-        setShowChatPanel(false);
-        setIsChatPanelOpen(false);
-      }
-    };
-
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
-
-  const handleSelectChat = (chat: Chat) => {
-    setActiveChat(chat);
-    if (isMobile) {
-      setShowChatPanel(true);
-      setIsChatPanelOpen(true);
-    }
-  };
-
-  const handleCloseChat = () => {
-    setShowChatPanel(false);
-    setIsChatPanelOpen(false);
-    setTimeout(() => {
-      setActiveChat(null);
-    }, 300);
-  };
-
-  const toggleTheme = () => {
-    setIsDarkMode(!isDarkMode);
-    if (!isDarkMode) {
+    // Ensure the 'dark' class is applied to the <html> element
+    if (initial === 'dark') {
       document.documentElement.classList.add('dark');
+      document.body.style.backgroundColor = '#1a202c'; // Explicitly set dark background
     } else {
       document.documentElement.classList.remove('dark');
+      document.body.style.backgroundColor = '#f9fafb'; // Explicitly set light background
     }
-  };
+  }, []);
+
+  const toggleTheme = () => {
+    const next = theme === 'light' ? 'dark' : 'light';
+    setTheme(next);
+
+    // Toggle the 'dark' class on the <html> element
+    if (next === 'dark') {
+      document.documentElement.classList.add('dark');
+      document.body.style.backgroundColor = '#1a202c'; // Explicitly set dark background
+    } else {
+      document.documentElement.classList.remove('dark');
+      document.body.style.backgroundColor = '#f9fafb'; // Explicitly set light background
+    }
+
+    localStorage.setItem('theme', next);
+  }
+
+  // Handlers
+  const handleLike = (id: number) => {
+    setSnippets(snippets.map(s => s.id === id ? { ...s, likes: s.likes + 1 } : s))
+    setLikedSnippets(prev => [...prev, id])
+  }
+
+  const handleAddComment = (id: number) => {
+    if (!newComment.trim()) return
+    const comment: Comment = { id: Date.now(), text: newComment, author: 'You' }
+    setSnippets(
+      snippets.map(s =>
+        s.id === id ? { ...s, comments: [...s.comments, comment] } : s
+      )
+    )
+    setNewComment('')
+  }
+
+  // Filtering
+  const filtered = snippets.filter(s => {
+    const search = searchQuery.toLowerCase()
+    const matches = [s.author, s.language, s.code].some(field =>
+      field.toLowerCase().includes(search)
+    )
+    return activeFilter === 'all' ? matches : matches && s.language === activeFilter
+  })
+
+  const languages = ['all', ...new Set(snippets.map(s => s.language))]
 
   return (
-    <div className={`min-h-screen flex flex-col ${isDarkMode ? 'dark bg-gray-900' : 'bg-gray-50'}`}>
-      <header className="bg-white dark:bg-gray-800 px-4 py-3 shadow-sm sticky top-0 z-10">
-        <div className="container mx-auto flex justify-between items-center">
-          <div className="flex items-center">
-            <FolderKanban className="w-8 h-8 mr-2 text-blue-600 dark:text-blue-400" />
-            <h1 className="text-xl font-bold text-gray-900 dark:text-white">Developer Community</h1>
-          </div>
-          <div className="flex items-center space-x-4">
+    <div className={`${inter.variable} ${poppins.variable} font-sans min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors`}>
+      <div className="max-w-3xl mx-auto px-4 md:px-6 py-8">
+        <header className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6">
+          <h1 className="text-4xl md:text-5xl font-bold text-indigo-600 dark:text-indigo-400 mb-4 md:mb-0">
+            Dev Showcase
+          </h1>
+          <div className="flex items-center space-x-3">
             <button
               onClick={toggleTheme}
-              className="p-2 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+              aria-label="Toggle theme"
+              className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
             >
-              {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+              {theme === 'light'
+                ? <FiMoon className="w-6 h-6 text-gray-700" />
+                : <FiSun className="w-6 h-6 text-yellow-300" />
+              }
             </button>
-            <button
-              onClick={() => setShowChatPanel(!showChatPanel)}
-              className="relative p-2 rounded-full bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
-            >
-              <MessageSquare className="w-5 h-5" />
-              {chats.some((chat) => chat.messages.some((msg) => !msg.isRead)) && (
-                <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
-              )}
-            </button>
-          </div>
-        </div>
-      </header>
-
-      <div className="flex flex-1 relative">
-        <main className="flex-1 p-4">
-          <div className="container mx-auto">
-            {activeTab === 'feed' && (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="md:col-span-2">
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Recent Posts</h2>
-                  <div className="space-y-6">
-                    {posts.map((post) => (
-                      <PostCard key={post.id} post={post} />
-                    ))}
-                  </div>
-                </div>
-                <div className="md:col-span-1">
-                  <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md border border-gray-200 dark:border-gray-700">
-                    <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">Top Contributors</h2>
-                    <div className="space-y-4">
-                      {[1, 2, 3].map((user) => (
-                        <div key={user} className="flex items-center">
-                          <img
-                            src={`https://api.dicebear.com/7.x/miniavars/svg?seed=${user}`}
-                            alt={`User ${user}`}
-                            className="w-8 h-8 rounded-full mr-3 object-cover"
-                          />
-                          <div>
-                            <p className="font-medium text-gray-900 dark:text-white">User {user}</p>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">{5 + user} posts</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-            {activeTab === 'profile' && (
-              <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md border border-gray-200 dark:border-gray-700">
-                <div className="flex flex-col md:flex-row items-start md:items-center">
-                  <img
-                    src={user.avatar}
-                    alt={user.name}
-                    className="w-20 h-20 rounded-full mb-4 md:mb-0 md:mr-4 object-cover"
-                  />
-                  <div>
-                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{user.name}</h2>
-                    <p className="text-gray-600 dark:text-gray-300 mt-1">{user.bio}</p>
-                    <div className="mt-3 space-y-1">
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
-                        <span className="font-medium">Location:</span> {user.location}
-                      </p>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
-                        <span className="font-medium">Website:</span> <a href={user.website} className="text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300">{user.website}</a>
-                      </p>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
-                        <span className="font-medium">Joined:</span> {user.joined}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        </main>
-
-        {isMobile && showChatPanel && (
-          <div
-            className={`fixed inset-0 z-50 transition-transform duration-300 ease-in-out overflow-hidden ${
-              isChatPanelOpen ? 'translate-x-0' : 'translate-x-full'
-            }`}
-          >
-            <div className="absolute inset-0 bg-black bg-opacity-50" onClick={handleCloseChat}></div>
-            <div className="absolute inset-y-0 right-0 w-full sm:w-96 bg-white dark:bg-gray-800 flex flex-col h-full">
-              <ChatPanel
-                chats={chats}
-                activeChat={activeChat}
-                onSelectChat={handleSelectChat}
-                onClose={handleCloseChat}
+            <div className="relative flex-1">
+              <input
+                type="text"
+                aria-label="Search feed"
+                placeholder="Search code, language, or author..."
+                className="w-full px-4 py-2 pl-10 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
               />
+              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+                🔍
+              </span>
             </div>
           </div>
-        )}
+        </header>
 
-        {!isMobile && showChatPanel && (
-          <ChatPanel
-            chats={chats}
-            activeChat={activeChat}
-            onSelectChat={handleSelectChat}
-            onClose={handleCloseChat}
-          />
-        )}
-      </div>
-
-      <footer className="bg-white dark:bg-gray-800 px-4 py-3 border-t border-gray-200 dark:border-gray-700">
-        <div className="container mx-auto">
-          <p className="text-sm text-gray-500 dark:text-gray-400 text-center">
-            © 2025 Developer Community. All rights reserved.
-          </p>
+        <div className="flex flex-wrap gap-2 mb-6">
+          {languages.map(lang => (
+            <button
+              key={lang}
+              onClick={() => setActiveFilter(lang)}
+              className={`px-3 py-1 rounded-full text-sm font-medium transition-colors whitespace-nowrap ${
+                activeFilter === lang
+                  ? 'bg-indigo-600 text-white shadow'
+                  : 'bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-700'
+              }`}
+            >
+              {lang.charAt(0).toUpperCase() + lang.slice(1)}
+            </button>
+          ))}
         </div>
-      </footer>
+
+        <div className="space-y-6">
+          {filtered.length > 0 ? (
+            filtered.map(s => (
+              <article
+                key={s.id}
+                className="bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 overflow-hidden transition-shadow hover:shadow-lg"
+              >
+                <div className="flex justify-between items-center px-4 py-3 bg-gray-100 dark:bg-gray-700">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 rounded-full bg-indigo-500 flex items-center justify-center text-white font-semibold">
+                      {s.author.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <h2 className="font-semibold text-lg text-gray-900 dark:text-gray-100">
+                        {s.author}
+                      </h2>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        Shared a code snippet • {new Date().toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+                  <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200">
+                    {s.language}
+                  </span>
+                </div>
+
+                <div className="px-4 py-3">
+                  <SyntaxHighlighter
+                    language={s.language}
+                    style={vscDarkPlus}
+                    customStyle={{
+                      background: theme === 'light' ? '#f5f5f5' : '#2d2d2d',
+                      borderRadius: '0.5rem',
+                      fontSize: '0.9rem',
+                    }}
+                  >
+                    {s.code}
+                  </SyntaxHighlighter>
+                </div>
+
+                <div className="flex justify-between items-center px-4 py-3 bg-gray-100 dark:bg-gray-700">
+                  <div className="flex space-x-6">
+                    <button
+                      onClick={() => handleLike(s.id)}
+                      className="flex items-center space-x-1 text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                    >
+                      <AiOutlineLike
+                        className={`w-5 h-5 ${
+                          likedSnippets.includes(s.id) ? 'text-indigo-600' : ''
+                        }`}
+                      />
+                      <span className="font-medium">{s.likes}</span>
+                    </button>
+                    <button
+                      onClick={() =>
+                        setSelectedSnippetId(
+                          selectedSnippetId === s.id ? null : s.id
+                        )
+                      }
+                      className="flex items-center space-x-1 text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                    >
+                      <AiOutlineComment className="w-5 h-5" />
+                      <span className="font-medium">{s.comments.length}</span>
+                    </button>
+                  </div>
+                </div>
+
+                {selectedSnippetId === s.id && (
+                  <div className="px-4 py-3 bg-gray-50 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 space-y-4">
+                    {s.comments.map(c => (
+                      <div key={c.id} className="flex items-start space-x-3">
+                        <div className="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center text-white font-medium">
+                          {c.author.charAt(0).toUpperCase()}
+                        </div>
+                        <div className="bg-white dark:bg-gray-900 p-3 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 flex-1">
+                          <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                            {c.author}
+                          </p>
+                          <p className="mt-1 text-sm text-gray-700 dark:text-gray-300">
+                            {c.text}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                    <div className="flex space-x-2">
+                      <input
+                        type="text"
+                        aria-label="Add comment"
+                        placeholder="Add a comment..."
+                        className="flex-1 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+                        value={newComment}
+                        onChange={e => setNewComment(e.target.value)}
+                      />
+                      <button
+                        onClick={() => handleAddComment(s.id)}
+                        className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+                      >
+                        Post
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </article>
+            ))
+          ) : (
+            <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg shadow-md">
+              <p className="text-gray-500 dark:text-gray-400">
+                No code snippets found. Try another search.
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
-  );
-};
+  )
+}
 
-export default App;
-
+export default DeveloperFeed

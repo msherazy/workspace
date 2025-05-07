@@ -5,11 +5,11 @@ module.exports = {
     './src/components/**/*.{js,ts,jsx,tsx,mdx}',
     './src/app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
-  darkMode: 'class', // This enables dark mode with the 'dark' class
+  darkMode: 'class', // Ensure this is set to 'class'
   theme: {
     extend: {
       // Your theme extensions here
     },
   },
   plugins: [],
-}
+};
