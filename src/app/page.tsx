@@ -1,648 +1,624 @@
 "use client";
+import { useEffect, useRef, useState } from "react";
+import { Code, FolderKanban, MessageSquare, Moon, Send, Star, Sun, X } from "lucide-react";
 
-import React, { useEffect, useState } from "react";
-import { Edit, Eye, MoreVertical, Plus, Trash2 } from "lucide-react";
-
-// ========== TYPES ==========
-interface Tenant {
+interface Comment {
   id: number;
-  name: string;
-  roomNumber: string;
-  building: string;
-  gender: string;
-  leaseStart: string;
-  leaseEnd: string;
-  rentStatus: "paid" | "pending";
-  image: string;
-  email: string;
-  phone: string;
+  author: string;
+  text: string;
+  date: string;
 }
 
-interface Building {
+interface Post {
   id: number;
-  name: string;
-  totalRooms: number;
-  occupiedRooms: number;
+  title: string;
+  code: string;
+  description: string;
+  comments: Comment[];
+  stars: number;
+  author: string;
+  date: string;
+  language: string;
 }
 
-// ========== COMPONENTS ==========
-const Button = ({ children, ...props }: React.ButtonHTMLAttributes<HTMLButtonElement>) => (
-  <button
-    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
-    {...props}
-  >
-    {children}
-  </button>
-);
+interface Message {
+  id: number;
+  sender: string;
+  text: string;
+  date: string;
+  isRead: boolean;
+}
 
-const Input = ({ ...props }: React.InputHTMLAttributes<HTMLInputElement>) => (
-  <input
-    className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-    {...props}
-  />
-);
+interface Chat {
+  id: number;
+  user: string;
+  lastMessage: string;
+  date: string;
+  isOnline: boolean;
+  messages: Message[];
+}
 
-const Label = ({ children }: { children: React.ReactNode }) => (
-  <label className="block text-sm font-medium text-gray-700 mb-1">{children}</label>
-);
+interface User {
+  id: number;
+  name: string;
+  bio: string;
+  location: string;
+  website: string;
+  joined: string;
+  avatar: string;
+}
 
-const Badge = ({
-                 variant = 'default',
-                 children
-               }: {
-  variant?: 'default' | 'success' | 'warning';
-  children: React.ReactNode
-}) => {
-  const variants = {
-    default: 'bg-gray-100 text-gray-800',
-    success: 'bg-green-100 text-green-800',
-    warning: 'bg-yellow-100 text-yellow-800'
-  };
-
-  return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${variants[variant]}`}>
-      {children}
-    </span>
-  );
+const user: User = {
+  id: 1,
+  name: 'Alex Johnson',
+  bio: 'Full-stack developer passionate about building scalable web applications...',
+  location: 'San Francisco, CA',
+  website: 'https://alexjohnson.dev',
+  joined: 'March 2023',
+  avatar: 'https://images.unsplash.com/photo-1599566150163-29194dcaad36?q=80&w=3087&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
 };
 
-const Table = ({ children }: { children: React.ReactNode }) => (
-  <div className="overflow-x-auto">
-    <table className="min-w-full divide-y divide-gray-200">{children}</table>
-  </div>
-);
+const posts: Post[] = [
+  {
+    id: 1,
+    title: 'Building a RESTful API with Node.js and Express',
+    code: `const express = require('express');
+const app = express();
 
-const TableHeader = ({ children }: { children: React.ReactNode }) => (
-  <thead className="bg-gray-50">{children}</thead>
-);
+app.get('/api/users', (req, res) => {
+  res.json([{ id: 1, name: 'John Doe' }]);
+});
 
-const TableBody = ({ children }: { children: React.ReactNode }) => (
-  <tbody className="bg-white divide-y divide-gray-200">{children}</tbody>
-);
+app.listen(3000, () => console.log('Server running on port 3000'));`,
+    description: 'Learn how to create a simple RESTful API using Node.js and Express framework...',
+    comments: [
+      { id: 1, author: 'Jane Doe', text: 'Great tutorial! Very informative.', date: '2 hours ago' },
+      { id: 2, author: 'John Doe', text: 'Thanks for sharing this. Very helpful for beginners.', date: '1 hour ago' }
+    ],
+    stars: 12,
+    author: 'Alex Johnson',
+    date: '2 days ago',
+    language: 'javascript'
+  },
+  {
+    id: 2,
+    title: 'Introduction to React Hooks',
+    code: `import React, { useState } from 'react';
 
-const TableRow = ({ children }: { children: React.ReactNode }) => (
-  <tr>{children}</tr>
-);
-
-const TableHead = ({ children }: { children: React.ReactNode }) => (
-  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-    {children}
-  </th>
-);
-
-const TableCell = ({ children }: { children: React.ReactNode }) => (
-  <td className="px-6 py-4 whitespace-nowrap">{children}</td>
-);
-
-const Dialog = ({
-                  open,
-                  onOpenChange,
-                  children
-                }: {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  children: React.ReactNode
-}) => {
-  if (!open) return null;
+function Counter() {
+  const [count, setCount] = useState(0);
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto">
-      <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-        <div className="fixed inset-0 transition-opacity" onClick={() => onOpenChange(false)}>
-          <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
-        </div>
-        <span className="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
-        <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-          {children}
-        </div>
-      </div>
+    <div>
+      <p>You clicked {count} times</p>
+      <button onClick={() => setCount(count + 1)}>Click me</button>
     </div>
   );
-};
+}`,
+    description: 'Understand the basics of React Hooks and how to use them in your applications...',
+    comments: [
+      { id: 1, author: 'Jane Doe', text: 'Great tutorial! Very informative.', date: '2 hours ago' },
+      { id: 2, author: 'John Doe', text: 'Thanks for sharing this. Very helpful for beginners.', date: '1 hour ago' }
+    ],
+    stars: 8,
+    author: 'Sam Smith',
+    date: '3 days ago',
+    language: 'javascript'
+  },
+  {
+    id: 3,
+    title: 'CSS Grid Layout Guide',
+    code: `.container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
 
-const DialogContent = ({ children }: { children: React.ReactNode }) => (
-  <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-    {children}
-  </div>
-);
+.item {
+  background-color: #f0f0f0;
+  padding: 20px;
+  border-radius: 5px;
+}`,
+    description: 'Master the power of CSS Grid to create complex layouts with ease...',
+    comments: [
+      { id: 1, author: 'Jane Doe', text: 'Great tutorial! Very informative.', date: '2 hours ago' },
+      { id: 2, author: 'John Doe', text: 'Thanks for sharing this. Very helpful for beginners.', date: '1 hour ago' }
+    ],
+    stars: 15,
+    author: 'Taylor Brown',
+    date: '4 days ago',
+    language: 'css'
+  },
+];
 
-const DialogHeader = ({ children }: { children: React.ReactNode }) => (
-  <div className="mb-4">{children}</div>
-);
+const chats: Chat[] = [
+  {
+    id: 1,
+    user: 'Jordan Peterson',
+    lastMessage: 'Hey, need help with your code?',
+    date: '10:00 AM',
+    isOnline: true,
+    messages: [
+      { id: 1, sender: 'Jordan Peterson', text: 'Hey! How are you doing?', date: '10:05 AM', isRead: true },
+      { id: 2, sender: user.name, text: 'I\'m good, thanks! How about you?', date: '10:07 AM', isRead: true },
+      { id: 3, sender: 'Jordan Peterson', text: 'I\'m doing well. Need help with your code?', date: '10:10 AM', isRead: true },
+      { id: 4, sender: user.name, text: 'Sure, what seems to be the problem?', date: '10:12 AM', isRead: true },
+      { id: 5, sender: 'Jordan Peterson', text: 'I\'m getting an error with...', date: '10:15 AM', isRead: false },
+    ]
+  },
+  {
+    id: 2,
+    user: 'Sarah Williams',
+    lastMessage: 'Let\'s catch up soon!',
+    date: 'Yesterday',
+    isOnline: false,
+    messages: [
+      { id: 1, sender: 'Sarah Williams', text: 'Hey! Long time no talk.', date: 'Yesterday 5:30 PM', isRead: true },
+      { id: 2, sender: user.name, text: 'Yeah! How have you been?', date: 'Yesterday 5:35 PM', isRead: true },
+      { id: 3, sender: 'Sarah Williams', text: 'I\'ve been good. Let\'s catch up soon!', date: 'Yesterday 5:40 PM', isRead: true },
+    ]
+  },
+  {
+    id: 3,
+    user: 'Michael Johnson',
+    lastMessage: 'I\'ll send you the details.',
+    date: 'Tuesday',
+    isOnline: true,
+    messages: [
+      { id: 1, sender: 'Michael Johnson', text: 'Hi! I wanted to discuss the project.', date: 'Tuesday 2:45 PM', isRead: true },
+      { id: 2, sender: user.name, text: 'Sure, I\'m interested. Tell me more.', date: 'Tuesday 2:50 PM', isRead: true },
+      { id: 3, sender: 'Michael Johnson', text: 'I\'ll send you the details.', date: 'Tuesday 2:55 PM', isRead: true },
+    ]
+  },
+];
 
-const DialogTitle = ({ children }: { children: React.ReactNode }) => (
-  <h3 className="text-lg leading-6 font-medium text-gray-900">{children}</h3>
-);
-
-const DialogDescription = ({ children }: { children: React.ReactNode }) => (
-  <p className="text-sm text-gray-500">{children}</p>
-);
-
-const DialogFooter = ({ children }: { children: React.ReactNode }) => (
-  <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-    {children}
-  </div>
-);
-
-const DropdownMenu = ({ children }: { children: React.ReactNode }) => {
-  const [open, setOpen] = useState(false);
-
-  return (
-    <div className="relative inline-block text-left">
-      {React.Children.map(children, (child) => {
-        if (React.isValidElement(child)) {
-          if (child.type === DropdownMenuTrigger) {
-            return React.cloneElement(child, { onClick: () => setOpen(!open) });
-          }
-          if (child.type === DropdownMenuContent && open) {
-            return child;
-          }
-        }
-        return null;
-      })}
-    </div>
-  );
-};
-
-const DropdownMenuTrigger = ({ children, ...props }: React.ButtonHTMLAttributes<HTMLButtonElement>) => (
-  <button {...props}>{children}</button>
-);
-
-const DropdownMenuContent = ({ children }: { children: React.ReactNode }) => (
-  <div className="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
-    <div className="py-1">{children}</div>
-  </div>
-);
-
-const DropdownMenuItem = ({ children, ...props }: React.ButtonHTMLAttributes<HTMLButtonElement>) => (
-  <button className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" {...props}>
-    {children}
-  </button>
-);
-
-const Select = ({
-                  value,
-                  onValueChange,
-                  children
-                }: {
-  value: string;
-  onValueChange: (value: string) => void;
-  children: React.ReactNode;
-}) => {
-  const [open, setOpen] = useState(false);
-
-  return (
-    <div className="relative">
-      <button
-        className="w-full p-2 border border-gray-300 rounded text-left"
-        onClick={() => setOpen(!open)}
-      >
-        {React.Children.toArray(children).find(
-          (child: any) => child.props.value === value
-        )?.props?.children || 'Select...'}
-      </button>
-      {open && (
-        <div className="absolute z-10 mt-1 w-full bg-white shadow-lg rounded border border-gray-200">
-          {React.Children.map(children, child => {
-            if (React.isValidElement(child)) {
-              return React.cloneElement(child, {
-                onClick: () => {
-                  onValueChange(child.props.value);
-                  setOpen(false);
-                }
-              } as React.Attributes & { onClick?: () => void });
-            }
-            return child;
-          })}
-        </div>
-      )}
-    </div>
-  );
-};
-
-const SelectItem = ({
-                      value,
-                      children,
-                      onClick
-                    }: {
-  value: string;
-  children: React.ReactNode;
-  onClick?: () => void;
-}) => (
-  <button
-    className="w-full text-left px-4 py-2 hover:bg-gray-100"
-    onClick={onClick}
-  >
-    {children}
-  </button>
-);
-
-// ========== MAIN COMPONENT ==========
-const Dashboard = () => {
-  const [tenants, setTenants] = useState<Tenant[]>([
-    {
-      id: 1,
-      name: "John Doe",
-      roomNumber: "101",
-      building: "A",
-      gender: "male",
-      leaseStart: "2023-01-01",
-      leaseEnd: "2023-12-31",
-      rentStatus: "paid",
-      image: "https://randomuser.me/api/portraits/men/1.jpg",
-      email: "john@example.com",
-      phone: "+1234567890"
-    },
-    // Add more tenants as needed
-  ]);
-
-  const [buildings] = useState<Building[]>([
-    { id: 1, name: "A", totalRooms: 50, occupiedRooms: 45 },
-    { id: 2, name: "B", totalRooms: 50, occupiedRooms: 42 }
-  ]);
-
-  const [filteredTenants, setFilteredTenants] = useState<Tenant[]>([]);
-  const [selectedBuilding, setSelectedBuilding] = useState("all");
-  const [selectedGender, setSelectedGender] = useState("all");
-  const [rentStatusFilter, setRentStatusFilter] = useState("all");
-  const [searchTerm, setSearchTerm] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
-  const [tenantsPerPage] = useState(10);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isTenantModalOpen, setIsTenantModalOpen] = useState(false);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [deleteTenantId, setDeleteTenantId] = useState<number | null>(null);
-  const [imagePreview, setImagePreview] = useState("");
-
+const SyntaxHighlighter = ({ code, language }: { code: string, language: string }) => {
   useEffect(() => {
-    setFilteredTenants(tenants);
-  }, [tenants]);
-
-  useEffect(() => {
-    let result = [...tenants];
-
-    if (selectedBuilding !== "all") {
-      result = result.filter(t => t.building === selectedBuilding);
-    }
-
-    if (selectedGender !== "all") {
-      result = result.filter(t => t.gender === selectedGender);
-    }
-
-    if (rentStatusFilter !== "all") {
-      result = result.filter(t => t.rentStatus === rentStatusFilter);
-    }
-
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
-      result = result.filter(t =>
-        t.name.toLowerCase().includes(term) ||
-        t.roomNumber.toLowerCase().includes(term)
-      );
-    }
-
-    setFilteredTenants(result);
-    setCurrentPage(1);
-  }, [selectedBuilding, selectedGender, rentStatusFilter, searchTerm, tenants]);
-
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        if (event.target?.result) {
-          setImagePreview(event.target.result as string);
-        }
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleDeleteTenant = (id: number) => {
-    setTenants(tenants.filter(t => t.id !== id));
-    setIsDeleteDialogOpen(false);
-  };
-
-  const handleAddTenant = (e: React.FormEvent) => {
-    e.preventDefault();
-    const form = e.target as HTMLFormElement;
-    const newTenant: Tenant = {
-      id: tenants.length + 1,
-      name: (form.elements.namedItem('name') as HTMLInputElement).value,
-      roomNumber: (form.elements.namedItem('roomNumber') as HTMLInputElement).value,
-      building: (form.elements.namedItem('building') as HTMLInputElement).value,
-      gender: (form.elements.namedItem('gender') as HTMLInputElement).value,
-      leaseStart: (form.elements.namedItem('leaseStart') as HTMLInputElement).value,
-      leaseEnd: (form.elements.namedItem('leaseEnd') as HTMLInputElement).value,
-      rentStatus: (form.elements.namedItem('rentStatus') as HTMLInputElement).value as "paid" | "pending",
-      image: imagePreview || "https://randomuser.me/api/portraits/men/1.jpg",
-      email: (form.elements.namedItem('email') as HTMLInputElement).value,
-      phone: (form.elements.namedItem('phone') as HTMLInputElement).value,
+    const highlight = async () => {
+      try {
+        const { default: hljs } = await import('highlight.js');
+        document.querySelectorAll<HTMLElement>('.code-block code').forEach((block) => {
+          hljs.highlightElement(block);
+        });
+      } catch (error) {
+        console.error('Failed to load highlight.js:', error);
+      }
     };
-    setTenants([...tenants, newTenant]);
-    setIsTenantModalOpen(false);
-    setImagePreview("");
-  };
-
-  const paginatedTenants = filteredTenants.slice(
-    (currentPage - 1) * tenantsPerPage,
-    currentPage * tenantsPerPage
-  );
-
-  const totalPages = Math.ceil(filteredTenants.length / tenantsPerPage);
+    highlight();
+  }, [code]);
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <div className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8 flex justify-between items-center">
-          <h1 className="text-3xl font-bold text-gray-900">Tenant Management</h1>
-          <Button onClick={() => setIsTenantModalOpen(true)}>
-            <Plus className="h-5 w-5 mr-2" />
-            Add Tenant
-          </Button>
+    <div className="code-block rounded-md overflow-hidden my-4">
+      <pre className="p-4">
+        <code className={`language-${language}`}>
+          {code.trim()}
+        </code>
+      </pre>
+    </div>
+  );
+};
+
+const PostCard = ({ post }: { post: Post }) => {
+  const [showComments, setShowComments] = useState(false);
+  const [newComment, setNewComment] = useState('');
+  const [commentsList, setCommentsList] = useState(post.comments);
+  const [starsCount, setStarsCount] = useState(post.stars);
+  const [hasStarred, setHasStarred] = useState(false);
+  const [showCode, setShowCode] = useState(false);
+
+  const handleAddComment = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newComment.trim()) {
+      const comment: Comment = {
+        id: commentsList.length + 1,
+        author: user.name,
+        text: newComment,
+        date: 'Just now'
+      };
+      setCommentsList([...commentsList, comment]);
+      setNewComment('');
+    }
+  };
+
+  const handleStar = () => {
+    if (!hasStarred) {
+      setStarsCount(starsCount + 1);
+      setHasStarred(true);
+    }
+  };
+
+  return (
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden mb-6 transition-all duration-300 border border-gray-200 dark:border-gray-700 hover:shadow-lg">
+      <div className="p-6">
+        <div className="flex justify-between items-start mb-4">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white">{post.title}</h2>
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={handleStar}
+              className={`flex items-center space-x-1 px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+                hasStarred
+                  ? 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400'
+                  : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300 hover:bg-yellow-50 dark:hover:bg-yellow-900/20'
+              }`}
+            >
+              <Star className={`w-4 h-4 ${hasStarred ? 'fill-current' : ''}`} />
+              <span>{starsCount}</span>
+            </button>
+            <button
+              onClick={() => setShowComments(!showComments)}
+              className="flex items-center space-x-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-3 py-1 rounded-full text-sm font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+            >
+              <MessageSquare className="w-4 h-4" />
+              <span>{commentsList.length}</span>
+            </button>
+          </div>
         </div>
+
+        <div className="flex items-center mb-4 text-sm text-gray-500 dark:text-gray-400">
+          <img
+            src={user.avatar}
+            alt={post.author}
+            className="w-8 h-8 rounded-full mr-2 object-cover"
+          />
+          <div>
+            <span className="font-medium text-gray-900 dark:text-white">{post.author}</span> • {post.date}
+          </div>
+        </div>
+
+        <p className="text-gray-700 dark:text-gray-300 mb-4">{post.description}</p>
+
+        {showCode && (
+          <SyntaxHighlighter code={post.code} language={post.language} />
+        )}
+
+        <button
+          onClick={() => setShowCode(!showCode)}
+          className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium flex items-center mb-4 transition-colors"
+        >
+          <Code className="w-4 h-4 mr-1" />
+          {showCode ? 'Hide code' : 'View code'}
+        </button>
+
+        {showComments && (
+          <div className="mt-6 space-y-4">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Comments ({commentsList.length})</h3>
+            <div className="max-h-64 overflow-y-auto space-y-3">
+              {commentsList.map((comment) => (
+                <div key={comment.id} className="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">
+                  <div className="flex justify-between items-start mb-1">
+                    <span className="font-medium text-gray-900 dark:text-white">{comment.author}</span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400">{comment.date}</span>
+                  </div>
+                  <p className="text-gray-700 dark:text-gray-300">{comment.text}</p>
+                </div>
+              ))}
+            </div>
+            <form onSubmit={handleAddComment} className="mt-3">
+              <div className="flex space-x-2">
+                <input
+                  type="text"
+                  value={newComment}
+                  onChange={(e) => setNewComment(e.target.value)}
+                  placeholder="Add your comment..."
+                  className="flex-1 px-3 py-2 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg border border-gray-200 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                />
+                <button
+                  type="submit"
+                  className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+                >
+                  <Send className="w-4 h-4" />
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const ChatPanel = ({ chats, activeChat, onSelectChat, onClose }: { chats: Chat[], activeChat: Chat | null, onSelectChat: (chat: Chat) => void, onClose: () => void }) => {
+  const [newMessage, setNewMessage] = useState('');
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [activeChat?.messages]);
+
+  const handleSendMessage = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newMessage.trim() && activeChat) {
+      const updatedChats = chats.map((chat) => {
+        if (chat.id === activeChat.id) {
+          const newMsg: Message = {
+            id: chat.messages.length + 1,
+            sender: user.name,
+            text: newMessage,
+            date: 'Just now',
+            isRead: true
+          };
+          return {
+            ...chat,
+            lastMessage: newMsg.text,
+            date: newMsg.date,
+            messages: [...chat.messages, newMsg]
+          };
+        }
+        return chat;
+      });
+      onSelectChat(updatedChats.find((chat) => chat.id === activeChat.id)!);
+      setNewMessage('');
+    }
+  };
+
+  return (
+    <div className="bg-white dark:bg-gray-800 w-full md:w-80 h-full flex flex-col absolute md:static top-0 right-0 z-50 border-l border-gray-200 dark:border-gray-700">
+      <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Messages</h2>
+        <button
+          onClick={onClose}
+          className="md:hidden text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
+        >
+          <X className="w-5 h-5" />
+        </button>
       </div>
 
-      <main className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
-        {/* Filters */}
-        <div className="bg-white p-4 rounded-lg shadow mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div>
-              <Label>Building</Label>
-              <Select
-                value={selectedBuilding}
-                onValueChange={setSelectedBuilding}
-              >
-                <SelectItem value="all">All Buildings</SelectItem>
-                {buildings.map(b => (
-                  <SelectItem key={b.id} value={b.name}>
-                    Building {b.name}
-                  </SelectItem>
-                ))}
-              </Select>
+      <div className="flex flex-col flex-1 overflow-hidden">
+        {activeChat ? (
+          <>
+            <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700">
+              <div className="flex justify-between items-center">
+                <div className="flex items-center">
+                  <div className="relative">
+                    <img
+                      src={`https://api.dicebear.com/7.x/miniavars/svg?seed=${activeChat.user}`}
+                      alt={activeChat.user}
+                      className="w-10 h-10 rounded-full mr-3 object-cover"
+                    />
+                    {activeChat.isOnline && (
+                      <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white dark:border-gray-700"></span>
+                    )}
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900 dark:text-white">{activeChat.user}</h3>
+                    {activeChat.isOnline ? (
+                      <span className="text-xs text-green-600 dark:text-green-400">Online</span>
+                    ) : (
+                      <span className="text-xs text-gray-500 dark:text-gray-400">Offline</span>
+                    )}
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <div>
-              <Label>Gender</Label>
-              <Select
-                value={selectedGender}
-                onValueChange={setSelectedGender}
-              >
-                <SelectItem value="all">All Genders</SelectItem>
-                <SelectItem value="male">Male</SelectItem>
-                <SelectItem value="female">Female</SelectItem>
-              </Select>
+            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+              {activeChat.messages.map((message) => (
+                <div
+                  key={message.id}
+                  className={`flex ${message.sender === user.name ? 'justify-end' : 'justify-start'}`}
+                >
+                  <div className={`max-w-xs p-3 rounded-lg ${
+                    message.sender === user.name
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white'
+                  }`}>
+                    <p className="text-sm">{message.text}</p>
+                    <span className="text-xs mt-1 block">{message.date}</span>
+                  </div>
+                </div>
+              ))}
+              <div ref={messagesEndRef} />
             </div>
 
-            <div>
-              <Label>Rent Status</Label>
-              <Select
-                value={rentStatusFilter}
-                onValueChange={setRentStatusFilter}
-              >
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="paid">Paid</SelectItem>
-                <SelectItem value="pending">Pending</SelectItem>
-              </Select>
-            </div>
+            <form onSubmit={handleSendMessage} className="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700">
+              <div className="flex space-x-2">
+                <input
+                  type="text"
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  placeholder="Type a message..."
+                  className="flex-1 px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg border border-gray-200 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                />
+                <button
+                  type="submit"
+                  className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+                >
+                  <Send className="w-4 h-4" />
+                </button>
+              </div>
+            </form>
+          </>
+        ) : (
+          <div className="flex-1 flex flex-col items-center justify-center text-gray-500 dark:text-gray-400 p-4">
+            <MessageSquare className="w-16 h-16 mb-4 opacity-50" />
+            <p className="text-lg font-medium mb-2">Your Messages</p>
+            <p className="text-sm text-center max-w-xs mb-4">Start a conversation by selecting a chat from the list</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
 
-            <div>
-              <Label>Search</Label>
-              <Input
-                placeholder="Search tenants..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+const App = () => {
+  const [activeTab, setActiveTab] = useState('feed');
+  const [showChatPanel, setShowChatPanel] = useState(false);
+  const [activeChat, setActiveChat] = useState<Chat | null>(null);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [isChatPanelOpen, setIsChatPanelOpen] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+      if (window.innerWidth >= 768) {
+        setShowChatPanel(false);
+        setIsChatPanelOpen(false);
+      }
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  const handleSelectChat = (chat: Chat) => {
+    setActiveChat(chat);
+    if (isMobile) {
+      setShowChatPanel(true);
+      setIsChatPanelOpen(true);
+    }
+  };
+
+  const handleCloseChat = () => {
+    setShowChatPanel(false);
+    setIsChatPanelOpen(false);
+    setTimeout(() => {
+      setActiveChat(null);
+    }, 300);
+  };
+
+  const toggleTheme = () => {
+    setIsDarkMode(!isDarkMode);
+    if (!isDarkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  };
+
+  return (
+    <div className={`min-h-screen flex flex-col ${isDarkMode ? 'dark bg-gray-900' : 'bg-gray-50'}`}>
+      <header className="bg-white dark:bg-gray-800 px-4 py-3 shadow-sm sticky top-0 z-10">
+        <div className="container mx-auto flex justify-between items-center">
+          <div className="flex items-center">
+            <FolderKanban className="w-8 h-8 mr-2 text-blue-600 dark:text-blue-400" />
+            <h1 className="text-xl font-bold text-gray-900 dark:text-white">Developer Community</h1>
+          </div>
+          <div className="flex items-center space-x-4">
+            <button
+              onClick={toggleTheme}
+              className="p-2 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+            >
+              {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+            </button>
+            <button
+              onClick={() => setShowChatPanel(!showChatPanel)}
+              className="relative p-2 rounded-full bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+            >
+              <MessageSquare className="w-5 h-5" />
+              {chats.some((chat) => chat.messages.some((msg) => !msg.isRead)) && (
+                <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
+              )}
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <div className="flex flex-1 relative">
+        <main className="flex-1 p-4">
+          <div className="container mx-auto">
+            {activeTab === 'feed' && (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="md:col-span-2">
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Recent Posts</h2>
+                  <div className="space-y-6">
+                    {posts.map((post) => (
+                      <PostCard key={post.id} post={post} />
+                    ))}
+                  </div>
+                </div>
+                <div className="md:col-span-1">
+                  <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md border border-gray-200 dark:border-gray-700">
+                    <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">Top Contributors</h2>
+                    <div className="space-y-4">
+                      {[1, 2, 3].map((user) => (
+                        <div key={user} className="flex items-center">
+                          <img
+                            src={`https://api.dicebear.com/7.x/miniavars/svg?seed=${user}`}
+                            alt={`User ${user}`}
+                            className="w-8 h-8 rounded-full mr-3 object-cover"
+                          />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">User {user}</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">{5 + user} posts</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+            {activeTab === 'profile' && (
+              <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md border border-gray-200 dark:border-gray-700">
+                <div className="flex flex-col md:flex-row items-start md:items-center">
+                  <img
+                    src={user.avatar}
+                    alt={user.name}
+                    className="w-20 h-20 rounded-full mb-4 md:mb-0 md:mr-4 object-cover"
+                  />
+                  <div>
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{user.name}</h2>
+                    <p className="text-gray-600 dark:text-gray-300 mt-1">{user.bio}</p>
+                    <div className="mt-3 space-y-1">
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        <span className="font-medium">Location:</span> {user.location}
+                      </p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        <span className="font-medium">Website:</span> <a href={user.website} className="text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300">{user.website}</a>
+                      </p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        <span className="font-medium">Joined:</span> {user.joined}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </main>
+
+        {isMobile && showChatPanel && (
+          <div
+            className={`fixed inset-0 z-50 transition-transform duration-300 ease-in-out overflow-hidden ${
+              isChatPanelOpen ? 'translate-x-0' : 'translate-x-full'
+            }`}
+          >
+            <div className="absolute inset-0 bg-black bg-opacity-50" onClick={handleCloseChat}></div>
+            <div className="absolute inset-y-0 right-0 w-full sm:w-96 bg-white dark:bg-gray-800 flex flex-col h-full">
+              <ChatPanel
+                chats={chats}
+                activeChat={activeChat}
+                onSelectChat={handleSelectChat}
+                onClose={handleCloseChat}
               />
             </div>
           </div>
+        )}
+
+        {!isMobile && showChatPanel && (
+          <ChatPanel
+            chats={chats}
+            activeChat={activeChat}
+            onSelectChat={handleSelectChat}
+            onClose={handleCloseChat}
+          />
+        )}
+      </div>
+
+      <footer className="bg-white dark:bg-gray-800 px-4 py-3 border-t border-gray-200 dark:border-gray-700">
+        <div className="container mx-auto">
+          <p className="text-sm text-gray-500 dark:text-gray-400 text-center">
+            © 2025 Developer Community. All rights reserved.
+          </p>
         </div>
-
-        {/* Tenants Table */}
-        <div className="bg-white shadow rounded-lg overflow-hidden">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Room</TableHead>
-                <TableHead>Building</TableHead>
-                <TableHead>Gender</TableHead>
-                <TableHead>Lease Dates</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {paginatedTenants.map(tenant => (
-                <TableRow key={tenant.id}>
-                  <TableCell>
-                    <div className="flex items-center">
-                      <img
-                        src={tenant.image}
-                        alt={tenant.name}
-                        className="h-10 w-10 rounded-full mr-3"
-                      />
-                      <div>
-                        <div className="font-medium">{tenant.name}</div>
-                        <div className="text-gray-500">{tenant.email}</div>
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>{tenant.roomNumber}</TableCell>
-                  <TableCell>{tenant.building}</TableCell>
-                  <TableCell>
-                    <Badge variant={tenant.gender === 'male' ? 'default' : 'warning'}>
-                      {tenant.gender}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    {tenant.leaseStart} - {tenant.leaseEnd}
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={tenant.rentStatus === 'paid' ? 'success' : 'warning'}>
-                      {tenant.rentStatus}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger>
-                        <MoreVertical className="h-5 w-5 text-gray-500 hover:text-gray-700" />
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent>
-                        <DropdownMenuItem>
-                          <Eye className="h-4 w-4 mr-2" /> View
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>
-                          <Edit className="h-4 w-4 mr-2" /> Edit
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => {
-                          setDeleteTenantId(tenant.id);
-                          setIsDeleteDialogOpen(true);
-                        }}>
-                          <Trash2 className="h-4 w-4 mr-2" /> Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-
-        {/* Pagination */}
-        <div className="flex justify-between items-center mt-4">
-          <div>
-            Showing {paginatedTenants.length} of {filteredTenants.length} tenants
-          </div>
-          <div className="flex gap-2">
-            <Button
-              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-              disabled={currentPage === 1}
-            >
-              Previous
-            </Button>
-            <Button
-              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-              disabled={currentPage === totalPages}
-            >
-              Next
-            </Button>
-          </div>
-        </div>
-      </main>
-
-      {/* Add Tenant Modal */}
-      <Dialog open={isTenantModalOpen} onOpenChange={setIsTenantModalOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Add New Tenant</DialogTitle>
-            <DialogDescription>
-              Fill in the details to add a new tenant to the system.
-            </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleAddTenant}>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-              <div>
-                <Label>Name</Label>
-                <Input name="name" required />
-              </div>
-              <div>
-                <Label>Room Number</Label>
-                <Input name="roomNumber" required />
-              </div>
-              <div>
-                <Label>Building</Label>
-                <Select
-                  name="building"
-                  value=""
-                  onValueChange={() => {}}
-                >
-                  {buildings.map(b => (
-                    <SelectItem key={b.id} value={b.name}>
-                      Building {b.name}
-                    </SelectItem>
-                  ))}
-                </Select>
-              </div>
-              <div>
-                <Label>Gender</Label>
-                <Select
-                  name="gender"
-                  value=""
-                  onValueChange={() => {}}
-                >
-                  <SelectItem value="male">Male</SelectItem>
-                  <SelectItem value="female">Female</SelectItem>
-                </Select>
-              </div>
-              <div>
-                <Label>Lease Start</Label>
-                <Input name="leaseStart" type="date" required />
-              </div>
-              <div>
-                <Label>Lease End</Label>
-                <Input name="leaseEnd" type="date" required />
-              </div>
-              <div>
-                <Label>Rent Status</Label>
-                <Select
-                  name="rentStatus"
-                  value=""
-                  onValueChange={() => {}}
-                >
-                  <SelectItem value="paid">Paid</SelectItem>
-                  <SelectItem value="pending">Pending</SelectItem>
-                </Select>
-              </div>
-              <div>
-                <Label>Email</Label>
-                <Input name="email" type="email" required />
-              </div>
-              <div>
-                <Label>Phone</Label>
-                <Input name="phone" type="tel" required />
-              </div>
-              <div>
-                <Label>Profile Image</Label>
-                <Input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageChange}
-                />
-              </div>
-            </div>
-            {imagePreview && (
-              <div className="mb-4">
-                <img
-                  src={imagePreview}
-                  alt="Preview"
-                  className="h-32 w-32 rounded-full object-cover"
-                />
-              </div>
-            )}
-            <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setIsTenantModalOpen(false)}
-              >
-                Cancel
-              </Button>
-              <Button type="submit">Add Tenant</Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
-
-      {/* Delete Confirmation Dialog */}
-      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Delete Tenant</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete this tenant? This action cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              onClick={() => setIsDeleteDialogOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={() => {
-                if (deleteTenantId) {
-                  handleDeleteTenant(deleteTenantId);
-                }
-              }}
-            >
-              Delete
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      </footer>
     </div>
   );
 };
 
-export default Dashboard;
+export default App;
+
