@@ -1,943 +1,1313 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { FiSun, FiMoon, FiFilter, FiX, FiPlus, FiMinus, FiShoppingCart, FiHeart, FiStar, FiChevronDown } from "react-icons/fi";
+import { useState, useEffect } from "react";
+import { FiBook, FiPlus, FiFilter, FiSun, FiMoon, FiChevronDown, FiMoreVertical, FiTrash2, FiEdit2, FiStar, FiAward } from "react-icons/fi";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { Inter, Poppins } from 'next/font/google';
 import React from "react";
 
-interface Product {
-    id: number;
-    name: string;
-    price: string;
-    originalPrice?: string;
-    stockStatus: string;
-    category: string;
-    image: string;
-    description: string;
-    quantity: number;
-    rating: number;
-    reviews: number;
-    colors?: string[];
-    sizes?: string[];
-    isNew?: boolean;
-    isFeatured?: boolean;
-    isOnSale?: boolean;
+// Load modern fonts
+const inter = Inter({ subsets: ['latin'] });
+const poppins = Poppins({ weight: ['400', '600', '700'], subsets: ['latin'] });
+
+interface Book {
+    title: string;
+    author: string;
+    pages: number;
+    genre: string;
+    status: "in-progress" | "finished" | "upcoming";
+    favorite: boolean;
+    rating?: number;
+    review?: string;
+    startedAt?: string;
+    finishedAt?: string;
+    id: string;
+    coverImage?: string;
 }
 
-const products: Product[] = [
-    {
-        id: 1,
-        name: "Premium Cotton Tee",
-        price: "$24.99",
-        originalPrice: "$29.99",
-        stockStatus: "In Stock",
-        category: "Tops",
-        image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&h=400&q=80",
-        description: "Ultra-soft premium cotton tee with a perfect fit. Designed for comfort and style.",
-        quantity: 10,
-        rating: 4.5,
-        reviews: 128,
-        colors: ["#3b82f6", "#ef4444", "#000000"],
-        sizes: ["S", "M", "L", "XL"],
-        isNew: true,
-        isOnSale: true
-    },
-    {
-        id: 2,
-        name: "Slim Fit Denim Jeans",
-        price: "$59.99",
-        stockStatus: "In Stock",
-        category: "Bottoms",
-        image: "https://images.unsplash.com/photo-1542272604-787c3835535d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&h=400&q=80",
-        description: "Classic slim fit denim jeans with stretch technology for all-day comfort.",
-        quantity: 15,
-        rating: 4.2,
-        reviews: 89,
-        colors: ["#1e40af", "#000000"],
-        sizes: ["28", "30", "32", "34", "36"],
-        isFeatured: true
-    },
-    {
-        id: 3,
-        name: "Winter Parka Jacket",
-        price: "$129.99",
-        stockStatus: "Low Stock",
-        category: "Outerwear",
-        image: "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&h=400&q=80",
-        description: "Heavy-duty winter parka with waterproof shell and thermal insulation.",
-        quantity: 3,
-        rating: 4.8,
-        reviews: 56,
-        colors: ["#1e293b", "#92400e"],
-        sizes: ["S", "M", "L", "XL"],
-        isFeatured: true
-    },
-    {
-        id: 4,
-        name: "Performance Running Shoes",
-        price: "$89.99",
-        stockStatus: "In Stock",
-        category: "Footwear",
-        image: "https://images.unsplash.com/photo-1600269452121-4f2416e55c28?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&h=400&q=80",
-        description: "Lightweight running shoes with responsive cushioning and breathable mesh.",
-        quantity: 20,
-        rating: 4.7,
-        reviews: 215,
-        colors: ["#f59e0b", "#000000", "#dc2626"],
-        sizes: ["US 7", "US 8", "US 9", "US 10", "US 11", "US 12"],
-        isNew: true
-    },
-    {
-        id: 5,
-        name: "Italian Wool Blazer",
-        price: "$199.99",
-        originalPrice: "$249.99",
-        stockStatus: "Out of Stock",
-        category: "Outerwear",
-        image: "https://images.unsplash.com/photo-1598033129183-c4f50c736f10?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&h=400&q=80",
-        description: "Premium Italian wool blazer with tailored fit and satin lining.",
-        quantity: 0,
-        rating: 4.9,
-        reviews: 42,
-        colors: ["#1e293b", "#4b5563"],
-        sizes: ["38R", "40R", "42R", "44R"],
-        isOnSale: true
-    },
-    {
-        id: 6,
-        name: "Linen Shorts",
-        price: "$34.99",
-        stockStatus: "In Stock",
-        category: "Bottoms",
-        image: "https://images.unsplash.com/photo-1604176354204-9268737828e4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&h=400&q=80",
-        description: "Breathable linen shorts perfect for summer with an elastic waistband.",
-        quantity: 12,
-        rating: 4.1,
-        reviews: 37,
-        colors: ["#84cc16", "#f97316", "#ffffff"],
-        sizes: ["S", "M", "L", "XL"]
-    },
-    {
-        id: 7,
-        name: "Leather Crossbody Bag",
-        price: "$79.99",
-        stockStatus: "In Stock",
-        category: "Accessories",
-        image: "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&h=400&q=80",
-        description: "Genuine leather crossbody bag with multiple compartments and adjustable strap.",
-        quantity: 8,
-        rating: 4.6,
-        reviews: 63,
-        colors: ["#78350f", "#000000"]
-    },
-    {
-        id: 8,
-        name: "High-Waisted Yoga Pants",
-        price: "$49.99",
-        stockStatus: "In Stock",
-        category: "Activewear",
-        image: "https://images.unsplash.com/photo-1589984662646-e7b2e4962f18?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&h=400&q=80",
-        description: "High-waisted yoga pants with four-way stretch and moisture-wicking fabric.",
-        quantity: 18,
-        rating: 4.4,
-        reviews: 94,
-        colors: ["#000000", "#64748b", "#ec4899"],
-        sizes: ["XS", "S", "M", "L", "XL"]
-    },
-    {
-        id: 9,
-        name: "Cashmere Hoodie",
-        price: "$149.99",
-        stockStatus: "In Stock",
-        category: "Outerwear",
-        image: "https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&h=400&q=80",
-        description: "Luxurious cashmere hoodie with kangaroo pocket and ribbed cuffs.",
-        quantity: 5,
-        rating: 4.9,
-        reviews: 31,
-        colors: ["#57534e", "#1e40af", "#831843"],
-        sizes: ["S", "M", "L"]
-    },
-    {
-        id: 10,
-        name: "Leather Sandals",
-        price: "$59.99",
-        stockStatus: "Out of Stock",
-        category: "Footwear",
-        image: "https://images.unsplash.com/photo-1560769629-975ec94e6a86?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&h=400&q=80",
-        description: "Handcrafted leather sandals with cushioned footbed and adjustable straps.",
-        quantity: 0,
-        rating: 4.3,
-        reviews: 28,
-        colors: ["#78350f", "#000000"],
-        sizes: ["US 6", "US 7", "US 8", "US 9", "US 10"]
-    },
-    {
-        id: 11,
-        name: "Silk Midi Dress",
-        price: "$89.99",
-        stockStatus: "In Stock",
-        category: "Dresses",
-        image: "https://images.unsplash.com/photo-1539533018447-63fcce2678e4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&h=400&q=80",
-        description: "Elegant silk midi dress with v-neckline and concealed side zipper.",
-        quantity: 7,
-        rating: 4.7,
-        reviews: 52,
-        colors: ["#7c3aed", "#0d9488", "#be123c"],
-        sizes: ["XS", "S", "M", "L"]
-    },
-    {
-        id: 12,
-        name: "Cropped Knit Sweater",
-        price: "$45.99",
-        originalPrice: "$59.99",
-        stockStatus: "In Stock",
-        category: "Tops",
-        image: "https://images.unsplash.com/photo-1551232864-3f0890e580d9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&h=400&q=80",
-        description: "Chunky knit cropped sweater with ribbed hem and cuffs.",
-        quantity: 9,
-        rating: 4.0,
-        reviews: 41,
-        colors: ["#f59e0b", "#ec4899", "#1e40af"],
-        sizes: ["S", "M", "L"],
-        isOnSale: true
-    }
-];
-
-const categoryOptions: string[] = ["All", "Tops", "Bottoms", "Outerwear", "Footwear", "Accessories", "Activewear", "Dresses"];
-const stockOptions: string[] = ["All", "In Stock", "Low Stock", "Out of Stock"];
-const sortOptions: { value: string; label: string }[] = [
-    { value: "featured", label: "Featured" },
-    { value: "newest", label: "Newest" },
-    { value: "price-low", label: "Price: Low to High" },
-    { value: "price-high", label: "Price: High to Low" },
-    { value: "rating", label: "Highest Rated" }
-];
-
-interface ProductCardProps {
-    product: Product;
-    onOpen: (product: Product) => void;
-    onAddToCart: (product: Product) => void;
-    onAddToWishlist: (product: Product) => void;
+interface StatCardProps {
+    label: string;
+    value: string | number;
+    icon: "FiBook" | "FiPlus" | "FiFilter";
+    highlight?: boolean;
 }
 
-const ProductCard: React.FC<ProductCardProps> = ({ product, onOpen, onAddToCart, onAddToWishlist }) => {
-    const { name, price, originalPrice, stockStatus, category, image, rating, reviews, isNew, isFeatured, isOnSale } = product;
+interface BookCardProps {
+    book: Book;
+    index: number;
+    onUpdateBook: (id: string, updates: Partial<Book>) => void;
+    onDeleteBook: (id: string) => void;
+}
 
-    return (
-        <motion.div
-            className="relative rounded-xl overflow-hidden transition-all duration-300 hover:shadow-lg bg-white dark:bg-slate-800"
-            whileHover={{ y: -4 }}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-        >
-            {/* Badges */}
-            <div className="absolute top-3 left-3 z-10 flex flex-col items-start space-y-2">
-                {isNew && (
-                    <span className="px-2 py-1 text-xs font-bold rounded-full bg-blue-600 text-white">
-            New
-          </span>
-                )}
-                {isFeatured && (
-                    <span className="px-2 py-1 text-xs font-bold rounded-full bg-purple-600 text-white">
-            Featured
-          </span>
-                )}
-                {isOnSale && (
-                    <span className="px-2 py-1 text-xs font-bold rounded-full bg-red-600 text-white">
-            Sale
-          </span>
-                )}
-            </div>
-
-            {/* Wishlist button */}
-            <button
-                className="absolute top-3 right-3 z-10 p-2 rounded-full bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm shadow-md hover:bg-red-100 dark:hover:bg-red-900/50 transition-colors duration-300"
-                onClick={(e) => {
-                    e.stopPropagation();
-                    onAddToWishlist(product);
-                }}
-            >
-                <FiHeart className="h-5 w-5 text-slate-900 dark:text-white" />
-            </button>
-
-            <div onClick={() => onOpen(product)} className="cursor-pointer">
-                <div className="h-64 overflow-hidden relative">
-                    <img
-                        src={image}
-                        alt={`Image of ${name}`}
-                        className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
-                        loading="lazy"
-                    />
-                    <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-black/60 to-transparent"></div>
-                    <div className="absolute bottom-3 left-3 right-3 flex justify-between items-center">
-                        <div className="px-3 py-1 rounded-full text-xs font-semibold shadow-md bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm">
-                            {category}
-                        </div>
-                        <div className="px-3 py-1 rounded-full text-xs font-semibold shadow-md bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm">
-              <span
-                  className={`w-2 h-2 rounded-full mr-1 inline-block ${
-                      stockStatus === "In Stock"
-                          ? "bg-emerald-500"
-                          : stockStatus === "Low Stock"
-                              ? "bg-amber-500"
-                              : "bg-rose-500"
-                  }`}
-              ></span>
-                            {stockStatus}
-                        </div>
-                    </div>
-                </div>
-                <div className="p-5">
-                    <div className="flex justify-between items-start mb-2">
-                        <h3 className="font-bold text-slate-900 dark:text-white line-clamp-1">{name}</h3>
-                    </div>
-
-                    <div className="flex items-center mb-3">
-                        <div className="flex items-center mr-2">
-                            {[...Array(5)].map((_, i) => (
-                                <FiStar
-                                    key={i}
-                                    className={`h-4 w-4 ${
-                                        i < Math.floor(rating)
-                                            ? "text-yellow-400 fill-yellow-400"
-                                            : i < rating
-                                                ? "text-yellow-400 fill-yellow-400/30"
-                                                : "text-slate-300 dark:text-slate-600"
-                                    }`}
-                                />
-                            ))}
-                        </div>
-                        <span className="text-xs text-slate-500 dark:text-slate-400">
-              ({reviews})
-            </span>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                        <div>
-                            {originalPrice ? (
-                                <>
-                                    <span className="text-lg font-bold text-slate-900 dark:text-white">{price}</span>
-                                    <span className="ml-2 text-sm line-through text-slate-500 dark:text-slate-400">
-                    {originalPrice}
-                  </span>
-                                </>
-                            ) : (
-                                <span className="text-lg font-bold text-slate-900 dark:text-white">{price}</span>
-                            )}
-                        </div>
-                        <button
-                            className="p-2 rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-slate-700 dark:hover:bg-slate-200 transition-colors duration-300"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                onAddToCart(product);
-                            }}
-                            disabled={stockStatus === "Out of Stock"}
-                        >
-                            <FiShoppingCart className="h-5 w-5" />
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </motion.div>
-    );
-};
-
-interface ProductModalProps {
-    product: Product | null;
+interface AddBookModalProps {
+    isOpen: boolean;
     onClose: () => void;
-    onAddToCart: (product: Product) => void;
-    onAddToWishlist: (product: Product) => void;
+    onAddBook: (book: Book) => void;
 }
 
-const ProductModal: React.FC<ProductModalProps> = ({ product, onClose, onAddToCart, onAddToWishlist }) => {
-    const [selectedColor, setSelectedColor] = useState<string | null>(null);
-    const [selectedSize, setSelectedSize] = useState<string | null>(null);
-    const [quantity, setQuantity] = useState<number>(1);
+interface UpdateBookModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+    book: Book;
+    onUpdateBook: (id: string, updates: Partial<Book>) => void;
+}
 
-    useEffect(() => {
-        if (product) {
-            setSelectedColor(product.colors?.[0] || null);
-            setSelectedSize(product.sizes?.[0] || null);
-            setQuantity(1);
-        }
-    }, [product]);
+interface DeleteBookModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+    book: Book;
+    onDeleteBook: (id: string) => void;
+}
 
-    if (!product) return null;
+interface ShareBookModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+    book: Book;
+}
 
-    const { name, price, originalPrice, stockStatus, category, image, description, rating, reviews, colors, sizes } = product;
+interface BookModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+    book: Book;
+}
 
-    const handleQuantityChange = (value: number) => {
-        setQuantity(Math.max(1, Math.min(product.quantity, value)));
-    };
+const generateId = () => Date.now().toString(36) + Math.random().toString(36).substring(2);
 
-    return (
-        <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 dark:bg-black/80 backdrop-blur-sm p-4 overflow-y-auto"
-            onClick={onClose}
-        >
-            <motion.div
-                className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-4xl shadow-xl max-h-[90vh] overflow-y-auto"
-                onClick={(e) => e.stopPropagation()}
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-            >
-                <div className="relative">
-                    <button
-                        className="absolute top-4 right-4 bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm rounded-full p-2 text-slate-900 dark:text-white hover:bg-white dark:hover:bg-slate-800 transition-colors duration-300 shadow-md z-10"
-                        onClick={onClose}
-                    >
-                        <FiX className="h-5 w-5" />
-                    </button>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2">
-                        <div className="h-full relative">
-                            <div className="h-96 md:h-full overflow-hidden relative rounded-t-2xl md:rounded-tr-none md:rounded-l-2xl">
-                                <img
-                                    src={image}
-                                    alt={`Detailed view of ${name}`}
-                                    className="w-full h-full object-cover"
-                                    loading="lazy"
-                                />
-                            </div>
-                        </div>
-
-                        <div className="p-6 md:p-8">
-                            <div className="flex justify-between items-start mb-4">
-                                <div>
-                                    <div className="px-3 py-1 rounded-full text-xs font-semibold shadow-md inline-block bg-slate-100 dark:bg-slate-800 mb-2">
-                                        {category}
-                                    </div>
-                                    <h2 className="text-2xl font-bold text-slate-900 dark:text-white">{name}</h2>
-                                </div>
-                                <button
-                                    className="p-2 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white hover:bg-red-100 dark:hover:bg-red-900/50 transition-colors duration-300"
-                                    onClick={() => onAddToWishlist(product)}
-                                >
-                                    <FiHeart className="h-5 w-5" />
-                                </button>
-                            </div>
-
-                            <div className="flex items-center mb-6">
-                                <div className="flex items-center mr-2">
-                                    {[...Array(5)].map((_, i) => (
-                                        <FiStar
-                                            key={i}
-                                            className={`h-5 w-5 ${
-                                                i < Math.floor(rating)
-                                                    ? "text-yellow-400 fill-yellow-400"
-                                                    : i < rating
-                                                        ? "text-yellow-400 fill-yellow-400/30"
-                                                        : "text-slate-300 dark:text-slate-600"
-                                            }`}
-                                        />
-                                    ))}
-                                </div>
-                                <span className="text-sm text-slate-500 dark:text-slate-400">
-                  {rating.toFixed(1)} ({reviews} reviews)
-                </span>
-                            </div>
-
-                            <p className="text-slate-600 dark:text-slate-300 mb-6">{description}</p>
-
-                            <div className="mb-6">
-                                {originalPrice ? (
-                                    <div className="flex items-center">
-                                        <span className="text-2xl font-bold text-slate-900 dark:text-white">{price}</span>
-                                        <span className="ml-3 text-lg line-through text-slate-500 dark:text-slate-400">
-                      {originalPrice}
-                    </span>
-                                        {originalPrice && (
-                                            <span className="ml-3 px-2 py-1 text-xs font-bold rounded-full bg-red-600 text-white">
-                        {Math.round(
-                            ((parseFloat(originalPrice.replace("$", "")) -
-                                    parseFloat(price.replace("$", ""))) /
-                                parseFloat(originalPrice.replace("$", ""))) * 100
-                            )}% OFF
-                      </span>
-                                        )}
-                                    </div>
-                                ) : (
-                                    <span className="text-2xl font-bold text-slate-900 dark:text-white">{price}</span>
-                                )}
-                            </div>
-
-                            {colors && colors.length > 0 && (
-                                <div className="mb-6">
-                                    <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-2">
-                                        Color: {selectedColor && <span className="font-normal">{selectedColor}</span>}
-                                    </h3>
-                                    <div className="flex space-x-2">
-                                        {colors.map((color) => (
-                                            <button
-                                                key={color}
-                                                className={`w-8 h-8 rounded-full border-2 transition-all duration-300 ${
-                                                    selectedColor === color
-                                                        ? "border-slate-900 dark:border-white"
-                                                        : "border-transparent hover:border-slate-300 dark:hover:border-slate-600"
-                                                }`}
-                                                style={{ backgroundColor: color }}
-                                                onClick={() => setSelectedColor(color)}
-                                            />
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-
-                            {sizes && sizes.length > 0 && (
-                                <div className="mb-6">
-                                    <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-2">
-                                        Size: {selectedSize && <span className="font-normal">{selectedSize}</span>}
-                                    </h3>
-                                    <div className="flex flex-wrap gap-2">
-                                        {sizes.map((size) => (
-                                            <button
-                                                key={size}
-                                                className={`px-4 py-2 rounded-md transition-all duration-300 ${
-                                                    selectedSize === size
-                                                        ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900"
-                                                        : "bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white hover:bg-slate-200 dark:hover:bg-slate-700"
-                                                }`}
-                                                onClick={() => setSelectedSize(size)}
-                                            >
-                                                {size}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-
-                            <div className="mb-6">
-                                <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-2">
-                                    Availability
-                                </h3>
-                                <p
-                                    className={`text-lg font-semibold ${
-                                        stockStatus === "In Stock"
-                                            ? "text-emerald-500"
-                                            : stockStatus === "Low Stock"
-                                                ? "text-amber-500"
-                                                : "text-rose-500"
-                                    }`}
-                                >
-                                    {stockStatus}
-                                    {stockStatus === "In Stock" && product.quantity > 0 && (
-                                        <span className="text-sm font-normal text-slate-500 dark:text-slate-400 ml-2">
-                      ({product.quantity} available)
-                    </span>
-                                    )}
-                                </p>
-                            </div>
-
-                            {stockStatus !== "Out of Stock" && (
-                                <div className="space-y-4">
-                                    <div>
-                                        <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-2">
-                                            Quantity
-                                        </h3>
-                                        <div className="flex items-center space-x-4">
-                                            <div className="flex items-center border border-slate-300 dark:border-slate-600 rounded-md overflow-hidden bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm">
-                                                <button
-                                                    className="px-3 py-2 text-slate-900 dark:text-white hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors duration-300"
-                                                    onClick={() => handleQuantityChange(quantity - 1)}
-                                                    disabled={quantity <= 1}
-                                                >
-                                                    <FiMinus className="h-5 w-5" />
-                                                </button>
-                                                <span className="px-4 py-2 text-slate-900 dark:text-white">{quantity}</span>
-                                                <button
-                                                    className="px-3 py-2 text-slate-900 dark:text-white hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors duration-300"
-                                                    onClick={() => handleQuantityChange(quantity + 1)}
-                                                    disabled={quantity >= product.quantity}
-                                                >
-                                                    <FiPlus className="h-5 w-5" />
-                                                </button>
-                                            </div>
-                                            <button
-                                                className="flex-1 bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-4 py-3 rounded-md transition-colors duration-300 hover:bg-slate-700 dark:hover:bg-slate-200 flex items-center justify-center space-x-2"
-                                                onClick={() => onAddToCart(product)}
-                                            >
-                                                <FiShoppingCart className="h-5 w-5" />
-                                                <span>Add to Cart</span>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            </motion.div>
-        </div>
-    );
+const getRandomCoverImage = () => {
+    const colors = [
+        "bg-gradient-to-br from-violet-500/10 to-violet-600/10 dark:from-violet-400/20 dark:to-violet-500/20",
+        "bg-gradient-to-br from-emerald-500/10 to-emerald-600/10 dark:from-emerald-400/20 dark:to-emerald-500/20",
+        "bg-gradient-to-br from-amber-500/10 to-amber-600/10 dark:from-amber-400/20 dark:to-amber-500/20",
+        "bg-gradient-to-br from-rose-500/10 to-rose-600/10 dark:from-rose-400/20 dark:to-rose-500/20",
+        "bg-gradient-to-br from-blue-500/10 to-blue-600/10 dark:from-blue-400/20 dark:to-blue-500/20"
+    ];
+    return colors[Math.floor(Math.random() * colors.length)];
 };
 
-const ClothingBoutique: React.FC = () => {
-    const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-    const [category, setCategory] = useState<string>("All");
-    const [stockStatus, setStockStatus] = useState<string>("All");
-    const [sortOption, setSortOption] = useState<string>("featured");
-    const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
-    const [isFilterOpen, setIsFilterOpen] = useState<boolean>(false);
-    const [isLoading, setIsLoading] = useState<boolean>(true);
+const ReadingTracker = () => {
+    const [books, setBooks] = useState<Book[]>([]);
+    const [filteredBooks, setFilteredBooks] = useState<Book[]>([]);
+    const [selectedGenre, setSelectedGenre] = useState<string>("all");
     const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
-    const [cart, setCart] = useState<Product[]>([]);
-    const [, setWishlist] = useState<Product[]>([]);
-    const [showCartNotification, setShowCartNotification] = useState<boolean>(false);
-    const [showWishlistNotification, setShowWishlistNotification] = useState<boolean>(false);
-    const [mounted, setMounted] = useState<boolean>(false);
+    const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
+    const [isUpdateModalOpen, setIsUpdateModalOpen] = useState<boolean>(false);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
+    const [isShareModalOpen, setIsShareModalOpen] = useState<boolean>(false);
+    const [selectedBook, setSelectedBook] = useState<Book | null>(null);
+    const [isBookModalOpen, setIsBookModalOpen] = useState<boolean>(false);
+    const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+    const [sortOption] = useState<"title" | "author" | "progress" | "rating">("title");
+    const [isFilterOpen, setIsFilterOpen] = useState<boolean>(false);
+    const [isClient, setIsClient] = useState<boolean>(false);
+    const [timeRange, setTimeRange] = useState<"week" | "month">("week");
 
     useEffect(() => {
-        setMounted(true);
-        // Check for saved dark mode preference
-        const savedDarkMode = localStorage.getItem("darkMode") === "true";
-        setIsDarkMode(savedDarkMode);
+        setIsClient(true);
+
+        // Check for stored theme or OS preference
+        const storedTheme = localStorage.getItem("theme");
+        const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        let themeToUse: boolean;
+
+        if (storedTheme === "dark") {
+            themeToUse = true;
+        } else if (storedTheme === "light") {
+            themeToUse = false;
+        } else {
+            themeToUse = prefersDark;
+        }
+
+        setIsDarkMode(themeToUse);
+        document.documentElement.classList.toggle("dark", themeToUse);
+
+        // Listen for OS-level changes only if user hasn't set a preference
+        const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+        const handleChange = (e: MediaQueryListEvent) => {
+            if (!localStorage.getItem("theme")) {
+                setIsDarkMode(e.matches);
+                document.documentElement.classList.toggle("dark", e.matches);
+            }
+        };
+        mediaQuery.addEventListener("change", handleChange);
+
+        const storedBooks = localStorage.getItem("books");
+        if (storedBooks) {
+            const parsedBooks: Book[] = JSON.parse(storedBooks).map((book: Book) => ({
+                ...book,
+                id: book.id || generateId(),
+                coverImage: book.coverImage || getRandomCoverImage()
+            }));
+            setBooks(sortBooks(parsedBooks, sortOption));
+        }
+        setIsLoading(false);
+
+        return () => {
+            mediaQuery.removeEventListener("change", handleChange);
+        };
     }, []);
 
-    useEffect(() => {
-        if (mounted) {
-            localStorage.setItem("darkMode", isDarkMode.toString());
-            document.documentElement.classList.toggle("dark", isDarkMode);
+    const toggleTheme = () => {
+        const newTheme = !isDarkMode;
+        setIsDarkMode(newTheme);
+        document.documentElement.classList.toggle("dark", newTheme);
+        localStorage.setItem("theme", newTheme ? "dark" : "light");
+    };
+
+    const updateBook = (id: string, updates: Partial<Book>) => {
+        const updatedBooks = books.map((book) => {
+            if (book.id === id) {
+                const updatedBook = { ...book, ...updates };
+                if (updates.status === "finished" && !updatedBook.finishedAt) {
+                    updatedBook.finishedAt = new Date().toISOString();
+                }
+                return updatedBook;
+            }
+            return book;
+        });
+        setBooks(sortBooks(updatedBooks, sortOption));
+    };
+
+    const deleteBook = (id: string) => {
+        setBooks(books.filter((book) => book.id !== id));
+    };
+
+    const filterByGenre = (genre: string) => {
+        setSelectedGenre(genre);
+        setFilteredBooks(genre === "all" ? books : books.filter((book) => book.genre === genre));
+    };
+
+    const sortBooks = (bookList: Book[], option: "title" | "author" | "progress" | "rating") => {
+        const sorted = [...bookList];
+        switch (option) {
+            case "title": return sorted.sort((a, b) => a.title.localeCompare(b.title));
+            case "author": return sorted.sort((a, b) => a.author.localeCompare(b.author));
+            case "progress": return sorted.sort((a, b) => {
+                const aProgress = a.status === "finished" ? 100 : (a.pages / 500) * 100;
+                const bProgress = b.status === "finished" ? 100 : (b.pages / 500) * 100;
+                return bProgress - aProgress;
+            });
+            case "rating": return sorted.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+            default: return sorted;
         }
-    }, [isDarkMode, mounted]);
-
-    const filteredAndSortedProducts = useMemo(() => {
-        let result = [...products];
-
-        // Apply filters
-        if (category !== "All") {
-            result = result.filter((product) => product.category === category);
-        }
-
-        if (stockStatus !== "All") {
-            result = result.filter((product) => product.stockStatus === stockStatus);
-        }
-
-        // Apply sorting
-        switch (sortOption) {
-            case "newest":
-                result.sort((a, b) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0));
-                break;
-            case "price-low":
-                result.sort(
-                    (a, b) =>
-                        parseFloat(a.price.replace("$", "")) - parseFloat(b.price.replace("$", ""))
-                );
-                break;
-            case "price-high":
-                result.sort(
-                    (a, b) =>
-                        parseFloat(b.price.replace("$", "")) - parseFloat(a.price.replace("$", ""))
-                );
-                break;
-            case "rating":
-                result.sort((a, b) => b.rating - a.rating);
-                break;
-            case "featured":
-            default:
-                result.sort((a, b) => (b.isFeatured ? 1 : 0) - (a.isFeatured ? 1 : 0));
-                break;
-        }
-
-        return result;
-    }, [category, stockStatus, sortOption]);
+    };
 
     useEffect(() => {
-        const timer = setTimeout(() => {
-            setFilteredProducts(filteredAndSortedProducts);
-            setIsLoading(false);
-        }, 500);
-        return () => clearTimeout(timer);
-    }, [filteredAndSortedProducts]);
+        localStorage.setItem("books", JSON.stringify(books));
+        filterByGenre(selectedGenre);
+    }, [books]);
 
-    const handleOpenModal = (product: Product): void => {
-        setSelectedProduct(product);
+    const getReadingStats = () => [
+        {
+            label: "Read This Year",
+            value: books.filter((book) => book.status === "finished").length,
+            icon: "FiBook",
+            highlight: true,
+        },
+        {
+            label: "Currently Reading",
+            value: books.filter((book) => book.status === "in-progress").length,
+            icon: "FiPlus",
+        },
+        {
+            label: "Next Up",
+            value: books.filter((book) => book.status === "upcoming").length,
+            icon: "FiFilter",
+        },
+    ];
+
+    const getPagesPerDay = () => {
+        const days = timeRange === "week" ? 7 : 30;
+        return Array.from({ length: days }, (_, i) => {
+            const date = new Date();
+            date.setDate(date.getDate() - i);
+            return date.toISOString().split("T")[0];
+        }).reverse().map((date) => ({
+            date: new Date(date).toLocaleDateString("en-US", {
+                weekday: timeRange === "week" ? "short" : undefined,
+                month: timeRange === "month" ? "short" : undefined,
+                day: "numeric"
+            }),
+            pages: books
+                .filter((book) => book.status === "finished" && book.finishedAt?.startsWith(date))
+                .reduce((sum, book) => sum + book.pages, 0),
+        }));
     };
 
-    const handleCloseModal = (): void => {
-        setSelectedProduct(null);
+    const getUniqueGenres = () => ["all", ...Array.from(new Set(books.map((book) => book.genre)))];
+
+    const handleAddBook = (newBook: Book) => {
+        const bookWithCover = { ...newBook, coverImage: getRandomCoverImage() };
+        setBooks(sortBooks([...books, bookWithCover], sortOption));
+        setIsAddModalOpen(false);
     };
 
-    const toggleDarkMode = (): void => {
-        setIsDarkMode(!isDarkMode);
-    };
-
-    const addToCart = (product: Product): void => {
-        setCart((prevCart) => [...prevCart, product]);
-        setShowCartNotification(true);
-        setTimeout(() => setShowCartNotification(false), 3000);
-    };
-
-    const addToWishlist = (product: Product): void => {
-        setWishlist((prevWishlist) => [...prevWishlist, product]);
-        setShowWishlistNotification(true);
-        setTimeout(() => setShowWishlistNotification(false), 3000);
-    };
-
-    const cartItemCount = cart.length;
-
-    return (
-        <div className={`min-h-screen transition-colors duration-300 ${isDarkMode ? "dark bg-slate-950" : "light bg-slate-50"}`}>
-            {/* Notification Toasts */}
-            <AnimatePresence>
-                {showCartNotification && (
-                    <motion.div
-                        className="fixed bottom-4 right-4 z-50 bg-emerald-500 text-white px-4 py-2 rounded-md shadow-lg flex items-center space-x-2"
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 20 }}
-                    >
-                        <FiShoppingCart className="h-5 w-5" />
-                        <span>Item added to cart!</span>
-                    </motion.div>
-                )}
-                {showWishlistNotification && (
-                    <motion.div
-                        className="fixed bottom-4 right-4 z-50 bg-rose-500 text-white px-4 py-2 rounded-md shadow-lg flex items-center space-x-2"
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 20 }}
-                    >
-                        <FiHeart className="h-5 w-5" />
-                        <span>Item added to wishlist!</span>
-                    </motion.div>
-                )}
-            </AnimatePresence>
-
-            <div className="max-w-7xl mx-auto p-6 md:p-8">
-                <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-8 space-y-6 md:space-y-0">
-                    <div className="relative">
-                        <h1 className="text-4xl font-bold text-slate-900 dark:text-white tracking-tight">
-                            LuxeBoutique
-                            <span className="absolute -top-2 -right-3 bg-rose-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center shadow-md">
-                {cartItemCount > 0 ? cartItemCount : "B"}
-              </span>
-                        </h1>
-                        <p className="text-slate-600 dark:text-slate-400 mt-2">
-                            Curated luxury fashion collection
+    const StatCard = ({ label, value, icon, highlight = false }: StatCardProps) => {
+        const Icon = icon === "FiBook" ? FiBook : icon === "FiPlus" ? FiPlus : FiFilter;
+        return (
+            <div className={`flex flex-col p-6 rounded-2xl transition-all duration-300 shadow-sm ${
+                highlight
+                    ? "bg-gradient-to-br from-violet-600 to-violet-500 text-white"
+                    : "bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700"
+            }`}>
+                <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                        <p className={`text-sm font-medium mb-1 ${highlight ? "text-violet-100" : "text-gray-500 dark:text-gray-400"}`}>{label}</p>
+                        <p className={`text-3xl font-bold ${highlight ? "text-white" : "text-gray-900 dark:text-white"}`}>
+                            {value}
                         </p>
                     </div>
-                    <div className="flex space-x-4">
-                        <button
-                            className={`px-4 py-2 rounded-md transition-colors duration-300 flex items-center space-x-2 shadow-md ${
-                                isDarkMode
-                                    ? "bg-slate-800 text-white hover:bg-slate-700"
-                                    : "bg-white text-slate-900 hover:bg-slate-100"
-                            }`}
-                            onClick={toggleDarkMode}
-                        >
-                            {isDarkMode ? (
-                                <>
-                                    <FiSun className="h-5 w-5" />
-                                    <span>Light Mode</span>
-                                </>
-                            ) : (
-                                <>
-                                    <FiMoon className="h-5 w-5" />
-                                    <span>Dark Mode</span>
-                                </>
-                            )}
-                        </button>
-                        <button
-                            className={`md:hidden px-4 py-2 rounded-md transition-colors duration-300 flex items-center space-x-2 shadow-md ${
-                                isDarkMode
-                                    ? "bg-slate-800 text-white hover:bg-slate-700"
-                                    : "bg-white text-slate-900 hover:bg-slate-100"
-                            }`}
-                            onClick={() => setIsFilterOpen(!isFilterOpen)}
-                        >
-                            <FiFilter className="h-5 w-5" />
-                            <span>Filters</span>
-                        </button>
-                    </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                    <div
-                        className={`md:col-span-1 transition-all duration-300 ${
-                            isFilterOpen ? "block" : "hidden md:block"
-                        }`}
-                    >
-                        <div className="bg-white dark:bg-slate-900 rounded-xl shadow-md p-6 mb-6 md:mb-0 border border-slate-200 dark:border-slate-800">
-                            <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-6 flex items-center">
-                                <FiFilter className="h-5 w-5 mr-2" />
-                                Filters
-                            </h2>
-                            <div className="space-y-6">
-                                <div>
-                                    <label className="block text-sm font-semibold text-slate-900 dark:text-white mb-2">
-                                        Sort By
-                                    </label>
-                                    <div className="relative">
-                                        <select
-                                            value={sortOption}
-                                            onChange={(e) => setSortOption(e.target.value)}
-                                            className="w-full appearance-none bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-4 py-3 rounded-md border border-slate-300 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent transition-all duration-300 pr-8"
-                                        >
-                                            {sortOptions.map((option) => (
-                                                <option key={option.value} value={option.value}>
-                                                    {option.label}
-                                                </option>
-                                            ))}
-                                        </select>
-                                        <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-slate-500 dark:text-slate-400">
-                                            <FiChevronDown className="h-5 w-5" />
-                                        </div>
-                                    </div>
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-semibold text-slate-900 dark:text-white mb-2">
-                                        Category
-                                    </label>
-                                    <div className="relative">
-                                        <select
-                                            value={category}
-                                            onChange={(e) => setCategory(e.target.value)}
-                                            className="w-full appearance-none bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-4 py-3 rounded-md border border-slate-300 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent transition-all duration-300 pr-8"
-                                        >
-                                            {categoryOptions.map((option) => (
-                                                <option key={option} value={option}>
-                                                    {option}
-                                                </option>
-                                            ))}
-                                        </select>
-                                        <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-slate-500 dark:text-slate-400">
-                                            <FiChevronDown className="h-5 w-5" />
-                                        </div>
-                                    </div>
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-semibold text-slate-900 dark:text-white mb-2">
-                                        Availability
-                                    </label>
-                                    <div className="relative">
-                                        <select
-                                            value={stockStatus}
-                                            onChange={(e) => setStockStatus(e.target.value)}
-                                            className="w-full appearance-none bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-4 py-3 rounded-md border border-slate-300 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent transition-all duration-300 pr-8"
-                                        >
-                                            {stockOptions.map((option) => (
-                                                <option key={option} value={option}>
-                                                    {option}
-                                                </option>
-                                            ))}
-                                        </select>
-                                        <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-slate-500 dark:text-slate-400">
-                                            <FiChevronDown className="h-5 w-5" />
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="pt-4 border-t border-slate-200 dark:border-slate-800">
-                                    <button
-                                        onClick={() => {
-                                            setCategory("All");
-                                            setStockStatus("All");
-                                            setSortOption("featured");
-                                        }}
-                                        className="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-4 py-3 rounded-md transition-colors duration-300 hover:bg-slate-700 dark:hover:bg-slate-200"
-                                    >
-                                        Reset Filters
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="md:col-span-3">
-                        {isLoading ? (
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {[1, 2, 3, 4, 5, 6].map((i) => (
-                                    <div
-                                        key={i}
-                                        className="bg-white dark:bg-slate-900 rounded-xl shadow-md overflow-hidden animate-pulse"
-                                    >
-                                        <div className="h-64 bg-slate-300 dark:bg-slate-700"></div>
-                                        <div className="p-5">
-                                            <div className="h-6 bg-slate-300 dark:bg-slate-700 rounded w-3/4 mb-3"></div>
-                                            <div className="h-4 bg-slate-300 dark:bg-slate-700 rounded w-1/2 mb-5"></div>
-                                            <div className="h-10 bg-slate-300 dark:bg-slate-700 rounded"></div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        ) : (
-                            <>
-                                {filteredProducts.length > 0 ? (
-                                    <motion.div
-                                        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-                                        initial={{ opacity: 0 }}
-                                        animate={{ opacity: 1 }}
-                                        exit={{ opacity: 0 }}
-                                    >
-                                        {filteredProducts.map((product) => (
-                                            <ProductCard
-                                                key={product.id}
-                                                product={product}
-                                                onOpen={handleOpenModal}
-                                                onAddToCart={addToCart}
-                                                onAddToWishlist={addToWishlist}
-                                            />
-                                        ))}
-                                    </motion.div>
-                                ) : (
-                                    <motion.div
-                                        className="text-center py-12 bg-white dark:bg-slate-900 rounded-xl shadow-md"
-                                        initial={{ opacity: 0, y: 20 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        exit={{ opacity: 0, y: 20 }}
-                                    >
-                                        <svg
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            className="h-12 w-12 mx-auto mb-4 text-slate-400"
-                                            fill="none"
-                                            viewBox="0 0 24 24"
-                                            stroke="currentColor"
-                                        >
-                                            <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth={2}
-                                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                                            />
-                                        </svg>
-                                        <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">
-                                            No products found
-                                        </h3>
-                                        <p className="text-slate-600 dark:text-slate-400">
-                                            We couldn't find any products matching your filters.
-                                        </p>
-                                        <button
-                                            onClick={() => {
-                                                setCategory("All");
-                                                setStockStatus("All");
-                                                setSortOption("featured");
-                                            }}
-                                            className="mt-6 bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-4 py-2 rounded-md transition-colors duration-300 hover:bg-slate-700 dark:hover:bg-slate-200"
-                                        >
-                                            Reset Filters
-                                        </button>
-                                    </motion.div>
-                                )}
-                            </>
-                        )}
+                    <div className={`p-3 rounded-xl ${
+                        highlight
+                            ? "bg-white/20 text-white"
+                            : "bg-violet-100/50 dark:bg-violet-900/20 text-violet-600 dark:text-violet-400"
+                    }`}>
+                        <Icon className="w-6 h-6" />
                     </div>
                 </div>
             </div>
+        );
+    };
 
-            <AnimatePresence>
-                {selectedProduct && (
-                    <ProductModal
-                        product={selectedProduct}
-                        onClose={handleCloseModal}
-                        onAddToCart={addToCart}
-                        onAddToWishlist={addToWishlist}
+    const BookCard = ({ book }: BookCardProps) => {
+        const getProgressColor = () => {
+            if (book.status === "finished") return "bg-gradient-to-r from-emerald-500 to-emerald-600";
+            if (book.status === "in-progress") return "bg-gradient-to-r from-violet-500 to-violet-600";
+            return "bg-gradient-to-r from-gray-200 to-gray-300 dark:from-gray-600 dark:to-gray-700";
+        };
+
+        const getProgressPercent = () => book.status === "finished" ? 100 : (book.pages / 500) * 100;
+
+        const getStatusBadge = () => {
+            if (book.status === "finished") return (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-300">
+                    <FiAward className="w-3.5 h-3.5" /> Finished
+                </span>
+            );
+            if (book.status === "in-progress") return (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-violet-100 dark:bg-violet-900/30 text-violet-800 dark:text-violet-300">
+                    <FiBook className="w-3.5 h-3.5" /> In Progress
+                </span>
+            );
+            return (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300">
+                    <FiPlus className="w-3.5 h-3.5" /> Upcoming
+                </span>
+            );
+        };
+
+        return (
+            <div className={`group bg-white dark:bg-gray-800 rounded-2xl overflow-hidden transition-all duration-300 shadow-sm hover:shadow-md ${
+                viewMode === "grid" ? "flex flex-col" : "flex items-center p-4 gap-4 hover:-translate-y-0.5"
+            }`}>
+                {viewMode === "grid" && (
+                    <div className="relative w-full pt-[150%]">
+                        <div className={`absolute inset-0 ${book.coverImage} flex items-center justify-center`}>
+                            <span className="text-5xl font-bold bg-gradient-to-br from-violet-600 to-violet-400 bg-clip-text text-transparent">
+                                {book.title.charAt(0)}
+                            </span>
+                            <div className="absolute top-3 right-3 z-10">
+                                <button
+                                    onClick={() => { setSelectedBook(book); setIsUpdateModalOpen(true); }}
+                                    className="p-2 rounded-full bg-white/90 dark:bg-gray-800/90 hover:bg-violet-500/20 dark:hover:bg-violet-400/20 transition-colors shadow-sm"
+                                >
+                                    <FiEdit2 className="w-5 h-5 text-violet-600 dark:text-violet-400" />
+                                </button>
+                            </div>
+                            {book.favorite && (
+                                <div className="absolute top-3 left-3 z-10">
+                                    <FiStar className="w-5 h-5 text-amber-400 fill-current drop-shadow-sm" />
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
+
+                <div className={viewMode === "grid" ? "p-5 space-y-4" : "flex-1 space-y-3"}>
+                    <div className="space-y-2">
+                        <h3 className="text-lg font-bold text-gray-900 dark:text-white">{book.title}</h3>
+                        <p className="text-sm text-gray-600 dark:text-gray-300">{book.author}</p>
+                        {viewMode === "grid" && (
+                            <div className="flex flex-wrap gap-2 pt-2">
+                                <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                                    selectedGenre === book.genre
+                                        ? "bg-violet-100 dark:bg-violet-900/30 text-violet-800 dark:text-violet-300"
+                                        : "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300"
+                                }`}>
+                                    {book.genre}
+                                </span>
+                                {getStatusBadge()}
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="space-y-3">
+                        <div className="flex items-center justify-between gap-2">
+                            <div className="text-sm text-gray-500 dark:text-gray-400">Progress</div>
+                            <div className="text-sm font-semibold text-violet-600 dark:text-violet-400">
+                                {getProgressPercent().toFixed(0)}%
+                            </div>
+                        </div>
+                        <div className="h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                            <div
+                                className={`h-full ${getProgressColor()} transition-all duration-500 ease-out`}
+                                style={{ width: `${getProgressPercent()}%` }}
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                {viewMode === "list" && (
+                    <div className="flex items-center gap-3">
+                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                            selectedGenre === book.genre
+                                ? "bg-violet-100 dark:bg-violet-900/30 text-violet-800 dark:text-violet-300"
+                                : "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300"
+                        }`}>
+                            {book.genre}
+                        </span>
+                        {getStatusBadge()}
+                        <div className="flex items-center gap-1">
+                            <button
+                                onClick={() => { setSelectedBook(book); setIsUpdateModalOpen(true); }}
+                                className="p-2 rounded-full bg-white/90 dark:bg-gray-800/90 hover:bg-violet-500/20 dark:hover:bg-violet-400/20 transition-colors shadow-sm"
+                            >
+                                <FiEdit2 className="w-5 h-5 text-violet-600 dark:text-violet-400" />
+                            </button>
+                            <button
+                                onClick={() => { setSelectedBook(book); setIsDeleteModalOpen(true); }}
+                                className="p-2 rounded-full bg-white/90 dark:bg-gray-800/90 hover:bg-red-500/20 dark:hover:bg-red-400/20 transition-colors shadow-sm"
+                            >
+                                <FiTrash2 className="w-5 h-5 text-red-600 dark:text-red-400" />
+                            </button>
+                        </div>
+                    </div>
+                )}
+            </div>
+        );
+    };
+
+    const AddBookModal = ({ isOpen, onClose, onAddBook }: AddBookModalProps) => {
+        const [title, setTitle] = useState<string>("");
+        const [author, setAuthor] = useState<string>("");
+        const [pages, setPages] = useState<number>(0);
+        const [genre, setGenre] = useState<string>("");
+        const [status, setStatus] = useState<"in-progress" | "finished" | "upcoming">("upcoming");
+        const [startDate, setStartDate] = useState<string>("");
+        const [finishDate, setFinishDate] = useState<string>("");
+        const [rating, setRating] = useState<number | undefined>(undefined);
+        const [review, setReview] = useState<string>("");
+        const [favorite, setFavorite] = useState<boolean>(false);
+
+        const handleSubmit = (e: React.FormEvent) => {
+            e.preventDefault();
+            if (!title || !author || !genre) return;
+
+            const newBook: Book = {
+                id: generateId(),
+                title,
+                author,
+                pages,
+                genre,
+                status,
+                favorite,
+                rating,
+                review: review || undefined,
+                startedAt: startDate || undefined,
+                finishedAt: status === "finished" ? (finishDate || new Date().toISOString()) : undefined
+            };
+            onAddBook(newBook);
+        };
+
+        if (!isOpen) return null;
+
+        return (
+            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+                    <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+                        <div className="flex items-center justify-between mb-2">
+                            <h2 className={`text-xl font-semibold text-gray-900 dark:text-white ${poppins.className}`}>Add New Book</h2>
+                            <button onClick={onClose} className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                                &times;
+                            </button>
+                        </div>
+                    </div>
+                    <form onSubmit={handleSubmit} className="p-6 space-y-4">
+                        <div>
+                            <label htmlFor="title" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title *</label>
+                            <input
+                                type="text"
+                                id="title"
+                                required
+                                value={title}
+                                onChange={(e) => setTitle(e.target.value)}
+                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500"
+                            />
+                        </div>
+                        <div>
+                            <label htmlFor="author" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Author *</label>
+                            <input
+                                type="text"
+                                id="author"
+                                required
+                                value={author}
+                                onChange={(e) => setAuthor(e.target.value)}
+                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500"
+                            />
+                        </div>
+                        <div>
+                            <label htmlFor="pages" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Pages</label>
+                            <input
+                                type="number"
+                                id="pages"
+                                value={pages}
+                                onChange={(e) => setPages(parseInt(e.target.value) || 0)}
+                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500"
+                            />
+                        </div>
+                        <div>
+                            <label htmlFor="genre" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Genre *</label>
+                            <input
+                                type="text"
+                                id="genre"
+                                required
+                                value={genre}
+                                onChange={(e) => setGenre(e.target.value.toLowerCase())}
+                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500"
+                                placeholder="fiction, non-fiction, etc."
+                            />
+                        </div>
+                        <div>
+                            <label htmlFor="status" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
+                            <select
+                                id="status"
+                                value={status}
+                                onChange={(e) => setStatus(e.target.value as "in-progress" | "finished" | "upcoming")}
+                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500"
+                            >
+                                <option value="upcoming">Upcoming</option>
+                                <option value="in-progress">In Progress</option>
+                                <option value="finished">Finished</option>
+                            </select>
+                        </div>
+
+                        {(status === "in-progress" || status === "finished") && (
+                            <div>
+                                <label htmlFor="startDate" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    Started Reading
+                                </label>
+                                <input
+                                    type="date"
+                                    id="startDate"
+                                    value={startDate}
+                                    onChange={(e) => setStartDate(e.target.value)}
+                                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500"
+                                />
+                            </div>
+                        )}
+
+                        {status === "finished" && (
+                            <>
+                                <div>
+                                    <label htmlFor="finishDate" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                        Finished Reading
+                                    </label>
+                                    <input
+                                        type="date"
+                                        id="finishDate"
+                                        value={finishDate}
+                                        onChange={(e) => setFinishDate(e.target.value)}
+                                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500"
+                                    />
+                                </div>
+                                <div>
+                                    <label htmlFor="rating" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Rating (1-5)</label>
+                                    <div className="flex items-center space-x-1">
+                                        {[1, 2, 3, 4, 5].map((star) => (
+                                            <button
+                                                key={star}
+                                                type="button"
+                                                onClick={() => setRating(star)}
+                                                className="focus:outline-none"
+                                            >
+                                                <FiStar
+                                                    className={`w-6 h-6 ${rating && star <= rating ? "text-amber-400 fill-current" : "text-gray-300 dark:text-gray-600"}`}
+                                                />
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                                <div>
+                                    <label htmlFor="review" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Your Review</label>
+                                    <textarea
+                                        id="review"
+                                        value={review}
+                                        onChange={(e) => setReview(e.target.value)}
+                                        rows={3}
+                                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500"
+                                    />
+                                </div>
+                            </>
+                        )}
+
+                        <div className="flex items-center">
+                            <input
+                                type="checkbox"
+                                id="favorite"
+                                checked={favorite}
+                                onChange={(e) => setFavorite(e.target.checked)}
+                                className="h-4 w-4 text-violet-600 focus:ring-violet-500 border-gray-300 rounded"
+                            />
+                            <label htmlFor="favorite" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
+                                Mark as favorite
+                            </label>
+                        </div>
+
+                        <div className="pt-4 flex justify-end space-x-3 border-t border-gray-200 dark:border-gray-700">
+                            <button
+                                type="button"
+                                onClick={onClose}
+                                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-lg"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="submit"
+                                disabled={!title || !author || !genre}
+                                className="px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-lg disabled:opacity-50"
+                            >
+                                Add Book
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        );
+    };
+
+    const UpdateBookModal = ({ isOpen, onClose, book, onUpdateBook }: UpdateBookModalProps) => {
+        const [title, setTitle] = useState<string>(book.title);
+        const [author, setAuthor] = useState<string>(book.author);
+        const [pages, setPages] = useState<number>(book.pages);
+        const [genre, setGenre] = useState<string>(book.genre);
+        const [status, setStatus] = useState<"in-progress" | "finished" | "upcoming">(book.status);
+        const [startDate, setStartDate] = useState<string>(book.startedAt || "");
+        const [finishDate, setFinishDate] = useState<string>(book.finishedAt || "");
+        const [rating, setRating] = useState<number | undefined>(book.rating);
+        const [review, setReview] = useState<string>(book.review || "");
+        const [favorite, setFavorite] = useState<boolean>(book.favorite);
+
+        useEffect(() => {
+            setTitle(book.title);
+            setAuthor(book.author);
+            setPages(book.pages);
+            setGenre(book.genre);
+            setStatus(book.status);
+            setStartDate(book.startedAt || "");
+            setFinishDate(book.finishedAt || "");
+            setRating(book.rating);
+            setReview(book.review || "");
+            setFavorite(book.favorite);
+        }, [book]);
+
+        const handleSubmit = (e: React.FormEvent) => {
+            e.preventDefault();
+            if (!title || !author || !genre) return;
+
+            const updates: Partial<Book> = {
+                title,
+                author,
+                pages,
+                genre,
+                status,
+                favorite,
+                rating,
+                review: review || undefined,
+                startedAt: startDate || undefined,
+                finishedAt: status === "finished" ? (finishDate || new Date().toISOString()) : undefined
+            };
+            onUpdateBook(book.id, updates);
+            onClose();
+        };
+
+        if (!isOpen) return null;
+
+        return (
+            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+                    <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+                        <div className="flex items-center justify-between mb-2">
+                            <h2 className={`text-xl font-semibold text-gray-900 dark:text-white ${poppins.className}`}>Edit Book</h2>
+                            <button onClick={onClose} className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                                &times;
+                            </button>
+                        </div>
+                    </div>
+                    <form onSubmit={handleSubmit} className="p-6 space-y-4">
+                        <div>
+                            <label htmlFor="title" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title *</label>
+                            <input
+                                type="text"
+                                id="title"
+                                required
+                                value={title}
+                                onChange={(e) => setTitle(e.target.value)}
+                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500"
+                            />
+                        </div>
+                        <div>
+                            <label htmlFor="author" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Author *</label>
+                            <input
+                                type="text"
+                                id="author"
+                                required
+                                value={author}
+                                onChange={(e) => setAuthor(e.target.value)}
+                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500"
+                            />
+                        </div>
+                        <div>
+                            <label htmlFor="pages" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Pages</label>
+                            <input
+                                type="number"
+                                id="pages"
+                                value={pages}
+                                onChange={(e) => setPages(parseInt(e.target.value) || 0)}
+                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500"
+                            />
+                        </div>
+                        <div>
+                            <label htmlFor="genre" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Genre *</label>
+                            <input
+                                type="text"
+                                id="genre"
+                                required
+                                value={genre}
+                                onChange={(e) => setGenre(e.target.value.toLowerCase())}
+                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500"
+                            />
+                        </div>
+                        <div>
+                            <label htmlFor="status" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
+                            <select
+                                id="status"
+                                value={status}
+                                onChange={(e) => setStatus(e.target.value as "in-progress" | "finished" | "upcoming")}
+                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500"
+                            >
+                                <option value="upcoming">Upcoming</option>
+                                <option value="in-progress">In Progress</option>
+                                <option value="finished">Finished</option>
+                            </select>
+                        </div>
+
+                        {(status === "in-progress" || status === "finished") && (
+                            <div>
+                                <label htmlFor="startDate" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    Started Reading
+                                </label>
+                                <input
+                                    type="date"
+                                    id="startDate"
+                                    value={startDate}
+                                    onChange={(e) => setStartDate(e.target.value)}
+                                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500"
+                                />
+                            </div>
+                        )}
+
+                        {status === "finished" && (
+                            <>
+                                <div>
+                                    <label htmlFor="finishDate" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                        Finished Reading
+                                    </label>
+                                    <input
+                                        type="date"
+                                        id="finishDate"
+                                        value={finishDate}
+                                        onChange={(e) => setFinishDate(e.target.value)}
+                                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500"
+                                    />
+                                </div>
+                                <div>
+                                    <label htmlFor="rating" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Rating (1-5)</label>
+                                    <div className="flex items-center space-x-1">
+                                        {[1, 2, 3, 4, 5].map((star) => (
+                                            <button
+                                                key={star}
+                                                type="button"
+                                                onClick={() => setRating(star)}
+                                                className="focus:outline-none"
+                                            >
+                                                <FiStar
+                                                    className={`w-6 h-6 ${rating && star <= rating ? "text-amber-400 fill-current" : "text-gray-300 dark:text-gray-600"}`}
+                                                />
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                                <div>
+                                    <label htmlFor="review" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Your Review</label>
+                                    <textarea
+                                        id="review"
+                                        value={review}
+                                        onChange={(e) => setReview(e.target.value)}
+                                        rows={3}
+                                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500"
+                                    />
+                                </div>
+                            </>
+                        )}
+
+                        <div className="flex items-center">
+                            <input
+                                type="checkbox"
+                                id="favorite"
+                                checked={favorite}
+                                onChange={(e) => setFavorite(e.target.checked)}
+                                className="h-4 w-4 text-violet-600 focus:ring-violet-500 border-gray-300 rounded"
+                            />
+                            <label htmlFor="favorite" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
+                                Mark as favorite
+                            </label>
+                        </div>
+
+                        <div className="pt-4 flex justify-end space-x-3 border-t border-gray-200 dark:border-gray-700">
+                            <button
+                                type="button"
+                                onClick={onClose}
+                                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-lg"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="submit"
+                                disabled={!title || !author || !genre}
+                                className="px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-lg disabled:opacity-50"
+                            >
+                                Update Book
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        );
+    };
+
+    const DeleteBookModal = ({ isOpen, onClose, book, onDeleteBook }: DeleteBookModalProps) => {
+        if (!isOpen) return null;
+
+        const handleDelete = () => {
+            onDeleteBook(book.id);
+            onClose();
+        };
+
+        return (
+            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md">
+                    <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+                        <div className="flex items-center justify-between mb-2">
+                            <h2 className={`text-xl font-semibold text-gray-900 dark:text-white ${poppins.className}`}>Delete Book</h2>
+                            <button onClick={onClose} className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                                &times;
+                            </button>
+                        </div>
+                    </div>
+                    <div className="p-6">
+                        <p className="text-gray-700 dark:text-gray-300 mb-6">
+                            Are you sure you want to delete <span className="font-semibold">{book.title}</span> by {book.author}? This action cannot be undone.
+                        </p>
+                        <div className="flex justify-end space-x-3">
+                            <button
+                                onClick={onClose}
+                                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-lg"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleDelete}
+                                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg"
+                            >
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
+    const ShareBookModal = ({ isOpen, onClose, book }: ShareBookModalProps) => {
+        const [copied, setCopied] = useState<boolean>(false);
+
+        const shareText = `I ${book.status === "finished" ? "read" : book.status === "in-progress" ? "am reading" : "plan to read"} "${book.title}" by ${book.author}. ${book.rating ? `I rated it ${book.rating}/5 stars.` : ""} ${book.review ? `My thoughts: "${book.review}"` : ""} #ReadingTracker`;
+
+        const copyToClipboard = () => {
+            navigator.clipboard.writeText(shareText);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        };
+
+        const shareOptions = [
+            { name: "Twitter", icon: "Twitter", color: "bg-blue-400", url: `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}` },
+            { name: "Facebook", icon: "Facebook", color: "bg-blue-600", url: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}&quote=${encodeURIComponent(shareText)}` },
+            { name: "Email", icon: "Email", color: "bg-gray-500", url: `mailto:?subject=Book Recommendation: ${book.title}&body=${encodeURIComponent(shareText)}` }
+        ];
+
+        if (!isOpen) return null;
+
+        return (
+            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md">
+                    <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+                        <div className="flex items-center justify-between mb-2">
+                            <h2 className={`text-xl font-semibold text-gray-900 dark:text-white ${poppins.className}`}>Share &#34;{book.title}&#34;</h2>
+                            <button onClick={onClose} className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                                &times;
+                            </button>
+                        </div>
+                    </div>
+                    <div className="p-6">
+                        <div className="mb-6">
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Share Text</label>
+                            <textarea
+                                readOnly
+                                value={shareText}
+                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500"
+                                rows={4}
+                            />
+                            <button
+                                onClick={copyToClipboard}
+                                className="mt-2 px-3 py-1.5 text-sm bg-violet-600 hover:bg-violet-700 text-white rounded-lg"
+                            >
+                                {copied ? "Copied!" : "Copy to clipboard"}
+                            </button>
+                        </div>
+                        <div className="space-y-3">
+                            <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Share on:</p>
+                            <div className="flex gap-3">
+                                {shareOptions.map((option) => (
+                                    <a
+                                        key={option.name}
+                                        href={option.url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className={`flex items-center justify-center w-full py-2 rounded-lg text-white ${option.color}`}
+                                    >
+                                        {option.name}
+                                    </a>
+                                ))}
+                            </div>
+                        </div>
+                        <div className="mt-6 flex justify-end">
+                            <button
+                                onClick={onClose}
+                                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-lg"
+                            >
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
+    const BookModal = ({ isOpen, onClose, book }: BookModalProps) => {
+        if (!isOpen) return null;
+
+        const getProgressPercent = () => book.status === "finished" ? 100 : (book.pages / 500) * 100;
+
+        const getProgressColor = () => {
+            if (book.status === "finished") return "bg-gradient-to-r from-emerald-500 to-emerald-600";
+            if (book.status === "in-progress") return "bg-gradient-to-r from-violet-500 to-violet-600";
+            return "bg-gradient-to-r from-gray-200 to-gray-300 dark:from-gray-600 dark:to-gray-700";
+        };
+
+        const formatDate = (dateString?: string) => {
+            if (!dateString) return "Not set";
+            return new Date(dateString).toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "long",
+                day: "numeric"
+            });
+        };
+
+        return (
+            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+                    <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+                        <div className="flex items-center justify-between mb-2">
+                            <h2 className={`text-xl font-semibold text-gray-900 dark:text-white ${poppins.className}`}>{book.title}</h2>
+                            <button onClick={onClose} className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                                &times;
+                            </button>
+                        </div>
+                    </div>
+                    <div className="p-6">
+                        <div className="flex mb-6">
+                            <div className="w-1/3 mr-4">
+                                <div className={`aspect-[2/3] rounded-lg ${book.coverImage} flex items-center justify-center`}>
+                                    <span className="text-5xl font-bold bg-gradient-to-br from-violet-600 to-violet-400 bg-clip-text text-transparent">
+                                        {book.title.charAt(0)}
+                                    </span>
+                                </div>
+                            </div>
+                            <div className="w-2/3 space-y-2">
+                                <p className="text-gray-700 dark:text-gray-300">
+                                    <span className="font-semibold">Author:</span> {book.author}
+                                </p>
+                                <p className="text-gray-700 dark:text-gray-300">
+                                    <span className="font-semibold">Genre:</span> {book.genre}
+                                </p>
+                                <p className="text-gray-700 dark:text-gray-300">
+                                    <span className="font-semibold">Pages:</span> {book.pages}
+                                </p>
+                                <p className="text-gray-700 dark:text-gray-300">
+                                    <span className="font-semibold">Status:</span> {book.status.charAt(0).toUpperCase() + book.status.slice(1).replace("-", " ")}
+                                </p>
+                                <div className="space-y-1">
+                                    <p className="text-gray-700 dark:text-gray-300 text-sm flex justify-between">
+                                        <span className="font-semibold">Progress:</span>
+                                        <span>{getProgressPercent().toFixed(0)}%</span>
+                                    </p>
+                                    <div className="h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                                        <div className={`h-full ${getProgressColor()}`} style={{ width: `${getProgressPercent()}%` }} />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="space-y-4">
+                            {(book.startedAt || book.finishedAt) && (
+                                <div className="space-y-2">
+                                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Reading Dates</h3>
+                                    {book.startedAt && (
+                                        <p className="text-gray-700 dark:text-gray-300">
+                                            <span className="font-semibold">Started:</span> {formatDate(book.startedAt)}
+                                        </p>
+                                    )}
+                                    {book.finishedAt && (
+                                        <p className="text-gray-700 dark:text-gray-300">
+                                            <span className="font-semibold">Finished:</span> {formatDate(book.finishedAt)}
+                                        </p>
+                                    )}
+                                </div>
+                            )}
+
+                            {book.rating !== undefined && (
+                                <div className="space-y-2">
+                                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Rating</h3>
+                                    <div className="flex">
+                                        {[1, 2, 3, 4, 5].map((star) => (
+                                            <FiStar
+                                                key={star}
+                                                className={`w-5 h-5 ${star <= book.rating! ? "text-amber-400 fill-current" : "text-gray-300 dark:text-gray-600"}`}
+                                            />
+                                        ))}
+                                        <span className="ml-2 text-gray-700 dark:text-gray-300">{book.rating}/5</span>
+                                    </div>
+                                </div>
+                            )}
+
+                            {book.review && (
+                                <div className="space-y-2">
+                                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Review</h3>
+                                    <p className="text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg">
+                                        &#34;{book.review}&#34;
+                                    </p>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="mt-6 flex justify-end space-x-3">
+                            <button
+                                onClick={onClose}
+                                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-lg"
+                            >
+                                Close
+                            </button>
+                            <button
+                                onClick={() => { onClose(); setSelectedBook(book); setIsUpdateModalOpen(true); }}
+                                className="px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-lg"
+                            >
+                                Edit
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
+    if (!isClient) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-violet-50 to-violet-100 dark:from-gray-900 dark:to-violet-950 flex items-center justify-center">
+                <div className="text-xl font-bold mb-4">Loading Reading Tracker</div>
+                <div className="w-16 h-16 border-4 border-violet-500/30 dark:border-violet-400/30 border-t-violet-500 dark:border-t-violet-400 rounded-full animate-spin"></div>
+            </div>
+        );
+    }
+
+    return (
+        <div className={`min-h-screen bg-gradient-to-br from-violet-50 to-white dark:from-gray-950 dark:to-gray-900 ${inter.className}`}>
+            <div className="container mx-auto px-4 py-8 max-w-7xl">
+                <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-8">
+                    <div className="relative">
+                        <h1 className={`text-4xl font-bold bg-gradient-to-r from-violet-600 to-violet-400 bg-clip-text text-transparent ${poppins.className}`}>
+                            Reading Tracker
+                        </h1>
+                    </div>
+                    <div className="flex items-center gap-3">
+                        <button
+                            onClick={() => setIsAddModalOpen(true)}
+                            className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-violet-600 to-violet-500 text-white font-semibold shadow-sm hover:shadow-md transition-all"
+                        >
+                            <FiPlus className="w-5 h-5" /> Add New Book
+                        </button>
+                        <button
+                            onClick={toggleTheme}
+                            className="p-3 rounded-xl bg-white/80 dark:bg-gray-800/90 hover:bg-gray-100/80 dark:hover:bg-gray-700/80 transition-colors shadow-sm"
+                        >
+                            {isDarkMode
+                                ? <FiSun className="w-5 h-5 text-amber-400" />
+                                : <FiMoon className="w-5 h-5 text-violet-600" />}
+                        </button>
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
+                    {getReadingStats().map((stat, index) => (
+                        <StatCard key={index} {...stat}></StatCard>
+                    ))}
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-8">
+                    <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+                        <div className="flex items-center justify-between mb-6">
+                            <h2 className={`text-lg font-semibold text-gray-900 dark:text-white ${poppins.className}`}>
+                                Pages Read This {timeRange === "week" ? "Week" : "Month"}
+                            </h2>
+                            <div className="flex bg-white dark:bg-gray-700 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 overflow-hidden">
+                                <button
+                                    onClick={() => setTimeRange("week")}
+                                    className={`px-4 py-1.5 text-sm ${timeRange === "week" ? "bg-violet-600 text-white" : "text-gray-600 dark:text-gray-400"}`}
+                                >
+                                    Week
+                                </button>
+                                <button
+                                    onClick={() => setTimeRange("month")}
+                                    className={`px-4 py-1.5 text-sm ${timeRange === "month" ? "bg-violet-600 text-white" : "text-gray-600 dark:text-gray-400"}`}
+                                >
+                                    Month
+                                </button>
+                            </div>
+                        </div>
+                        <div className="h-[300px] w-full">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <BarChart data={getPagesPerDay()}>
+                                    <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? "#374151" : "#e5e7eb"} opacity={0.1} />
+                                    <XAxis
+                                        dataKey="date"
+                                        stroke={isDarkMode ? "#d1d5db" : "#374151"}
+                                        tick={{ fill: isDarkMode ? "#d1d5db" : "#374151", fontSize: 12 }}
+                                    />
+                                    <YAxis
+                                        stroke={isDarkMode ? "#d1d5db" : "#374151"}
+                                        tick={{ fill: isDarkMode ? "#d1d5db" : "#374151", fontSize: 12 }}
+                                    />
+                                    <Tooltip
+                                        contentStyle={{
+                                            backgroundColor: isDarkMode ? "rgba(31, 41, 55, 0.95)" : "rgba(255, 255, 255, 0.95)",
+                                            borderColor: isDarkMode ? "#4b5563" : "#e5e7eb",
+                                            borderRadius: "0.5rem",
+                                            boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)"
+                                        }}
+                                        itemStyle={{ color: isDarkMode ? "#f3f4f6" : "#111827" }}
+                                        labelStyle={{ color: isDarkMode ? "#f3f4f6" : "#111827", fontWeight: "bold" }}
+                                        formatter={(value) => [`${value} pages`, "Pages Read"]}
+                                    />
+                                    <Bar
+                                        dataKey="pages"
+                                        fill="url(#colorGradient)"
+                                        radius={[4, 4, 0, 0]}
+                                    />
+                                    <defs>
+                                        <linearGradient id="colorGradient" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="0%" stopColor={isDarkMode ? "#a78bfa" : "#8b5cf6"} />
+                                            <stop offset="100%" stopColor={isDarkMode ? "#8b5cf6" : "#7c3aed"} />
+                                        </linearGradient>
+                                    </defs>
+                                </BarChart>
+                            </ResponsiveContainer>
+                        </div>
+                    </div>
+
+                    <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+                        <h2 className={`text-lg font-semibold mb-6 text-gray-900 dark:text-white ${poppins.className}`}>Reading Goal</h2>
+                        <div className="flex flex-col items-center justify-center h-full">
+                            <div className="relative w-40 h-40">
+                                <svg className="w-full h-full" viewBox="0 0 100 100">
+                                    <circle
+                                        className="text-gray-200 dark:text-gray-700 stroke-current"
+                                        strokeWidth="10"
+                                        fill="transparent"
+                                        r="40"
+                                        cx="50"
+                                        cy="50"
+                                    />
+                                    <circle
+                                        className="text-violet-500 dark:text-violet-400 stroke-current"
+                                        strokeWidth="10"
+                                        strokeDasharray={`${(books.filter(b => b.status === "finished").length / 10) * 251} 251`}
+                                        strokeLinecap="round"
+                                        fill="transparent"
+                                        r="40"
+                                        cx="50"
+                                        cy="50"
+                                        transform="rotate(-90 50 50)"
+                                    />
+                                </svg>
+                                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center">
+                                    <p className="text-3xl font-bold text-gray-900 dark:text-white">
+                                        {books.filter(b => b.status === "finished").length}
+                                    </p>
+                                    <p className="text-sm text-gray-500 dark:text-gray-400">/ 10 books</p>
+                                </div>
+                            </div>
+                            <p className="text-center text-gray-600 dark:text-gray-300 mt-4">
+                                You&#39;ve finished {books.filter(b => b.status === "finished").length} books this year!
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-6">
+                    <h2 className={`text-xl font-semibold text-gray-900 dark:text-white ${poppins.className}`}>Your Bookshelf</h2>
+                    <div className="flex items-center gap-3">
+                        <div className="flex bg-white dark:bg-gray-700 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 overflow-hidden">
+                            <button
+                                onClick={() => setViewMode("grid")}
+                                className={`p-2 ${viewMode === "grid" ? "bg-violet-600 text-white" : "text-gray-600 dark:text-gray-400"}`}
+                            >
+                                <FiBook className="w-5 h-5" />
+                            </button>
+                            <button
+                                onClick={() => setViewMode("list")}
+                                className={`p-2 ${viewMode === "list" ? "bg-violet-600 text-white" : "text-gray-600 dark:text-gray-400"}`}
+                            >
+                                <FiMoreVertical className="w-5 h-5" />
+                            </button>
+                        </div>
+                        <div className="relative">
+                            <button
+                                onClick={() => setIsFilterOpen(!isFilterOpen)}
+                                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors shadow-sm border border-gray-200 dark:border-gray-600"
+                            >
+                                <FiFilter className="w-4 h-4" /> Filter <FiChevronDown className="w-4 h-4" />
+                            </button>
+                            {isFilterOpen && (
+                                <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg z-10 border border-gray-200 dark:border-gray-700">
+                                    <div className="py-1">
+                                        {getUniqueGenres().map((genre) => (
+                                            <button
+                                                key={genre}
+                                                onClick={() => { filterByGenre(genre); setIsFilterOpen(false); }}
+                                                className={`w-full text-left px-4 py-2 text-sm ${
+                                                    selectedGenre === genre
+                                                        ? "bg-violet-100 dark:bg-violet-900/30 text-violet-800 dark:text-violet-300"
+                                                        : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                                                }`}
+                                            >
+                                                {genre.charAt(0).toUpperCase() + genre.slice(1)}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+
+                {isLoading ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                        {[1, 2, 3, 4].map((i) => (
+                            <div key={i} className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm animate-pulse border border-gray-100 dark:border-gray-700">
+                                <div className="flex flex-col space-y-3">
+                                    <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
+                                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
+                                    <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                                    <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                ) : filteredBooks.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-16 text-center">
+                        <div className="w-20 h-20 bg-violet-100/80 dark:bg-violet-500/20 rounded-full flex items-center justify-center mb-4">
+                            <FiBook className="w-10 h-10 text-violet-600 dark:text-violet-400" />
+                        </div>
+                        <h3 className="text-xl font-medium text-gray-900 dark:text-white mb-2">No books found</h3>
+                        <p className="text-gray-600 dark:text-gray-400 mb-8 max-w-md">
+                            {selectedGenre === "all"
+                                ? "You haven't added any books yet. Start by adding a new book!"
+                                : `You don't have any books in the "${selectedGenre}" genre yet.`}
+                        </p>
+                        <button onClick={() => setIsAddModalOpen(true)}
+                                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-violet-600 to-violet-500 text-white shadow-sm hover:shadow-md transition-all">
+                            <FiPlus className="w-5 h-5" /> Add New Book
+                        </button>
+                    </div>
+                ) : (
+                    <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 ${viewMode === "list" ? "xl:grid-cols-1" : "xl:grid-cols-2"} gap-5`}>
+                        {filteredBooks.map((book, index) => (
+                            <BookCard key={book.id} book={book} index={index} onUpdateBook={updateBook} onDeleteBook={deleteBook} />
+                        ))}
+                    </div>
+                )}
+
+                {/* Modals */}
+                {isAddModalOpen && (
+                    <AddBookModal
+                        isOpen={isAddModalOpen}
+                        onClose={() => setIsAddModalOpen(false)}
+                        onAddBook={handleAddBook}
                     />
                 )}
-            </AnimatePresence>
+                {isUpdateModalOpen && selectedBook && (
+                    <UpdateBookModal
+                        isOpen={isUpdateModalOpen}
+                        onClose={() => setIsUpdateModalOpen(false)}
+                        book={selectedBook}
+                        onUpdateBook={updateBook}
+                    />
+                )}
+                {isDeleteModalOpen && selectedBook && (
+                    <DeleteBookModal
+                        isOpen={isDeleteModalOpen}
+                        onClose={() => setIsDeleteModalOpen(false)}
+                        book={selectedBook}
+                        onDeleteBook={deleteBook}
+                    />
+                )}
+                {isShareModalOpen && selectedBook && (
+                    <ShareBookModal
+                        isOpen={isShareModalOpen}
+                        onClose={() => setIsShareModalOpen(false)}
+                        book={selectedBook}
+                    />
+                )}
+                {isBookModalOpen && selectedBook && (
+                    <BookModal
+                        isOpen={isBookModalOpen}
+                        onClose={() => setIsBookModalOpen(false)}
+                        book={selectedBook}
+                    />
+                )}
+            </div>
         </div>
     );
 };
 
-export default ClothingBoutique;
+export default ReadingTracker;
