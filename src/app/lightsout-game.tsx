@@ -41,7 +41,7 @@ const PALETTE = {
     gridBorder: "#ff505b",
     solutionBg: "#ffe3e3",
     solutionText: "#a53860",
-  }
+  },
 };
 
 interface LightGrid {
@@ -75,9 +75,27 @@ const DEFAULT_NAME = "Anonymous";
 const LEADERBOARD_STORAGE_KEY = "lightsOutLeaderboard";
 
 const MOCK_LEADERBOARD: LeaderboardEntry[] = [
-  { id: "mock1", name: "Alex", score: 340, level: 4, timestamp: Date.now() - 120000 },
-  { id: "mock2", name: "Sam", score: 300, level: 3, timestamp: Date.now() - 80000 },
-  { id: "mock3", name: "Jamie", score: 250, level: 3, timestamp: Date.now() - 50000 }
+  {
+    id: "mock1",
+    name: "Alex",
+    score: 340,
+    level: 4,
+    timestamp: Date.now() - 120000,
+  },
+  {
+    id: "mock2",
+    name: "Sam",
+    score: 300,
+    level: 3,
+    timestamp: Date.now() - 80000,
+  },
+  {
+    id: "mock3",
+    name: "Jamie",
+    score: 250,
+    level: 3,
+    timestamp: Date.now() - 50000,
+  },
 ];
 
 // Utils
@@ -93,7 +111,7 @@ const generateGrid = (size: number, initialActive: number): LightGrid[] => {
   }
   return Array.from({ length: totalCells }, (_, index) => ({
     id: index,
-    isActive: activeCells.has(index)
+    isActive: activeCells.has(index),
   }));
 };
 
@@ -101,7 +119,10 @@ const getAdjacentCells = (index: number, size: number): number[] => {
   const x = Math.floor(index / size);
   const y = index % size;
   const directions = [
-    [0, 1], [0, -1], [1, 0], [-1, 0]
+    [0, 1],
+    [0, -1],
+    [1, 0],
+    [-1, 0],
   ];
   return directions
     .map(([dx, dy]) => {
@@ -179,7 +200,7 @@ export default function Home() {
       name,
       score,
       level,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     };
     const updated = [...leaderboard, newEntry]
       .sort((a, b) => b.score - a.score)
@@ -190,7 +211,9 @@ export default function Home() {
 
   // Grid init
   const initializeGrid = useCallback(() => {
-    setGrid(generateGrid(levelConfig.gridSize, levelConfig.initialActiveLights));
+    setGrid(
+      generateGrid(levelConfig.gridSize, levelConfig.initialActiveLights),
+    );
     setMoves(0);
     setSolved(false);
   }, [levelConfig]);
@@ -226,19 +249,33 @@ export default function Home() {
         setShowConfetti(false);
       }, 2500);
     }
-  }, [grid, solved, moves, score, levelConfig.maxMoves, leaderboard, showNameInput]);
+  }, [
+    grid,
+    solved,
+    moves,
+    score,
+    levelConfig.maxMoves,
+    leaderboard,
+    showNameInput,
+  ]);
 
   const calculateScore = (movesMade: number, gridSize: number) => {
     const baseScore = 100;
     const perfectMoves = Math.ceil((gridSize * gridSize) / 2);
-    const efficiency = Math.max(0, 1 - (movesMade - perfectMoves) / (perfectMoves * 2));
+    const efficiency = Math.max(
+      0,
+      1 - (movesMade - perfectMoves) / (perfectMoves * 2),
+    );
     return Math.round(baseScore * efficiency);
   };
 
   const toggleCell = (index: number) => {
     if (solved) return;
     const newGrid = [...grid];
-    const cellsToToggle = [index, ...getAdjacentCells(index, levelConfig.gridSize)];
+    const cellsToToggle = [
+      index,
+      ...getAdjacentCells(index, levelConfig.gridSize),
+    ];
     cellsToToggle.forEach((cellIndex) => {
       if (cellIndex >= 0 && cellIndex < newGrid.length) {
         newGrid[cellIndex].isActive = !newGrid[cellIndex].isActive;
@@ -281,16 +318,63 @@ export default function Home() {
   };
 
   // Accessibility: use an icon for ON/OFF, with ARIA
-  const LightIcon = ({ on, theme }: { on: boolean; theme: "light" | "dark" }) =>
+  const LightIcon = ({
+    on,
+    theme,
+  }: {
+    on: boolean;
+    theme: "light" | "dark";
+  }) =>
     on ? (
-      <svg aria-label="Light is on" width="32" height="32" fill="none" viewBox="0 0 32 32">
-        <circle cx="16" cy="16" r="14" fill={PALETTE[theme].gridOnIcon} stroke={PALETTE[theme].gridOn} strokeWidth="3" />
-        <rect x="14" y="8" width="4" height="10" rx="2" fill={PALETTE[theme].gridOn} />
+      <svg
+        aria-label="Light is on"
+        width="32"
+        height="32"
+        fill="none"
+        viewBox="0 0 32 32"
+      >
+        <circle
+          cx="16"
+          cy="16"
+          r="14"
+          fill={PALETTE[theme].gridOnIcon}
+          stroke={PALETTE[theme].gridOn}
+          strokeWidth="3"
+        />
+        <rect
+          x="14"
+          y="8"
+          width="4"
+          height="10"
+          rx="2"
+          fill={PALETTE[theme].gridOn}
+        />
       </svg>
     ) : (
-      <svg aria-label="Light is off" width="32" height="32" fill="none" viewBox="0 0 32 32">
-        <circle cx="16" cy="16" r="14" fill={PALETTE[theme].gridOff} stroke={PALETTE[theme].gridBorder} strokeWidth="3"/>
-        <rect x="14" y="8" width="4" height="10" rx="2" fill={PALETTE[theme].gridBorder} opacity={0.35} />
+      <svg
+        aria-label="Light is off"
+        width="32"
+        height="32"
+        fill="none"
+        viewBox="0 0 32 32"
+      >
+        <circle
+          cx="16"
+          cy="16"
+          r="14"
+          fill={PALETTE[theme].gridOff}
+          stroke={PALETTE[theme].gridBorder}
+          strokeWidth="3"
+        />
+        <rect
+          x="14"
+          y="8"
+          width="4"
+          height="10"
+          rx="2"
+          fill={PALETTE[theme].gridBorder}
+          opacity={0.35}
+        />
       </svg>
     );
 
@@ -309,21 +393,22 @@ export default function Home() {
         style={{
           background: cell.isActive ? colors.gridOn : colors.gridOff,
           border: `2.5px solid ${colors.gridBorder}`,
-          borderRadius: isTopRow && isLeftCol
-            ? "18px 0 0 0"
-            : isTopRow && isRightCol
-              ? "0 18px 0 0"
-              : isBottomRow && isLeftCol
-                ? "0 0 0 18px"
-                : isBottomRow && isRightCol
-                  ? "0 0 18px 0"
-                  : "12px",
+          borderRadius:
+            isTopRow && isLeftCol
+              ? "18px 0 0 0"
+              : isTopRow && isRightCol
+                ? "0 18px 0 0"
+                : isBottomRow && isLeftCol
+                  ? "0 0 0 18px"
+                  : isBottomRow && isRightCol
+                    ? "0 0 18px 0"
+                    : "12px",
           cursor: "pointer",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           minHeight: 48,
-          transition: "background 0.15s, border 0.15s"
+          transition: "background 0.15s, border 0.15s",
         }}
         aria-label={cell.isActive ? "Light is on" : "Light is off"}
       >
@@ -339,7 +424,7 @@ export default function Home() {
         background: colors.card,
         boxShadow: `0 8px 24px ${colors.cardShadow}`,
         gridTemplateColumns: `repeat(${levelConfig.gridSize}, minmax(36px, 1fr))`,
-        display: "grid"
+        display: "grid",
       }}
     >
       {grid.map(renderCell)}
@@ -349,14 +434,18 @@ export default function Home() {
   // Top-right theme toggle: show only on desktop
   const renderThemeToggle = () =>
     !isMobile ? (
-      <div style={{
-        position: 'fixed',
-        top: 24,
-        right: 36,
-        zIndex: 100
-      }}>
+      <div
+        style={{
+          position: "fixed",
+          top: 24,
+          right: 36,
+          zIndex: 100,
+        }}
+      >
         <button
-          aria-label={theme === "light" ? "Switch to dark mode" : "Switch to light mode"}
+          aria-label={
+            theme === "light" ? "Switch to dark mode" : "Switch to light mode"
+          }
           onClick={() => setTheme(theme === "light" ? "dark" : "light")}
           style={{
             background: theme === "dark" ? colors.card : colors.primary,
@@ -368,7 +457,7 @@ export default function Home() {
             padding: "0.52rem 1.35rem",
             boxShadow: `0 1px 8px ${colors.cardShadow}`,
             marginLeft: 8,
-            cursor: "pointer"
+            cursor: "pointer",
           }}
         >
           {theme === "light" ? "Dark mode" : "Light mode"}
@@ -382,7 +471,7 @@ export default function Home() {
       className="fixed bottom-4 transform -translate-x-1/2 backdrop-blur-md p-2 rounded-full shadow-lg flex gap-2 z-50"
       style={{
         background: `${colors.card}a0`,
-        boxShadow: `0 10px 25px -5px ${colors.cardShadow}`
+        boxShadow: `0 10px 25px -5px ${colors.cardShadow}`,
       }}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
@@ -394,13 +483,24 @@ export default function Home() {
         className="w-12 h-12 rounded-full flex items-center justify-center"
         style={{
           background: colors.primary,
-          color: colors.buttonText
+          color: colors.buttonText,
         }}
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
       >
-        <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="none" viewBox="0 0 24 24">
-          <path d="M3 12l9-9 9 9v7a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2v-3H9v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7z" stroke={colors.buttonText} strokeWidth={2} strokeLinejoin="round" />
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="25"
+          height="25"
+          fill="none"
+          viewBox="0 0 24 24"
+        >
+          <path
+            d="M3 12l9-9 9 9v7a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2v-3H9v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7z"
+            stroke={colors.buttonText}
+            strokeWidth={2}
+            strokeLinejoin="round"
+          />
         </svg>
       </motion.button>
       <motion.button
@@ -409,7 +509,7 @@ export default function Home() {
         className="w-12 h-12 rounded-full flex items-center justify-center"
         style={{
           background: theme === "dark" ? colors.button : colors.primary,
-          color: colors.buttonText
+          color: colors.buttonText,
         }}
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
@@ -431,7 +531,7 @@ export default function Home() {
         className="p-8 rounded-2xl shadow-2xl text-center max-w-md"
         style={{
           background: colors.card,
-          boxShadow: `0 18px 30px -10px ${colors.cardShadow}`
+          boxShadow: `0 18px 30px -10px ${colors.cardShadow}`,
         }}
         initial={{ scale: 0.93, y: 10 }}
         animate={{ scale: 1, y: 0 }}
@@ -441,7 +541,7 @@ export default function Home() {
           className="text-5xl font-bold mb-6"
           style={{
             color: colors.primary,
-            fontFamily: "Playfair Display, serif"
+            fontFamily: "Playfair Display, serif",
           }}
         >
           Lights Out
@@ -450,10 +550,11 @@ export default function Home() {
           className="text-lg mb-7"
           style={{
             color: colors.secondaryText,
-            fontFamily: "Montserrat, sans-serif"
+            fontFamily: "Montserrat, sans-serif",
           }}
         >
-          Turn off all the lights in as few moves as possible. Can you top the leaderboard?
+          Turn off all the lights in as few moves as possible. Can you top the
+          leaderboard?
         </motion.p>
         <motion.button
           onClick={handleStartGame}
@@ -465,7 +566,7 @@ export default function Home() {
             fontSize: "1.18rem",
             boxShadow: `0 2px 8px ${colors.cardShadow}`,
             border: "none",
-            cursor: "pointer"
+            cursor: "pointer",
           }}
           whileHover={{ scale: 1.06 }}
           whileTap={{ scale: 0.94 }}
@@ -488,7 +589,7 @@ export default function Home() {
         className="p-8 rounded-2xl shadow-2xl text-center max-w-md"
         style={{
           background: colors.card,
-          boxShadow: `0 18px 30px -10px ${colors.cardShadow}`
+          boxShadow: `0 18px 30px -10px ${colors.cardShadow}`,
         }}
         initial={{ scale: 0.93, y: 10 }}
         animate={{ scale: 1, y: 0 }}
@@ -498,7 +599,7 @@ export default function Home() {
           className="text-3xl font-bold mb-5"
           style={{
             color: colors.primary,
-            fontFamily: "Playfair Display, serif"
+            fontFamily: "Playfair Display, serif",
           }}
         >
           {newHighScore ? "New Record" : "Level Complete"}
@@ -508,7 +609,7 @@ export default function Home() {
             className="text-lg"
             style={{
               color: colors.secondaryText,
-              fontFamily: "Montserrat, sans-serif"
+              fontFamily: "Montserrat, sans-serif",
             }}
           >
             Level {level} Complete
@@ -517,7 +618,7 @@ export default function Home() {
             className="text-2xl font-bold mb-3"
             style={{
               color: colors.primary,
-              fontFamily: "Playfair Display, serif"
+              fontFamily: "Playfair Display, serif",
             }}
           >
             Score: {score}
@@ -526,7 +627,7 @@ export default function Home() {
             className="text-lg"
             style={{
               color: colors.secondaryText,
-              fontFamily: "Montserrat, sans-serif"
+              fontFamily: "Montserrat, sans-serif",
             }}
           >
             You solved it in {moves} moves and earned {levelScore} points
@@ -542,7 +643,7 @@ export default function Home() {
             fontSize: "1.18rem",
             boxShadow: `0 2px 8px ${colors.cardShadow}`,
             border: "none",
-            cursor: "pointer"
+            cursor: "pointer",
           }}
           whileHover={{ scale: 1.06 }}
           whileTap={{ scale: 0.94 }}
@@ -565,7 +666,7 @@ export default function Home() {
         className="p-8 rounded-2xl shadow-2xl text-center max-w-md"
         style={{
           background: colors.card,
-          boxShadow: `0 18px 30px -10px ${colors.cardShadow}`
+          boxShadow: `0 18px 30px -10px ${colors.cardShadow}`,
         }}
         initial={{ scale: 0.93, y: 10 }}
         animate={{ scale: 1, y: 0 }}
@@ -575,7 +676,7 @@ export default function Home() {
           className="text-3xl font-bold mb-6"
           style={{
             color: colors.primary,
-            fontFamily: "Playfair Display, serif"
+            fontFamily: "Playfair Display, serif",
           }}
         >
           New High Score
@@ -586,7 +687,7 @@ export default function Home() {
             className="block text-sm font-medium mb-2"
             style={{
               color: colors.primary,
-              fontFamily: "Montserrat, sans-serif"
+              fontFamily: "Montserrat, sans-serif",
             }}
           >
             Enter your name for the leaderboard:
@@ -601,7 +702,7 @@ export default function Home() {
               background: colors.background,
               borderColor: colors.accentSoft,
               color: colors.primary,
-              fontFamily: "Montserrat, sans-serif"
+              fontFamily: "Montserrat, sans-serif",
             }}
             placeholder="Your name"
             autoFocus
@@ -618,7 +719,7 @@ export default function Home() {
             boxShadow: `0 2px 8px ${colors.cardShadow}`,
             border: "none",
             cursor: playerName.trim() ? "pointer" : "not-allowed",
-            opacity: playerName.trim() ? 1 : 0.7
+            opacity: playerName.trim() ? 1 : 0.7,
           }}
           whileHover={{ scale: playerName.trim() ? 1.06 : 1 }}
           whileTap={{ scale: playerName.trim() ? 0.94 : 1 }}
@@ -652,13 +753,19 @@ export default function Home() {
           <div>
             <p
               className="text-sm font-medium uppercase"
-              style={{ color: colors.primary, fontFamily: "Montserrat, sans-serif" }}
+              style={{
+                color: colors.primary,
+                fontFamily: "Montserrat, sans-serif",
+              }}
             >
               Level {level}
             </p>
             <p
               className="text-xl font-bold"
-              style={{ color: colors.secondaryText, fontFamily: "Playfair Display, serif" }}
+              style={{
+                color: colors.secondaryText,
+                fontFamily: "Playfair Display, serif",
+              }}
             >
               Score: {score}
             </p>
@@ -666,13 +773,19 @@ export default function Home() {
           <div>
             <p
               className="text-sm font-medium uppercase"
-              style={{ color: colors.primary, fontFamily: "Montserrat, sans-serif" }}
+              style={{
+                color: colors.primary,
+                fontFamily: "Montserrat, sans-serif",
+              }}
             >
               Moves
             </p>
             <p
               className="text-xl font-bold"
-              style={{ color: colors.secondaryText, fontFamily: "Playfair Display, serif" }}
+              style={{
+                color: colors.secondaryText,
+                fontFamily: "Playfair Display, serif",
+              }}
             >
               {moves}
             </p>
@@ -689,7 +802,7 @@ export default function Home() {
               color: colors.primary,
               fontFamily: "Montserrat, sans-serif",
               border: "none",
-              cursor: "pointer"
+              cursor: "pointer",
             }}
             whileHover={{ scale: 1.07, color: colors.accent }}
           >
@@ -700,7 +813,7 @@ export default function Home() {
             style={{
               background: colors.solutionBg,
               color: colors.solutionText,
-              fontFamily: "Montserrat, sans-serif"
+              fontFamily: "Montserrat, sans-serif",
             }}
           >
             {solved ? "Solved" : "Find a solution"}
@@ -714,7 +827,7 @@ export default function Home() {
               color: colors.primary,
               fontFamily: "Montserrat, sans-serif",
               border: "none",
-              cursor: "pointer"
+              cursor: "pointer",
             }}
             whileHover={{ scale: 1.07, color: colors.accent }}
           >
@@ -726,13 +839,14 @@ export default function Home() {
   );
 
   const renderLeaderboard = () => {
-    const leaderboardToShow = leaderboard.length === 0 ? MOCK_LEADERBOARD : leaderboard;
+    const leaderboardToShow =
+      leaderboard.length === 0 ? MOCK_LEADERBOARD : leaderboard;
     return (
       <motion.div
         className="p-6 rounded-2xl shadow-xl mb-8 w-full"
         style={{
           background: colors.card,
-          boxShadow: `0 10px 25px -5px ${colors.cardShadow}`
+          boxShadow: `0 10px 25px -5px ${colors.cardShadow}`,
         }}
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
@@ -742,7 +856,7 @@ export default function Home() {
           className="text-2xl font-bold mb-4"
           style={{
             color: colors.primary,
-            fontFamily: "Playfair Display, serif"
+            fontFamily: "Playfair Display, serif",
           }}
         >
           Top 10 Scores
@@ -753,7 +867,7 @@ export default function Home() {
               key={entry.id || index}
               className="flex justify-between items-center p-3 rounded-xl"
               style={{
-                background: `${colors.accentSoft}50`
+                background: `${colors.accentSoft}50`,
               }}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -766,7 +880,7 @@ export default function Home() {
                   style={{
                     background: colors.background,
                     color: colors.primary,
-                    fontFamily: "Montserrat, sans-serif"
+                    fontFamily: "Montserrat, sans-serif",
                   }}
                 >
                   {index + 1}
@@ -775,7 +889,7 @@ export default function Home() {
                   className="font-medium truncate max-w-[100px]"
                   style={{
                     color: colors.text,
-                    fontFamily: "Montserrat, sans-serif"
+                    fontFamily: "Montserrat, sans-serif",
                   }}
                 >
                   {entry.name}
@@ -786,7 +900,7 @@ export default function Home() {
                   className="text-lg font-bold"
                   style={{
                     color: colors.primary,
-                    fontFamily: "Playfair Display, serif"
+                    fontFamily: "Playfair Display, serif",
                   }}
                 >
                   {entry.score}
@@ -795,7 +909,7 @@ export default function Home() {
                   className="text-xs"
                   style={{
                     color: colors.secondaryText,
-                    fontFamily: "Montserrat, sans-serif"
+                    fontFamily: "Montserrat, sans-serif",
                   }}
                 >
                   Level {entry.level}
@@ -813,7 +927,7 @@ export default function Home() {
       className="p-6 rounded-2xl shadow-xl w-full"
       style={{
         background: colors.card,
-        boxShadow: `0 10px 25px -5px ${colors.cardShadow}`
+        boxShadow: `0 10px 25px -5px ${colors.cardShadow}`,
       }}
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
@@ -823,16 +937,17 @@ export default function Home() {
         className="text-2xl font-bold mb-4"
         style={{
           color: colors.primary,
-          fontFamily: "Playfair Display, serif"
+          fontFamily: "Playfair Display, serif",
         }}
       >
         How to Play
       </h2>
       <div className="space-y-4">
-        {[ // Steps as array for DRY code
+        {[
+          // Steps as array for DRY code
           "Click any light to toggle it and its adjacent lights.",
           "Try to turn off all lights in as few moves as possible.",
-          "Complete levels to earn points and climb the leaderboard."
+          "Complete levels to earn points and climb the leaderboard.",
         ].map((text, i) => (
           <motion.div
             className="flex items-center"
@@ -846,7 +961,7 @@ export default function Home() {
               style={{
                 background: colors.background,
                 color: colors.primary,
-                fontFamily: "Montserrat, sans-serif"
+                fontFamily: "Montserrat, sans-serif",
               }}
             >
               {i + 1}
@@ -855,7 +970,7 @@ export default function Home() {
               className="leading-relaxed"
               style={{
                 color: colors.secondaryText,
-                fontFamily: "Montserrat, sans-serif"
+                fontFamily: "Montserrat, sans-serif",
               }}
             >
               {text}
@@ -875,11 +990,16 @@ export default function Home() {
 
   // --- Layouts for Desktop and Mobile ---
   const renderDesktopView = () => (
-    <div className="flex flex-col items-center justify-center min-h-screen p-4" style={{ background: colors.background }}>
+    <div
+      className="flex flex-col items-center justify-center min-h-screen p-4"
+      style={{ background: colors.background }}
+    >
       <div className="w-full max-w-7xl">
         <div className="grid grid-cols-3 gap-6">
           <div className="col-span-1">{renderLeaderboard()}</div>
-          <div className="col-span-1 flex flex-col items-center">{renderGameScreen()}</div>
+          <div className="col-span-1 flex flex-col items-center">
+            {renderGameScreen()}
+          </div>
           <div className="col-span-1">{renderInfoPanel()}</div>
         </div>
       </div>
@@ -888,7 +1008,10 @@ export default function Home() {
   );
 
   const renderMobileView = () => (
-    <div className="flex flex-col items-center justify-center min-h-screen p-4" style={{ background: colors.background }}>
+    <div
+      className="flex flex-col items-center justify-center min-h-screen p-4"
+      style={{ background: colors.background }}
+    >
       <div className="w-full max-w-md">
         {renderGameScreen()}
         <div className="mt-6 space-y-6">
@@ -904,9 +1027,20 @@ export default function Home() {
   return (
     <main style={{ background: colors.background, minHeight: "100vh" }}>
       <style jsx global>{`
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;700&family=Montserrat:wght@300;400;500;700&display=swap');
-        body { font-family: 'Montserrat', sans-serif; margin: 0; padding: 0; }
-        h1, h2, h3, h4, h5, h6 { font-family: 'Playfair Display', serif; }
+        @import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;700&family=Montserrat:wght@300;400;500;700&display=swap");
+        body {
+          font-family: "Montserrat", sans-serif;
+          margin: 0;
+          padding: 0;
+        }
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+          font-family: "Playfair Display", serif;
+        }
       `}</style>
       {isMobile ? renderMobileView() : renderDesktopView()}
       {/* Simple confetti effect */}
@@ -921,29 +1055,38 @@ export default function Home() {
             bottom: 0,
             zIndex: 100,
             background: "transparent",
-            animation: "fadeout 2.2s linear"
+            animation: "fadeout 2.2s linear",
           }}
         >
-          <div style={{
-            width: "100%",
-            height: "100%",
-            display: "flex",
-            flexWrap: "wrap",
-            alignItems: "flex-start",
-            justifyContent: "center",
-            pointerEvents: "none"
-          }}>
+          <div
+            style={{
+              width: "100%",
+              height: "100%",
+              display: "flex",
+              flexWrap: "wrap",
+              alignItems: "flex-start",
+              justifyContent: "center",
+              pointerEvents: "none",
+            }}
+          >
             {[...Array(60)].map((_, i) => (
-              <div key={i}
-                   style={{
-                     width: 12,
-                     height: 12,
-                     borderRadius: "50%",
-                     margin: 2,
-                     background: [colors.primary, colors.accent, colors.accentSoft, colors.gridOn, colors.gridOff][i % 5],
-                     opacity: 0.65 + Math.random() * 0.35,
-                     animation: `fall 2s linear ${(i * 0.02)}s`
-                   }}
+              <div
+                key={i}
+                style={{
+                  width: 12,
+                  height: 12,
+                  borderRadius: "50%",
+                  margin: 2,
+                  background: [
+                    colors.primary,
+                    colors.accent,
+                    colors.accentSoft,
+                    colors.gridOn,
+                    colors.gridOff,
+                  ][i % 5],
+                  opacity: 0.65 + Math.random() * 0.35,
+                  animation: `fall 2s linear ${i * 0.02}s`,
+                }}
               />
             ))}
           </div>

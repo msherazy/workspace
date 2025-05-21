@@ -1,7 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import {
+  CartesianGrid,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 import { FiActivity, FiCloud, FiMapPin, FiMoon, FiSun } from "react-icons/fi";
 import { AnimatePresence, motion } from "framer-motion";
 
@@ -19,7 +27,11 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 };
 
 // Temperature Simulation Function
-const simulateTemperature = (distance: number, atmosphere: number, surface: string) => {
+const simulateTemperature = (
+  distance: number,
+  atmosphere: number,
+  surface: string,
+) => {
   const surfaceFactors = {
     ocean: 0.8,
     forest: 0.9,
@@ -56,7 +68,9 @@ const PlanetSim = () => {
       } font-mono min-h-screen transition-all`}
     >
       <div className="flex justify-between items-center px-6 py-4 border-b border-gray-700">
-        <h1 className="text-2xl font-bold tracking-widest">NASA Planet simulating Console</h1>
+        <h1 className="text-2xl font-bold tracking-widest">
+          NASA Planet simulating Console
+        </h1>
         <button
           onClick={() => setDarkMode(!darkMode)}
           className={`p-2 border rounded-full transition ${
@@ -67,7 +81,6 @@ const PlanetSim = () => {
         >
           {darkMode ? <FiSun /> : <FiMoon />}
         </button>
-
       </div>
 
       <div className="grid md:grid-cols-5 gap-8 px-6 py-8">
@@ -80,7 +93,9 @@ const PlanetSim = () => {
           <div className="mb-6">
             <label className="block mb-2 text-sm text-gray-300 flex items-center gap-2">
               <FiMapPin /> Distance from Star (AU)
-              <span className="ml-2 text-xs text-gray-400">(closer = hotter)</span>
+              <span className="ml-2 text-xs text-gray-400">
+                (closer = hotter)
+              </span>
             </label>
             <input
               type="range"
@@ -97,7 +112,9 @@ const PlanetSim = () => {
           <div className="mb-6">
             <label className="block mb-2 text-sm text-gray-300 flex items-center gap-2">
               <FiCloud /> Atmosphere Thickness
-              <span className="ml-2 text-xs text-gray-400">(more = higher greenhouse effect)</span>
+              <span className="ml-2 text-xs text-gray-400">
+                (more = higher greenhouse effect)
+              </span>
             </label>
             <input
               type="range"
@@ -114,7 +131,9 @@ const PlanetSim = () => {
           <div className="mb-8">
             <label className="block mb-2 text-sm text-gray-300 flex items-center gap-2">
               <FiActivity /> Surface Type
-              <span className="ml-2 text-xs text-gray-400">(affects heat absorption)</span>
+              <span className="ml-2 text-xs text-gray-400">
+                (affects heat absorption)
+              </span>
             </label>
             <select
               value={surface}
@@ -142,7 +161,9 @@ const PlanetSim = () => {
               Telemetry Feed
             </h2>
             {simulate && (
-              <span className="text-sm text-teal-200">Simulation #{runCount}</span>
+              <span className="text-sm text-teal-200">
+                Simulation #{runCount}
+              </span>
             )}
           </div>
 

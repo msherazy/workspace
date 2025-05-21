@@ -1,7 +1,22 @@
 "use client";
 import { useEffect, useState } from "react";
-import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { animate, AnimatePresence, motion, useMotionValue, useSpring, useTransform } from "framer-motion";
+import {
+  CartesianGrid,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
+import {
+  animate,
+  AnimatePresence,
+  motion,
+  useMotionValue,
+  useSpring,
+  useTransform,
+} from "framer-motion";
 import { FaDollarSign, FaSync } from "react-icons/fa";
 import { BsMoonStars, BsSun } from "react-icons/bs";
 
@@ -96,15 +111,20 @@ export default function Home() {
     transition-all
   `;
 
-  if (!mounted) return <div className="min-h-screen bg-white dark:bg-[#181B26]" />;
+  if (!mounted)
+    return <div className="min-h-screen bg-white dark:bg-[#181B26]" />;
 
   return (
-    <div className={`
-      ${isDark
-      ? "bg-gradient-to-br from-[#161b26] via-[#23263a] to-[#0a1625] text-white"
-      : "bg-gradient-to-br from-[#F7FAFC] via-[#E3F0FC] to-[#ECFFF4] text-slate-900"}
+    <div
+      className={`
+      ${
+        isDark
+          ? "bg-gradient-to-br from-[#161b26] via-[#23263a] to-[#0a1625] text-white"
+          : "bg-gradient-to-br from-[#F7FAFC] via-[#E3F0FC] to-[#ECFFF4] text-slate-900"
+      }
       min-h-screen font-poppins transition-colors duration-300 flex flex-col items-center
-    `}>
+    `}
+    >
       {/* Sticky Header - now NO background color */}
       <motion.header
         initial={{ opacity: 0, y: -20 }}
@@ -113,9 +133,13 @@ export default function Home() {
         className="w-full max-w-xl mx-auto px-4 pt-6 flex justify-between items-center sticky top-0 z-50"
         style={{ minHeight: 64 }}
       >
-        <div className="flex items-center gap-2 text-2xl font-extrabold tracking-tight"
-             style={{ letterSpacing: "0.01em" }}>
-          <FaDollarSign style={{ color: COLORS.green, textShadow: "0 0 6px #22C55E99" }} />
+        <div
+          className="flex items-center gap-2 text-2xl font-extrabold tracking-tight"
+          style={{ letterSpacing: "0.01em" }}
+        >
+          <FaDollarSign
+            style={{ color: COLORS.green, textShadow: "0 0 6px #22C55E99" }}
+          />
           <span className="drop-shadow-md">USD/AED Explorer</span>
         </div>
         <button
@@ -123,9 +147,11 @@ export default function Home() {
           onClick={() => setTheme(isDark ? "light" : "dark")}
           className="rounded-full border border-gray-200 dark:border-gray-700 p-3 transition hover:scale-110 bg-white/70 dark:bg-[#23263a]/60"
         >
-          {isDark
-            ? <BsSun className="text-yellow-400 text-xl" />
-            : <BsMoonStars className="text-[#8B5CF6] text-xl" />}
+          {isDark ? (
+            <BsSun className="text-yellow-400 text-xl" />
+          ) : (
+            <BsMoonStars className="text-[#8B5CF6] text-xl" />
+          )}
         </button>
       </motion.header>
 
@@ -138,25 +164,33 @@ export default function Home() {
           className={cardStyle}
         >
           <div className="flex flex-col items-start gap-1 mb-4">
-            <h2 className="text-2xl md:text-3xl font-extrabold mb-1 tracking-tight"
-                style={{
-                  background: `linear-gradient(90deg, ${COLORS.blue} 0%, ${COLORS.cyan} 40%, ${COLORS.green} 100%)`,
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent"
-                }}
+            <h2
+              className="text-2xl md:text-3xl font-extrabold mb-1 tracking-tight"
+              style={{
+                background: `linear-gradient(90deg, ${COLORS.blue} 0%, ${COLORS.cyan} 40%, ${COLORS.green} 100%)`,
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+              }}
             >
               USD to AED Exchange Rate
             </h2>
-            <span className="text-sm opacity-80 font-semibold" style={{ color: isDark ? COLORS.yellow : COLORS.purple }}>Animated time-series chart</span>
+            <span
+              className="text-sm opacity-80 font-semibold"
+              style={{ color: isDark ? COLORS.yellow : COLORS.purple }}
+            >
+              Animated time-series chart
+            </span>
             <div className="flex gap-2 mt-3 w-full">
-              {rangeOptions.map(opt => (
+              {rangeOptions.map((opt) => (
                 <motion.button
                   key={opt.label}
                   className={`
                     flex-1 px-0 py-2 rounded-full font-bold text-base transition-all
-                    ${range.label === opt.label
-                    ? "bg-gradient-to-r from-blue-500 to-green-400 text-white shadow-lg scale-105"
-                    : "bg-gray-100 dark:bg-[#1F2937] text-gray-800 dark:text-gray-100 hover:bg-blue-50 hover:text-blue-600"}
+                    ${
+                      range.label === opt.label
+                        ? "bg-gradient-to-r from-blue-500 to-green-400 text-white shadow-lg scale-105"
+                        : "bg-gray-100 dark:bg-[#1F2937] text-gray-800 dark:text-gray-100 hover:bg-blue-50 hover:text-blue-600"
+                    }
                   `}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => setRange(opt)}
@@ -187,19 +221,30 @@ export default function Home() {
                       <stop offset="100%" stopColor={COLORS.green} />
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 6" stroke={isDark ? "#334155" : "#e5e7eb"} />
+                  <CartesianGrid
+                    strokeDasharray="3 6"
+                    stroke={isDark ? "#334155" : "#e5e7eb"}
+                  />
                   <XAxis
                     dataKey="date"
-                    tick={{ fontSize: 13, fontWeight: 700, fill: isDark ? COLORS.yellow : COLORS.navy }}
-                    tickFormatter={d => d.slice(5)}
+                    tick={{
+                      fontSize: 13,
+                      fontWeight: 700,
+                      fill: isDark ? COLORS.yellow : COLORS.navy,
+                    }}
+                    tickFormatter={(d) => d.slice(5)}
                     axisLine={false}
                     tickLine={false}
                   />
                   <YAxis
                     dataKey="rate"
                     domain={["dataMin-0.01", "dataMax+0.01"]}
-                    tickFormatter={v => v.toFixed(4)}
-                    tick={{ fontSize: 13, fontWeight: 700, fill: isDark ? COLORS.yellow : COLORS.navy }}
+                    tickFormatter={(v) => v.toFixed(4)}
+                    tick={{
+                      fontSize: 13,
+                      fontWeight: 700,
+                      fill: isDark ? COLORS.yellow : COLORS.navy,
+                    }}
                     axisLine={false}
                     tickLine={false}
                   />
@@ -207,13 +252,15 @@ export default function Home() {
                     contentStyle={{
                       background: isDark ? "#23263a" : "#fff",
                       borderRadius: 12,
-                      border: isDark ? `1px solid ${COLORS.purple}` : `1px solid ${COLORS.blue}`,
+                      border: isDark
+                        ? `1px solid ${COLORS.purple}`
+                        : `1px solid ${COLORS.blue}`,
                       color: isDark ? COLORS.yellow : COLORS.navy,
                       fontSize: 15,
                       boxShadow: `0 4px 16px ${COLORS.blue}40`,
                     }}
-                    formatter={value => [`${value} AED`, "Rate"]}
-                    labelFormatter={label => `Date: ${label}`}
+                    formatter={(value) => [`${value} AED`, "Rate"]}
+                    labelFormatter={(label) => `Date: ${label}`}
                     cursor={{ stroke: COLORS.cyan, strokeWidth: 1 }}
                   />
                   <Line
@@ -221,8 +268,20 @@ export default function Home() {
                     dataKey="rate"
                     stroke="url(#usdChart)"
                     strokeWidth={4}
-                    dot={{ r: 5, fill: COLORS.yellow, stroke: COLORS.blue, strokeWidth: 3, filter: "drop-shadow(0 2px 8px #22d3ee99)" }}
-                    activeDot={{ r: 9, fill: "#fff", stroke: COLORS.cyan, strokeWidth: 5, filter: `drop-shadow(0 4px 16px ${COLORS.green})` }}
+                    dot={{
+                      r: 5,
+                      fill: COLORS.yellow,
+                      stroke: COLORS.blue,
+                      strokeWidth: 3,
+                      filter: "drop-shadow(0 2px 8px #22d3ee99)",
+                    }}
+                    activeDot={{
+                      r: 9,
+                      fill: "#fff",
+                      stroke: COLORS.cyan,
+                      strokeWidth: 5,
+                      filter: `drop-shadow(0 4px 16px ${COLORS.green})`,
+                    }}
                     isAnimationActive={true}
                     animationDuration={900}
                   />
@@ -240,20 +299,24 @@ export default function Home() {
           className={cardStyle}
         >
           <div className="flex flex-col gap-2 mb-3">
-            <h3 className="text-xl md:text-2xl font-bold flex items-center gap-2"
-                style={{
-                  background: `linear-gradient(90deg, ${COLORS.cyan}, ${COLORS.purple})`,
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent"
-                }}>
+            <h3
+              className="text-xl md:text-2xl font-bold flex items-center gap-2"
+              style={{
+                background: `linear-gradient(90deg, ${COLORS.cyan}, ${COLORS.purple})`,
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+              }}
+            >
               <FaSync className="inline text-[#06B6D4]" /> Currency Converter
             </h3>
             <span className="text-xs text-gray-600 dark:text-gray-400 font-semibold">
-              Latest rate: <span className="font-mono text-lg">{latestRate}</span> <span className="opacity-60">AED/USD</span>
+              Latest rate:{" "}
+              <span className="font-mono text-lg">{latestRate}</span>{" "}
+              <span className="opacity-60">AED/USD</span>
             </span>
           </div>
           <form
-            onSubmit={e => {
+            onSubmit={(e) => {
               e.preventDefault();
               handleConvert();
             }}
@@ -268,11 +331,11 @@ export default function Home() {
               placeholder={from === "USD" ? "USD Amount" : "AED Amount"}
               className="flex-1 px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#23263a] focus:outline-none focus:ring-2 focus:ring-cyan-400 text-lg font-semibold shadow-inner"
               value={amount}
-              onChange={e => setAmount(e.target.value)}
+              onChange={(e) => setAmount(e.target.value)}
             />
             <select
               value={from}
-              onChange={e => {
+              onChange={(e) => {
                 setFrom(e.target.value as "USD" | "AED");
                 setConverted(null);
                 setAmount("");
@@ -285,7 +348,10 @@ export default function Home() {
             <motion.button
               type="submit"
               className="w-full px-6 py-3 mt-2 rounded-2xl bg-gradient-to-r from-[#2563EB] via-[#06B6D4] to-[#22C55E] shadow-lg hover:from-blue-700 hover:to-green-600 font-bold text-lg text-white transition-all"
-              whileHover={{ scale: 1.05, boxShadow: "0px 6px 16px 0px #06b6d460" }}
+              whileHover={{
+                scale: 1.05,
+                boxShadow: "0px 6px 16px 0px #06b6d460",
+              }}
               whileTap={{ scale: 0.98 }}
             >
               Convert
@@ -301,8 +367,12 @@ export default function Home() {
                 className="mt-5 text-xl font-extrabold text-blue-700 dark:text-cyan-300 text-center"
                 style={{ color: isDark ? COLORS.cyan : COLORS.blue }}
               >
-                <AnimatedNumber value={Number(converted)} /> {from === "USD" ? "AED" : "USD"}
-                <div className="mt-2 font-medium text-base text-gray-700 dark:text-gray-200">{amount} {from} = <AnimatedNumber value={Number(converted)} /> {from === "USD" ? "AED" : "USD"}</div>
+                <AnimatedNumber value={Number(converted)} />{" "}
+                {from === "USD" ? "AED" : "USD"}
+                <div className="mt-2 font-medium text-base text-gray-700 dark:text-gray-200">
+                  {amount} {from} = <AnimatedNumber value={Number(converted)} />{" "}
+                  {from === "USD" ? "AED" : "USD"}
+                </div>
               </motion.div>
             )}
           </AnimatePresence>

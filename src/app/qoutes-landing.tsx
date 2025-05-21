@@ -4,27 +4,39 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Space_Grotesk } from "next/font/google";
 
 const spaceGrotesk = Space_Grotesk({
-  subsets: ['latin'],
-  weight: ['400', '500', '700'],
-  display: 'swap',
+  subsets: ["latin"],
+  weight: ["400", "500", "700"],
+  display: "swap",
 });
 
 const quotes = [
-  { text: "Life is what happens when you're busy making other plans.", author: "John Lennon" },
-  { text: "Your time is limited, so don’t waste it living someone else’s life.", author: "Steve Jobs" },
-  { text: "Do what you can, with what you have, where you are.", author: "Theodore Roosevelt" },
-  { text: "Believe you can and you’re halfway there.", author: "Theodore Roosevelt" },
+  {
+    text: "Life is what happens when you're busy making other plans.",
+    author: "John Lennon",
+  },
+  {
+    text: "Your time is limited, so don’t waste it living someone else’s life.",
+    author: "Steve Jobs",
+  },
+  {
+    text: "Do what you can, with what you have, where you are.",
+    author: "Theodore Roosevelt",
+  },
+  {
+    text: "Believe you can and you’re halfway there.",
+    author: "Theodore Roosevelt",
+  },
 ];
 
 const colors = [
-  { bg: "#FF6B6B", accent: "#FF8E8E", quote: "#FFFFFF", author: "#FFE3E3" },   // Coral
-  { bg: "#4ECDC4", accent: "#6ED3C9", quote: "#FFFFFF", author: "#E8F7F6" },   // Teal
-  { bg: "#45B7D1", accent: "#5DC3D7", quote: "#FFFFFF", author: "#E4F4F8" },   // Blue
-  { bg: "#96CEB4", accent: "#A9D9C3", quote: "#FFFFFF", author: "#F0F8F4" },   // Green
-  { bg: "#D4A5A5", accent: "#DAB3B3", quote: "#FFFFFF", author: "#F8F0F0" },   // Soft Red
-  { bg: "#9B59B6", accent: "#A76AC4", quote: "#FFFFFF", author: "#F4EAF7" },   // Purple
-  { bg: "#3498DB", accent: "#4BA3EB", quote: "#FFFFFF", author: "#E7F3FC" },   // Royal Blue
-  { bg: "#E74C3C", accent: "#EC5F4F", quote: "#FFFFFF", author: "#FCEDEA" },   // Red Orange
+  { bg: "#FF6B6B", accent: "#FF8E8E", quote: "#FFFFFF", author: "#FFE3E3" }, // Coral
+  { bg: "#4ECDC4", accent: "#6ED3C9", quote: "#FFFFFF", author: "#E8F7F6" }, // Teal
+  { bg: "#45B7D1", accent: "#5DC3D7", quote: "#FFFFFF", author: "#E4F4F8" }, // Blue
+  { bg: "#96CEB4", accent: "#A9D9C3", quote: "#FFFFFF", author: "#F0F8F4" }, // Green
+  { bg: "#D4A5A5", accent: "#DAB3B3", quote: "#FFFFFF", author: "#F8F0F0" }, // Soft Red
+  { bg: "#9B59B6", accent: "#A76AC4", quote: "#FFFFFF", author: "#F4EAF7" }, // Purple
+  { bg: "#3498DB", accent: "#4BA3EB", quote: "#FFFFFF", author: "#E7F3FC" }, // Royal Blue
+  { bg: "#E74C3C", accent: "#EC5F4F", quote: "#FFFFFF", author: "#FCEDEA" }, // Red Orange
 ];
 
 export default function Home() {
@@ -44,11 +56,11 @@ export default function Home() {
     }, 1500);
 
     checkMobile();
-    window.addEventListener('resize', checkMobile);
+    window.addEventListener("resize", checkMobile);
 
     return () => {
       clearTimeout(timer);
-      window.removeEventListener('resize', checkMobile);
+      window.removeEventListener("resize", checkMobile);
     };
   }, []);
 
@@ -76,8 +88,8 @@ export default function Home() {
       transition: {
         when: "beforeChildren",
         staggerChildren: 0.3,
-        duration: 0.8
-      }
+        duration: 0.8,
+      },
     },
   };
 
@@ -89,8 +101,8 @@ export default function Home() {
       transition: {
         type: "spring",
         stiffness: 100,
-        damping: 12
-      }
+        damping: 12,
+      },
     },
   };
 
@@ -103,8 +115,8 @@ export default function Home() {
         type: "spring",
         stiffness: 260,
         damping: 20,
-        delay: 0.2
-      }
+        delay: 0.2,
+      },
     },
   };
 
@@ -113,7 +125,7 @@ export default function Home() {
       className={`min-h-screen w-full flex flex-col items-center justify-center relative overflow-hidden ${spaceGrotesk.className}`}
       style={{
         backgroundColor: currentColor.bg,
-        transition: "background-color 0.8s ease"
+        transition: "background-color 0.8s ease",
       }}
     >
       <motion.div
@@ -124,8 +136,19 @@ export default function Home() {
       >
         <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
           <defs>
-            <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-              <path d="M 40 0 L 0 0 0 40" fill="none" stroke={currentColor.accent} strokeWidth="0.5" strokeOpacity="0.2"/>
+            <pattern
+              id="grid"
+              width="40"
+              height="40"
+              patternUnits="userSpaceOnUse"
+            >
+              <path
+                d="M 40 0 L 0 0 0 40"
+                fill="none"
+                stroke={currentColor.accent}
+                strokeWidth="0.5"
+                strokeOpacity="0.2"
+              />
             </pattern>
           </defs>
           <rect width="100%" height="100%" fill="url(#grid)" />
@@ -141,11 +164,22 @@ export default function Home() {
         <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
           <defs>
             <filter id="noise" x="0" y="0" width="100%" height="100%">
-              <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/>
-              <feColorMatrix type="saturate" values="0"/>
+              <feTurbulence
+                type="fractalNoise"
+                baseFrequency="0.65"
+                numOctaves="3"
+                stitchTiles="stitch"
+              />
+              <feColorMatrix type="saturate" values="0" />
             </filter>
           </defs>
-          <rect width="100%" height="100%" fill="white" filter="url(#noise)" opacity="0.8"/>
+          <rect
+            width="100%"
+            height="100%"
+            fill="white"
+            filter="url(#noise)"
+            opacity="0.8"
+          />
         </svg>
       </motion.div>
 
@@ -168,13 +202,13 @@ export default function Home() {
             initial={{ scale: 0, opacity: 0 }}
             animate={{
               scale: [1, 1.2, 1],
-              opacity: [0, 0.15, 0]
+              opacity: [0, 0.15, 0],
             }}
             transition={{
               duration: 4,
               repeat: Number.POSITIVE_INFINITY,
               ease: "easeInOut",
-              delay: i * 0.8
+              delay: i * 0.8,
             }}
           />
         ))}
@@ -188,13 +222,32 @@ export default function Home() {
       >
         <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
           <defs>
-            <linearGradient id="slow-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor={colors[(colorIndex + 1) % colors.length].bg} stopOpacity="0.4"/>
-              <stop offset="100%" stopColor={colors[(colorIndex + 2) % colors.length].bg} stopOpacity="0.4"/>
+            <linearGradient
+              id="slow-gradient"
+              x1="0%"
+              y1="0%"
+              x2="100%"
+              y2="100%"
+            >
+              <stop
+                offset="0%"
+                stopColor={colors[(colorIndex + 1) % colors.length].bg}
+                stopOpacity="0.4"
+              />
+              <stop
+                offset="100%"
+                stopColor={colors[(colorIndex + 2) % colors.length].bg}
+                stopOpacity="0.4"
+              />
             </linearGradient>
           </defs>
           <rect width="100%" height="100%" fill="url(#slow-gradient)">
-            <animate attributeName="x" values="0%;-100%;0%" dur="80s" repeatCount="indefinite"/>
+            <animate
+              attributeName="x"
+              values="0%;-100%;0%"
+              dur="80s"
+              repeatCount="indefinite"
+            />
           </rect>
         </svg>
       </motion.div>
@@ -219,13 +272,13 @@ export default function Home() {
                 boxShadow: [
                   "0 0 0 0 rgba(255,255,255,0.4)",
                   "0 0 20px 10px rgba(255,255,255,0.2)",
-                  "0 0 0 0 rgba(255,255,255,0.4)"
-                ]
+                  "0 0 0 0 rgba(255,255,255,0.4)",
+                ],
               }}
               transition={{
                 repeat: Number.POSITIVE_INFINITY,
                 duration: 4,
-                ease: "easeInOut"
+                ease: "easeInOut",
               }}
             />
 
@@ -243,7 +296,7 @@ export default function Home() {
                 repeat: Number.POSITIVE_INFINITY,
                 duration: 6,
                 ease: "easeInOut",
-                repeatDelay: 1
+                repeatDelay: 1,
               }}
             >
               <path
@@ -283,14 +336,22 @@ export default function Home() {
           className="flex items-center gap-2"
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.8, type: "spring", stiffness: 100, damping: 20 }}
+          transition={{
+            delay: 0.8,
+            type: "spring",
+            stiffness: 100,
+            damping: 20,
+          }}
         >
           <motion.a
             href="https://www.pinterest.com/search/pins/?q=inspirational%20quotes"
             target="_blank"
             rel="noopener noreferrer"
             className="px-4 py-2 rounded-full bg-white/90 backdrop-blur-md text-gray-800 text-sm font-medium shadow-lg transition-all duration-200"
-            whileHover={{ scale: 1.05, boxShadow: "0 4px 12px rgba(255,255,255,0.3)" }}
+            whileHover={{
+              scale: 1.05,
+              boxShadow: "0 4px 12px rgba(255,255,255,0.3)",
+            }}
             whileTap={{ scale: 0.95 }}
           >
             <span className="relative">
@@ -308,13 +369,13 @@ export default function Home() {
           initial="hidden"
           animate="visible"
         >
-          <motion.div
-            className="text-center space-y-6"
-            variants={itemVariants}
-          >
+          <motion.div className="text-center space-y-6" variants={itemVariants}>
             <motion.div
               className="inline-block px-6 py-3 rounded-full border border-white/20 bg-white/5 backdrop-blur-md"
-              whileHover={{ scale: 1.05, backgroundColor: "rgba(255, 255, 255, 0.05)" }}
+              whileHover={{
+                scale: 1.05,
+                backgroundColor: "rgba(255, 255, 255, 0.05)",
+              }}
               transition={{ type: "spring", stiffness: 400, damping: 17 }}
             >
               <motion.span
@@ -336,12 +397,19 @@ export default function Home() {
               className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white leading-tight tracking-tight drop-shadow-lg"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3, type: "spring", stiffness: 100, damping: 12 }}
+              transition={{
+                delay: 0.3,
+                type: "spring",
+                stiffness: 100,
+                damping: 12,
+              }}
             >
               {isLoading ? (
                 <>
                   <span className="block">Discover Your</span>
-                  <span className="block text-white/80 text-2xl mt-2">Daily Inspiration</span>
+                  <span className="block text-white/80 text-2xl mt-2">
+                    Daily Inspiration
+                  </span>
                 </>
               ) : (
                 <AnimatePresence mode="wait">
@@ -359,10 +427,7 @@ export default function Home() {
             </motion.h2>
           </motion.div>
 
-          <motion.div
-            className="text-center space-y-4"
-            variants={itemVariants}
-          >
+          <motion.div className="text-center space-y-4" variants={itemVariants}>
             <motion.p
               className="text-white/80 italic text-lg"
               initial={{ opacity: 0 }}

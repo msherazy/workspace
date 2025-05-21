@@ -1,13 +1,23 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { FiCopy, FiLock, FiMoon, FiRefreshCw, FiSun, FiUnlock } from "react-icons/fi";
+import {
+  FiCopy,
+  FiLock,
+  FiMoon,
+  FiRefreshCw,
+  FiSun,
+  FiUnlock,
+} from "react-icons/fi";
 import { Inter } from "next/font/google";
 
 const inter = Inter({ subsets: ["latin"] });
 
 // Generate a random color in hex format
-const generateColor = () => `#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, "0")}`;
+const generateColor = () =>
+  `#${Math.floor(Math.random() * 16777215)
+    .toString(16)
+    .padStart(6, "0")}`;
 
 // Color block component with basic functionality
 const ColorBlock = ({ color, locked, onToggleLock, onCopy }) => {
@@ -17,13 +27,17 @@ const ColorBlock = ({ color, locked, onToggleLock, onCopy }) => {
                  shadow-lg w-full sm:w-48 h-48 transition-all duration-300 hover:scale-105"
       style={{
         backgroundColor: color,
-        boxShadow: `0 8px 32px ${color}40`
+        boxShadow: `0 8px 32px ${color}40`,
       }}
     >
-      <div className="absolute top-0 left-0 w-full h-full bg-black/10 rounded-2xl opacity-0
-                    group-hover:opacity-100 transition-opacity duration-300" />
+      <div
+        className="absolute top-0 left-0 w-full h-full bg-black/10 rounded-2xl opacity-0
+                    group-hover:opacity-100 transition-opacity duration-300"
+      />
 
-      <p className="text-white font-mono text-lg tracking-wider mb-4 z-10">{color}</p>
+      <p className="text-white font-mono text-lg tracking-wider mb-4 z-10">
+        {color}
+      </p>
 
       <div className="flex gap-6 z-10">
         <button
@@ -52,14 +66,17 @@ export default function PaletteApp() {
   const [toast, setToast] = useState("");
   // Color palette state
   const [colors, setColors] = useState(
-    Array.from({ length: 5 }, () => ({ color: generateColor(), locked: false }))
+    Array.from({ length: 5 }, () => ({
+      color: generateColor(),
+      locked: false,
+    })),
   );
   // Mobile detection state
   const [isMobile, setIsMobile] = useState(false);
 
   // Initialize theme from local storage on component mount
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       try {
         // Get theme from localStorage with a fallback
         const storedTheme = localStorage.getItem("theme") || "light";
@@ -79,7 +96,7 @@ export default function PaletteApp() {
 
   // Toggle between light and dark themes
   const toggleTheme = () => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       try {
         const newTheme = theme === "light" ? "dark" : "light";
         setTheme(newTheme);
@@ -101,13 +118,13 @@ export default function PaletteApp() {
 
   // Set up mobile detection and keyboard shortcuts
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       const checkMobile = () => {
         setIsMobile(window.innerWidth < 768);
       };
 
       checkMobile();
-      window.addEventListener('resize', checkMobile);
+      window.addEventListener("resize", checkMobile);
 
       // Add spacebar shortcut for desktop
       if (!isMobile) {
@@ -121,31 +138,31 @@ export default function PaletteApp() {
 
         return () => {
           window.removeEventListener("keydown", handleSpacebar);
-          window.removeEventListener('resize', checkMobile);
+          window.removeEventListener("resize", checkMobile);
         };
       }
 
-      return () => window.removeEventListener('resize', checkMobile);
+      return () => window.removeEventListener("resize", checkMobile);
     }
   }, [isMobile]);
 
   // Generate new colors for unlocked palette items
   const handleRefresh = () => {
     setColors((prev) =>
-      prev.map((c) => (c.locked ? c : { ...c, color: generateColor() }))
+      prev.map((c) => (c.locked ? c : { ...c, color: generateColor() })),
     );
   };
 
   // Toggle lock state for a specific color
   const handleToggleLock = (index) => {
     setColors((prev) =>
-      prev.map((c, i) => (i === index ? { ...c, locked: !c.locked } : c))
+      prev.map((c, i) => (i === index ? { ...c, locked: !c.locked } : c)),
     );
   };
 
   // Copy color code to clipboard
   const handleCopy = async (hex) => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       try {
         // Modern clipboard API
         if (navigator.clipboard && window.isSecureContext) {
@@ -153,27 +170,27 @@ export default function PaletteApp() {
           setToast(`Copied ${hex}`);
         } else {
           // Fallback for older browsers
-          const textArea = document.createElement('textarea');
+          const textArea = document.createElement("textarea");
           textArea.value = hex;
-          textArea.style.position = 'fixed';
-          textArea.style.left = '-999999px';
-          textArea.style.top = '-999999px';
+          textArea.style.position = "fixed";
+          textArea.style.left = "-999999px";
+          textArea.style.top = "-999999px";
           document.body.appendChild(textArea);
           textArea.focus();
           textArea.select();
 
           try {
-            document.execCommand('copy');
+            document.execCommand("copy");
             textArea.remove();
             setToast(`Copied ${hex}`);
           } catch (err) {
             textArea.remove();
-            setToast('Failed to copy - please try again');
+            setToast("Failed to copy - please try again");
           }
         }
       } catch (err) {
-        console.error('Copy failed:', err);
-        setToast('Failed to copy - please try again');
+        console.error("Copy failed:", err);
+        setToast("Failed to copy - please try again");
       }
 
       // Clear toast after delay
@@ -183,8 +200,10 @@ export default function PaletteApp() {
 
   return (
     <div className={theme === "dark" ? "dark" : ""}>
-      <div className={`min-h-screen px-6 py-8 bg-gray-50 dark:bg-gray-900
-                    text-gray-900 dark:text-white transition-colors ${inter.className}`}>
+      <div
+        className={`min-h-screen px-6 py-8 bg-gray-50 dark:bg-gray-900
+                    text-gray-900 dark:text-white transition-colors ${inter.className}`}
+      >
         <div className="max-w-6xl mx-auto">
           <div className="flex justify-between items-center mb-12">
             <div>
@@ -192,7 +211,9 @@ export default function PaletteApp() {
                 Color Palette Generator
               </h1>
               <p className="text-gray-600 dark:text-gray-400 text-sm sm:text-base">
-                {isMobile ? "Tap the button below to generate new colors" : "Press spacebar to generate new colors"}
+                {isMobile
+                  ? "Tap the button below to generate new colors"
+                  : "Press spacebar to generate new colors"}
               </p>
             </div>
             <button
@@ -205,8 +226,10 @@ export default function PaletteApp() {
             </button>
           </div>
 
-          <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3
-                        lg:grid-cols-5 mb-12">
+          <div
+            className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3
+                        lg:grid-cols-5 mb-12"
+          >
             {colors.map((c, i) => (
               <ColorBlock
                 key={i}

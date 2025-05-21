@@ -29,7 +29,7 @@ interface Artwork {
   id: string;
   title: string;
   artist: string;
-  medium: 'illustration' | '3d' | 'photography';
+  medium: "illustration" | "3d" | "photography";
   image: string;
   likes: number;
   views: number;
@@ -40,108 +40,123 @@ interface Artwork {
 // Sample data
 const sampleArtists: Artist[] = [
   {
-    id: 'artist-1',
-    name: 'Astra Nova',
-    bio: 'Digital sculptor and concept artist working at the intersection of organic forms and technology.',
-    profileImage: 'https://images.unsplash.com/photo-1594744803329-e58b31de8bf5?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=634&q=80',
+    id: "artist-1",
+    name: "Astra Nova",
+    bio: "Digital sculptor and concept artist working at the intersection of organic forms and technology.",
+    profileImage:
+      "https://images.unsplash.com/photo-1594744803329-e58b31de8bf5?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=634&q=80",
     skills: {
-      '3D Modeling': 92,
-      'Concept Art': 88,
-      'Texture Design': 75,
-      'Animation': 68,
-    }
+      "3D Modeling": 92,
+      "Concept Art": 88,
+      "Texture Design": 75,
+      Animation: 68,
+    },
   },
   {
-    id: 'artist-2',
-    name: 'Pixel Perfect',
-    bio: 'Illustrator specializing in vibrant digital paintings that blend surrealism with cyberpunk elements.',
-    profileImage: 'https://images.unsplash.com/photo-1542103749-8ef59b94f47e?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=700&q=80',
+    id: "artist-2",
+    name: "Pixel Perfect",
+    bio: "Illustrator specializing in vibrant digital paintings that blend surrealism with cyberpunk elements.",
+    profileImage:
+      "https://images.unsplash.com/photo-1542103749-8ef59b94f47e?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=700&q=80",
     skills: {
-      'Digital Painting': 95,
-      'Character Design': 89,
-      'Environment Art': 82,
-      'UI Design': 70,
-    }
+      "Digital Painting": 95,
+      "Character Design": 89,
+      "Environment Art": 82,
+      "UI Design": 70,
+    },
   },
   {
-    id: 'artist-3',
-    name: 'Lensa View',
-    bio: 'Photographer exploring urban landscapes and architectural abstraction through experimental techniques.',
-    profileImage: 'https://images.unsplash.com/photo-1588453383063-37ea0b78f30f?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=750&q=80',
+    id: "artist-3",
+    name: "Lensa View",
+    bio: "Photographer exploring urban landscapes and architectural abstraction through experimental techniques.",
+    profileImage:
+      "https://images.unsplash.com/photo-1588453383063-37ea0b78f30f?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=750&q=80",
     skills: {
-      'Photography': 96,
-      'Photo Manipulation': 85,
-      'Color Grading': 90,
-      'Composition': 94,
-    }
+      Photography: 96,
+      "Photo Manipulation": 85,
+      "Color Grading": 90,
+      Composition: 94,
+    },
   },
 ];
 
 const sampleArtworks: Artwork[] = [
   {
-    id: 'art-1',
-    title: 'Neon Dreams',
-    artist: 'Astra Nova',
-    medium: '3d',
-    image: 'https://images.unsplash.com/photo-1594322436404-5a0526db4d13?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
+    id: "art-1",
+    title: "Neon Dreams",
+    artist: "Astra Nova",
+    medium: "3d",
+    image:
+      "https://images.unsplash.com/photo-1594322436404-5a0526db4d13?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
     likes: 324,
     views: 4512,
-    description: 'Exploring the intersection of organic forms and digital architecture in an imagined cyberpunk cityscape.',
+    description:
+      "Exploring the intersection of organic forms and digital architecture in an imagined cyberpunk cityscape.",
     featured: true,
   },
   {
-    id: 'art-2',
-    title: 'Digital Flora',
-    artist: 'Pixel Perfect',
-    medium: 'illustration',
-    image: 'https://images.pexels.com/photos/158028/bellingrath-gardens-alabama-landscape-scenic-158028.jpeg?auto=compress&cs=tinysrgb&w=1200',
+    id: "art-2",
+    title: "Digital Flora",
+    artist: "Pixel Perfect",
+    medium: "illustration",
+    image:
+      "https://images.pexels.com/photos/158028/bellingrath-gardens-alabama-landscape-scenic-158028.jpeg?auto=compress&cs=tinysrgb&w=1200",
     likes: 267,
     views: 3128,
-    description: 'Digital illustration exploring the evolution of nature through algorithmic patterns and vibrant color theory.',
+    description:
+      "Digital illustration exploring the evolution of nature through algorithmic patterns and vibrant color theory.",
     featured: true,
   },
   {
-    id: 'art-3',
-    title: 'Urban Reflections',
-    artist: 'Lensa View',
-    medium: 'photography',
-    image: 'https://images.unsplash.com/photo-1518098268026-4e89f1a2cd8e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1074&q=80',
+    id: "art-3",
+    title: "Urban Reflections",
+    artist: "Lensa View",
+    medium: "photography",
+    image:
+      "https://images.unsplash.com/photo-1518098268026-4e89f1a2cd8e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1074&q=80",
     likes: 198,
     views: 2376,
-    description: 'A series exploring urban architecture through reflective surfaces, creating abstract compositions from everyday structures.',
+    description:
+      "A series exploring urban architecture through reflective surfaces, creating abstract compositions from everyday structures.",
     featured: false,
   },
   {
-    id: 'art-4',
-    title: 'Bio Mechanism',
-    artist: 'Astra Nova',
-    medium: '3d',
-    image: 'https://images.pexels.com/photos/53494/mushroom-fungi-fungus-many-53494.jpeg?auto=compress&cs=tinysrgb&w=1200',
+    id: "art-4",
+    title: "Bio Mechanism",
+    artist: "Astra Nova",
+    medium: "3d",
+    image:
+      "https://images.pexels.com/photos/53494/mushroom-fungi-fungus-many-53494.jpeg?auto=compress&cs=tinysrgb&w=1200",
     likes: 421,
     views: 5823,
-    description: '3D sculpture exploring the fusion of mechanical and biological forms in a post-human context.',
+    description:
+      "3D sculpture exploring the fusion of mechanical and biological forms in a post-human context.",
     featured: true,
   },
   {
-    id: 'art-5',
-    title: 'Dreamscape Portal',
-    artist: 'Pixel Perfect',
-    medium: 'illustration',
-    image: 'https://images.unsplash.com/photo-1619472351888-f844a0b33f5b?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1489&q=80',
+    id: "art-5",
+    title: "Dreamscape Portal",
+    artist: "Pixel Perfect",
+    medium: "illustration",
+    image:
+      "https://images.unsplash.com/photo-1619472351888-f844a0b33f5b?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1489&q=80",
     likes: 356,
     views: 4102,
-    description: 'Digital painting exploring subconscious realms through surreal imagery and symbolic motifs.',
+    description:
+      "Digital painting exploring subconscious realms through surreal imagery and symbolic motifs.",
     featured: false,
   },
   {
-    id: 'art-6',
-    title: 'Chromatic Fragments',
-    artist: 'Lensa View',
-    medium: 'photography',
-    image: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1064&q=80',
+    id: "art-6",
+    title: "Chromatic Fragments",
+    artist: "Lensa View",
+    medium: "photography",
+    image:
+      "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1064&q=80",
     likes: 245,
     views: 3297,
-    description: 'Experimental photography utilizing prisms and light manipulation to create abstract color compositions.',
+    description:
+      "Experimental photography utilizing prisms and light manipulation to create abstract color compositions.",
     featured: false,
   },
 ];
@@ -151,7 +166,7 @@ const morphPaths = [
   "M80,250 C169,210 195,110 269,116 C343,122 352,229 434,229 C515,229 570,169 570,80",
   "M80,180 C147,282 186,160 278,174 C369,188 367,283 434,180 C501,77 570,220 570,80",
   "M80,120 C139,200 206,287 266,216 C325,145 358,219 434,135 C509,51 570,145 570,80",
-  "M80,80 C135,149 183,54 269,54 C354,54 363,144 434,176 C505,208 570,97 570,80"
+  "M80,80 C135,149 183,54 269,54 C354,54 363,144 434,176 C505,208 570,97 570,80",
 ];
 
 // Main Component
@@ -169,9 +184,9 @@ export default function Home() {
   const [isSoundPlaying, setIsSoundPlaying] = useState(false);
   const [, setScrollY] = useState(0);
   const [uploadForm, setUploadForm] = useState({
-    title: '',
-    medium: 'illustration',
-    description: '',
+    title: "",
+    medium: "illustration",
+    description: "",
     file: null as File | null,
   });
 
@@ -192,7 +207,7 @@ export default function Home() {
 
   // Filter artworks based on selected medium
   const filteredArtworks = filterMedium
-    ? sampleArtworks.filter(artwork => artwork.medium === filterMedium)
+    ? sampleArtworks.filter((artwork) => artwork.medium === filterMedium)
     : sampleArtworks;
 
   // Generate path for SVG morph animation
@@ -209,22 +224,26 @@ export default function Home() {
       setScrollY(window.scrollY);
     };
 
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll);
     return () => {
-      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener("scroll", handleScroll);
     };
   }, []);
 
   // Initialize sounds
   useEffect(() => {
     const lightSound = new Howl({
-      src: ['https://assets.mixkit.co/sfx/preview/mixkit-atmosphere-ambience-2119.mp3'],
+      src: [
+        "https://assets.mixkit.co/sfx/preview/mixkit-atmosphere-ambience-2119.mp3",
+      ],
       loop: true,
       volume: 0.3,
     });
 
     const darkSound = new Howl({
-      src: ['https://assets.mixkit.co/sfx/preview/mixkit-small-waves-breaking-on-beach-1181.mp3'],
+      src: [
+        "https://assets.mixkit.co/sfx/preview/mixkit-small-waves-breaking-on-beach-1181.mp3",
+      ],
       loop: true,
       volume: 0.3,
     });
@@ -281,9 +300,9 @@ export default function Home() {
     // In a real app, this would upload to a server
     alert(`Artwork "${uploadForm.title}" submitted successfully!`);
     setUploadForm({
-      title: '',
-      medium: 'illustration',
-      description: '',
+      title: "",
+      medium: "illustration",
+      description: "",
       file: null,
     });
   };
@@ -299,7 +318,15 @@ export default function Home() {
   };
 
   // Radial Progress component with detailed comments
-  const RadialProgress = ({ skill, value, index }: { skill: string; value: number; index: number }) => {
+  const RadialProgress = ({
+    skill,
+    value,
+    index,
+  }: {
+    skill: string;
+    value: number;
+    index: number;
+  }) => {
     const radius = 40; // Radius of the circle
     const circumference = 2 * Math.PI * radius; // Circumference of the circle
     const offset = circumference - (value / 100) * circumference; // Calculate offset for progress
@@ -368,15 +395,19 @@ export default function Home() {
     </div>
   );
 
-  const [validationErrors, setValidationErrors] = useState<{ [key: string]: string }>({});
+  const [validationErrors, setValidationErrors] = useState<{
+    [key: string]: string;
+  }>({});
 
   const validateForm = () => {
     const errors: { [key: string]: string } = {};
 
     if (!newProperty.title.trim()) errors.title = "Title is required.";
     if (newProperty.price <= 0) errors.price = "Price must be greater than 0.";
-    if (newProperty.bedrooms < 0) errors.bedrooms = "Bedrooms cannot be negative.";
-    if (newProperty.bathrooms < 0) errors.bathrooms = "Bathrooms cannot be negative.";
+    if (newProperty.bedrooms < 0)
+      errors.bedrooms = "Bedrooms cannot be negative.";
+    if (newProperty.bathrooms < 0)
+      errors.bathrooms = "Bathrooms cannot be negative.";
     if (newProperty.area <= 0) errors.area = "Area must be greater than 0.";
     if (!newProperty.location.trim()) errors.location = "Location is required.";
     if (!newProperty.agent.trim()) errors.agent = "Agent is required.";
@@ -410,7 +441,9 @@ export default function Home() {
   };
 
   return (
-    <div className={`app-container ${poppins.className} ${darkMode ? 'dark-mode' : 'light-mode'}`}>
+    <div
+      className={`app-container ${poppins.className} ${darkMode ? "dark-mode" : "light-mode"}`}
+    >
       <Head>
         <title>Flux Gallery | Digital Art Portfolio</title>
         <meta name="description" content="A futuristic digital art portfolio" />
@@ -432,16 +465,39 @@ export default function Home() {
             animate={{ x: 0, opacity: 1 }}
             transition={{ duration: 0.8, staggerChildren: 0.1 }}
           >
-            <motion.li><a href="#featured">Featured</a></motion.li>
-            <motion.li><a href="#artists">Artists</a></motion.li>
-            <motion.li><a href="#gallery">Gallery</a></motion.li>
+            <motion.li>
+              <a href="#featured">Featured</a>
+            </motion.li>
+            <motion.li>
+              <a href="#artists">Artists</a>
+            </motion.li>
+            <motion.li>
+              <a href="#gallery">Gallery</a>
+            </motion.li>
             {isLoggedIn ? (
               <>
-                <motion.li><a href="#upload">Upload</a></motion.li>
-                <motion.li><button onClick={handleLogout} className="login-btn">Logout</button></motion.li>
+                <motion.li>
+                  <a href="#upload">Upload</a>
+                </motion.li>
+                <motion.li>
+                  <button onClick={handleLogout} className="login-btn">
+                    Logout
+                  </button>
+                </motion.li>
               </>
             ) : (
-              <motion.li><button onClick={() => document.getElementById('login-modal')?.classList.add('visible')} className="login-btn">Login</button></motion.li>
+              <motion.li>
+                <button
+                  onClick={() =>
+                    document
+                      .getElementById("login-modal")
+                      ?.classList.add("visible")
+                  }
+                  className="login-btn"
+                >
+                  Login
+                </button>
+              </motion.li>
             )}
           </motion.ul>
         </nav>
@@ -454,17 +510,28 @@ export default function Home() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.5 }}
           >
-            <h1>Where Digital Art<br /><span>Comes Alive</span></h1>
-            <p>Explore a curated collection of cutting-edge digital artwork from talented creators around the world</p>
+            <h1>
+              Where Digital Art
+              <br />
+              <span>Comes Alive</span>
+            </h1>
+            <p>
+              Explore a curated collection of cutting-edge digital artwork from
+              talented creators around the world
+            </p>
             <div className="hero-cta">
-              <button onClick={() => galleryRef.current?.scrollIntoView({ behavior: 'smooth' })}>
+              <button
+                onClick={() =>
+                  galleryRef.current?.scrollIntoView({ behavior: "smooth" })
+                }
+              >
                 Explore Gallery
               </button>
               <button className="mood-toggle" onClick={toggleMood}>
-                {darkMode ? '☀️ Light Mode' : '🌙 Dark Mode'}
+                {darkMode ? "☀️ Light Mode" : "🌙 Dark Mode"}
               </button>
               <button className="sound-toggle" onClick={toggleSound}>
-                {isSoundPlaying ? '🔇 Mute' : '🔊 Ambient Sound'}
+                {isSoundPlaying ? "🔇 Mute" : "🔊 Ambient Sound"}
               </button>
             </div>
           </motion.div>
@@ -483,25 +550,27 @@ export default function Home() {
           </motion.h2>
 
           <div className="featured-grid">
-            {sampleArtworks.filter(art => art.featured).map((artwork, index) => (
-              <motion.div
-                key={artwork.id}
-                className="featured-item"
-                initial={{ opacity: 0, y: 50 }}
-                animate={featuredInView ? { opacity: 1, y: 0 } : {}}
-                transition={{ duration: 0.6, delay: index * 0.2 }}
-                onClick={() => setExpandedArtwork(artwork)}
-              >
-                <div className="artwork-preview">
-                  <img src={artwork.image} alt={artwork.title} />
-                  <div className="artwork-overlay">
-                    <h3>{artwork.title}</h3>
-                    <p>by {artwork.artist}</p>
-                    <span className="medium-tag">{artwork.medium}</span>
+            {sampleArtworks
+              .filter((art) => art.featured)
+              .map((artwork, index) => (
+                <motion.div
+                  key={artwork.id}
+                  className="featured-item"
+                  initial={{ opacity: 0, y: 50 }}
+                  animate={featuredInView ? { opacity: 1, y: 0 } : {}}
+                  transition={{ duration: 0.6, delay: index * 0.2 }}
+                  onClick={() => setExpandedArtwork(artwork)}
+                >
+                  <div className="artwork-preview">
+                    <img src={artwork.image} alt={artwork.title} />
+                    <div className="artwork-overlay">
+                      <h3>{artwork.title}</h3>
+                      <p>by {artwork.artist}</p>
+                      <span className="medium-tag">{artwork.medium}</span>
+                    </div>
                   </div>
-                </div>
-              </motion.div>
-            ))}
+                </motion.div>
+              ))}
           </div>
         </section>
 
@@ -519,11 +588,15 @@ export default function Home() {
             {sampleArtists.map((artist, index) => (
               <motion.div
                 key={artist.id}
-                className={`artist-card ${currentArtist?.id === artist.id ? 'expanded' : ''}`}
+                className={`artist-card ${currentArtist?.id === artist.id ? "expanded" : ""}`}
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={artistsInView ? { opacity: 1, scale: 1 } : {}}
                 transition={{ duration: 0.6, delay: index * 0.2 }}
-                onClick={() => setCurrentArtist(currentArtist?.id === artist.id ? null : artist)}
+                onClick={() =>
+                  setCurrentArtist(
+                    currentArtist?.id === artist.id ? null : artist,
+                  )
+                }
               >
                 <div className="artist-profile">
                   <div className="artist-image">
@@ -539,14 +612,21 @@ export default function Home() {
                   <motion.div
                     className="artist-skills"
                     initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
+                    animate={{ opacity: 1, height: "auto" }}
                     transition={{ duration: 0.3 }}
                   >
                     <h4>Skills</h4>
                     <div className="skills-grid">
-                      {Object.entries(artist.skills).map(([skill, value], i) => (
-                        <RadialProgress key={skill} skill={skill} value={value} index={i} />
-                      ))}
+                      {Object.entries(artist.skills).map(
+                        ([skill, value], i) => (
+                          <RadialProgress
+                            key={skill}
+                            skill={skill}
+                            value={value}
+                            index={i}
+                          />
+                        ),
+                      )}
                     </div>
                   </motion.div>
                 )}
@@ -561,35 +641,32 @@ export default function Home() {
 
           <div className="filter-controls">
             <button
-              className={filterMedium === null ? 'active' : ''}
+              className={filterMedium === null ? "active" : ""}
               onClick={() => setFilterMedium(null)}
             >
               All
             </button>
             <button
-              className={filterMedium === 'illustration' ? 'active' : ''}
-              onClick={() => setFilterMedium('illustration')}
+              className={filterMedium === "illustration" ? "active" : ""}
+              onClick={() => setFilterMedium("illustration")}
             >
               Illustration
             </button>
             <button
-              className={filterMedium === '3d' ? 'active' : ''}
-              onClick={() => setFilterMedium('3d')}
+              className={filterMedium === "3d" ? "active" : ""}
+              onClick={() => setFilterMedium("3d")}
             >
               3D Art
             </button>
             <button
-              className={filterMedium === 'photography' ? 'active' : ''}
-              onClick={() => setFilterMedium('photography')}
+              className={filterMedium === "photography" ? "active" : ""}
+              onClick={() => setFilterMedium("photography")}
             >
               Photography
             </button>
           </div>
 
-          <motion.div
-            className="gallery-grid"
-            layout
-          >
+          <motion.div className="gallery-grid" layout>
             <AnimatePresence>
               {filteredArtworks.map((artwork) => (
                 <motion.div
@@ -628,7 +705,9 @@ export default function Home() {
                   type="text"
                   id="title"
                   value={uploadForm.title}
-                  onChange={(e) => setUploadForm({...uploadForm, title: e.target.value})}
+                  onChange={(e) =>
+                    setUploadForm({ ...uploadForm, title: e.target.value })
+                  }
                   required
                 />
               </div>
@@ -638,7 +717,12 @@ export default function Home() {
                 <select
                   id="medium"
                   value={uploadForm.medium}
-                  onChange={(e) => setUploadForm({...uploadForm, medium: e.target.value as never})}
+                  onChange={(e) =>
+                    setUploadForm({
+                      ...uploadForm,
+                      medium: e.target.value as never,
+                    })
+                  }
                   required
                 >
                   <option value="illustration">Illustration</option>
@@ -652,7 +736,12 @@ export default function Home() {
                 <textarea
                   id="description"
                   value={uploadForm.description}
-                  onChange={(e) => setUploadForm({...uploadForm, description: e.target.value})}
+                  onChange={(e) =>
+                    setUploadForm({
+                      ...uploadForm,
+                      description: e.target.value,
+                    })
+                  }
                   required
                 />
               </div>
@@ -668,7 +757,9 @@ export default function Home() {
                 />
               </div>
 
-              <button type="submit" className="submit-btn">Upload Artwork</button>
+              <button type="submit" className="submit-btn">
+                Upload Artwork
+              </button>
             </form>
           </section>
         )}
@@ -685,19 +776,46 @@ export default function Home() {
           </div>
           <div className="footer-social">
             <a href="#" aria-label="Instagram">
-              <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
+              <svg
+                viewBox="0 0 24 24"
+                width="24"
+                height="24"
+                stroke="currentColor"
+                strokeWidth="2"
+                fill="none"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
                 <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
                 <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
                 <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
               </svg>
             </a>
             <a href="#" aria-label="Twitter">
-              <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
+              <svg
+                viewBox="0 0 24 24"
+                width="24"
+                height="24"
+                stroke="currentColor"
+                strokeWidth="2"
+                fill="none"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
                 <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path>
               </svg>
             </a>
             <a href="#" aria-label="Behance">
-              <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
+              <svg
+                viewBox="0 0 24 24"
+                width="24"
+                height="24"
+                stroke="currentColor"
+                strokeWidth="2"
+                fill="none"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
                 <path d="M1 12h6v4H1z"></path>
                 <path d="M9 8h6v8H9z"></path>
                 <path d="M17 12h6v4h-6z"></path>
@@ -713,7 +831,16 @@ export default function Home() {
       {/* Login Modal */}
       <div id="login-modal" className="modal">
         <div className="modal-content">
-          <button className="close-btn" onClick={() => document.getElementById('login-modal')?.classList.remove('visible')}>×</button>
+          <button
+            className="close-btn"
+            onClick={() =>
+              document
+                .getElementById("login-modal")
+                ?.classList.remove("visible")
+            }
+          >
+            ×
+          </button>
           <h2>Artist Login</h2>
           <form onSubmit={handleLogin}>
             <div className="form-group">
@@ -736,8 +863,12 @@ export default function Home() {
                 required
               />
             </div>
-            <button type="submit" className="login-submit">Login</button>
-            <p className="login-hint">(Use &quot;artist&quot; / &quot;password&quot; for demo)</p>
+            <button type="submit" className="login-submit">
+              Login
+            </button>
+            <p className="login-hint">
+              (Use &quot;artist&quot; / &quot;password&quot; for demo)
+            </p>
           </form>
         </div>
       </div>
@@ -746,7 +877,12 @@ export default function Home() {
       {expandedArtwork && (
         <div className="artwork-modal visible">
           <div className="artwork-modal-content">
-            <button className="close-btn" onClick={() => setExpandedArtwork(null)}>×</button>
+            <button
+              className="close-btn"
+              onClick={() => setExpandedArtwork(null)}
+            >
+              ×
+            </button>
             <div className="artwork-details">
               <div className="artwork-image">
                 <img src={expandedArtwork.image} alt={expandedArtwork.title} />
@@ -758,8 +894,12 @@ export default function Home() {
                   <span>❤️ {expandedArtwork.likes} likes</span>
                   <span>👁️ {expandedArtwork.views} views</span>
                 </div>
-                <p className="artwork-description">{expandedArtwork.description}</p>
-                <span className="medium-tag large">{expandedArtwork.medium}</span>
+                <p className="artwork-description">
+                  {expandedArtwork.description}
+                </p>
+                <span className="medium-tag large">
+                  {expandedArtwork.medium}
+                </span>
               </div>
             </div>
           </div>
@@ -778,7 +918,7 @@ export default function Home() {
         }
 
         body {
-          font-family: 'Space Grotesk', sans-serif;
+          font-family: "Space Grotesk", sans-serif;
           line-height: 1.6;
           overflow-x: hidden;
         }
@@ -794,7 +934,9 @@ export default function Home() {
         }
 
         .app-container {
-          transition: background-color 0.5s ease, color 0.5s ease;
+          transition:
+            background-color 0.5s ease,
+            color 0.5s ease;
         }
 
         .app-container.light-mode {
@@ -995,17 +1137,20 @@ export default function Home() {
           background-color: #e62e5c;
         }
 
-        .mood-toggle, .sound-toggle {
+        .mood-toggle,
+        .sound-toggle {
           background-color: transparent !important;
           border: 2px solid !important;
         }
 
-        .dark-mode .mood-toggle, .dark-mode .sound-toggle {
+        .dark-mode .mood-toggle,
+        .dark-mode .sound-toggle {
           border-color: #333 !important;
           color: #f0f0f0 !important;
         }
 
-        .light-mode .mood-toggle, .light-mode .sound-toggle {
+        .light-mode .mood-toggle,
+        .light-mode .sound-toggle {
           border-color: #ddd !important;
           color: #333 !important;
         }
@@ -1023,7 +1168,7 @@ export default function Home() {
         }
 
         .dark-mode section h2::after {
-          content: '';
+          content: "";
           position: absolute;
           bottom: -10px;
           left: 50%;
@@ -1034,7 +1179,7 @@ export default function Home() {
         }
 
         .light-mode section h2::after {
-          content: '';
+          content: "";
           position: absolute;
           bottom: -10px;
           left: 50%;

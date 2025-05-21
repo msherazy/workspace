@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
@@ -60,8 +61,12 @@ const DynamicSculptureGenerator = () => {
         border-radius: 0.75rem;
         padding: 1rem;
         margin-bottom: 1rem;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        box-shadow:
+          0 4px 6px -1px rgba(0, 0, 0, 0.1),
+          0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        transition:
+          transform 0.3s ease,
+          box-shadow 0.3s ease;
       }
 
       .dark .control-card {
@@ -70,7 +75,9 @@ const DynamicSculptureGenerator = () => {
 
       .control-card:hover {
         transform: translateY(-2px);
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        box-shadow:
+          0 10px 15px -3px rgba(0, 0, 0, 0.1),
+          0 4px 6px -2px rgba(0, 0, 0, 0.05);
       }
 
       /* Environment button styling */
@@ -96,7 +103,9 @@ const DynamicSculptureGenerator = () => {
       .env-button-active {
         background-color: #4f46e5;
         color: white;
-        box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.5), 0 2px 4px -1px rgba(79, 70, 229, 0.4);
+        box-shadow:
+          0 4px 6px -1px rgba(79, 70, 229, 0.5),
+          0 2px 4px -1px rgba(79, 70, 229, 0.4);
       }
 
       .dark .env-button-active {
@@ -136,7 +145,9 @@ const DynamicSculptureGenerator = () => {
         align-items: center;
         justify-content: center;
         margin-bottom: 0.75rem;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        box-shadow:
+          0 4px 6px -1px rgba(0, 0, 0, 0.1),
+          0 2px 4px -1px rgba(0, 0, 0, 0.06);
       }
 
       .primary-button-gradient {
@@ -147,7 +158,9 @@ const DynamicSculptureGenerator = () => {
       .primary-button-gradient:hover {
         background: linear-gradient(to right, #4338ca, #6d28d9);
         transform: translateY(-2px);
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2), 0 4px 6px -2px rgba(0, 0, 0, 0.1);
+        box-shadow:
+          0 10px 15px -3px rgba(0, 0, 0, 0.2),
+          0 4px 6px -2px rgba(0, 0, 0, 0.1);
       }
 
       .primary-button-gradient:active {
@@ -221,7 +234,7 @@ const DynamicSculptureGenerator = () => {
   const dragStartShapeRef = useRef<THREE.Vector3[] | null>(null);
   const clockRef = useRef<THREE.Clock | null>(null);
   const animationFrameIdRef = useRef<number | null>(null);
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  const [theme, setTheme] = useState<"light" | "dark">("light");
 
   const [uiConfig, setUiConfig] = useState({
     frequency: 3.0,
@@ -250,7 +263,7 @@ const DynamicSculptureGenerator = () => {
           min: 0.1,
           max: 10,
           step: 0.1,
-          format: (val: number) => val.toFixed(1)
+          format: (val: number) => val.toFixed(1),
         },
         {
           name: "Amplitude",
@@ -258,7 +271,7 @@ const DynamicSculptureGenerator = () => {
           min: 0.01,
           max: 0.5,
           step: 0.01,
-          format: (val: number) => val.toFixed(2)
+          format: (val: number) => val.toFixed(2),
         },
         {
           name: "Complexity",
@@ -266,7 +279,7 @@ const DynamicSculptureGenerator = () => {
           min: 1,
           max: 10,
           step: 1,
-          format: (val: number) => val.toFixed(0)
+          format: (val: number) => val.toFixed(0),
         },
         {
           name: "Smoothness",
@@ -274,9 +287,9 @@ const DynamicSculptureGenerator = () => {
           min: 0.1,
           max: 1,
           step: 0.1,
-          format: (val: number) => val.toFixed(1)
-        }
-      ]
+          format: (val: number) => val.toFixed(1),
+        },
+      ],
     },
     {
       name: "Material",
@@ -287,7 +300,7 @@ const DynamicSculptureGenerator = () => {
           min: 0,
           max: 1,
           step: 0.1,
-          format: (val: number) => val.toFixed(1)
+          format: (val: number) => val.toFixed(1),
         },
         {
           name: "Roughness",
@@ -295,10 +308,10 @@ const DynamicSculptureGenerator = () => {
           min: 0,
           max: 1,
           step: 0.1,
-          format: (val: number) => val.toFixed(1)
-        }
-      ]
-    }
+          format: (val: number) => val.toFixed(1),
+        },
+      ],
+    },
   ];
 
   const [dimensions, setDimensions] = useState({
@@ -311,7 +324,7 @@ const DynamicSculptureGenerator = () => {
 
   // Helper function to get environment indicator color
   const getEnvironmentColorDot = (environment: string) => {
-    switch(environment) {
+    switch (environment) {
       case "Midnight Jazz Club":
         return "#66ccff";
       case "Neon Graffiti":
@@ -410,13 +423,20 @@ const DynamicSculptureGenerator = () => {
       sceneRef.current.remove(shapeRef.current);
     }
 
-    const { frequency, amplitude, complexity, smoothness, metalness, roughness } = config;
+    const {
+      frequency,
+      amplitude,
+      complexity,
+      smoothness,
+      metalness,
+      roughness,
+    } = config;
 
     // Create geometry with detail based on complexity
     const geometry = new THREE.SphereGeometry(
       1,
-      Math.floor(32 * complexity / 4),
-      Math.floor(16 * complexity / 4)
+      Math.floor((32 * complexity) / 4),
+      Math.floor((16 * complexity) / 4),
     );
 
     // Store original positions for animation
@@ -458,9 +478,9 @@ const DynamicSculptureGenerator = () => {
 
   // Helper function to get material color based on environment and theme
   const getMaterialColor = (environment: string, currentTheme: string) => {
-    const isDark = currentTheme === 'dark';
+    const isDark = currentTheme === "dark";
 
-    switch(environment) {
+    switch (environment) {
       case "Midnight Jazz Club":
         return isDark ? 0x5ab0dd : 0x4499cc;
       case "Neon Graffiti":
@@ -493,7 +513,8 @@ const DynamicSculptureGenerator = () => {
     const originalPositions = geometry.userData.originalPositions;
 
     // Only update if it's been a while or forcing an update
-    if (forceUpdate || now - geometry.userData.lastUpdateTime > 0.05) { // More frequent updates
+    if (forceUpdate || now - geometry.userData.lastUpdateTime > 0.05) {
+      // More frequent updates
       geometry.userData.lastUpdateTime = now;
 
       // Update animation properties
@@ -514,8 +535,8 @@ const DynamicSculptureGenerator = () => {
           Math.cos(y * config.frequency + now) *
           Math.sin(z * config.frequency + now);
 
-        const smoothedNoise = noiseValue * config.smoothness +
-          (1 - config.smoothness) * distance;
+        const smoothedNoise =
+          noiseValue * config.smoothness + (1 - config.smoothness) * distance;
 
         const deformation = config.amplitude * smoothedNoise;
 
@@ -531,15 +552,17 @@ const DynamicSculptureGenerator = () => {
 
   const handleControlChange = (key: string, value: number) => {
     // Update the UI config
-    setUiConfig(prev => ({...prev, [key]: value}));
+    setUiConfig((prev) => ({ ...prev, [key]: value }));
 
     // Apply the change immediately to the shape
     if (shapeRef.current && sceneRef.current) {
-      const newConfig = {...uiConfig, [key]: value};
+      const newConfig = { ...uiConfig, [key]: value };
 
       // Recreate the shape if complexity changes
-      if (key === 'complexity' &&
-        shapeRef.current.geometry.userData.complexity !== value) {
+      if (
+        key === "complexity" &&
+        shapeRef.current.geometry.userData.complexity !== value
+      ) {
         createShape(newConfig);
       } else {
         // Otherwise just update the existing shape
@@ -553,10 +576,10 @@ const DynamicSculptureGenerator = () => {
 
     // Remove existing lights
     const lightsToRemove = sceneRef.current.children.filter(
-      child => child instanceof THREE.Light
+      (child) => child instanceof THREE.Light,
     );
 
-    lightsToRemove.forEach(light => {
+    lightsToRemove.forEach((light) => {
       sceneRef.current!.remove(light);
     });
 
@@ -564,13 +587,16 @@ const DynamicSculptureGenerator = () => {
     const env = getEnvironmentSettings(environmentName);
 
     // Add ambient light
-    const ambientLight = new THREE.AmbientLight(env.ambientColor, env.ambientIntensity);
+    const ambientLight = new THREE.AmbientLight(
+      env.ambientColor,
+      env.ambientIntensity,
+    );
     sceneRef.current.add(ambientLight);
 
     // Add directional light
     const directionalLight = new THREE.DirectionalLight(
       env.directionalColor,
-      env.directionalIntensity
+      env.directionalIntensity,
     );
     directionalLight.position.copy(env.directionalPosition);
     directionalLight.castShadow = true;
@@ -595,7 +621,12 @@ const DynamicSculptureGenerator = () => {
   };
 
   const animate = () => {
-    if (!sceneRef.current || !cameraRef.current || !rendererRef.current || !controlsRef.current) {
+    if (
+      !sceneRef.current ||
+      !cameraRef.current ||
+      !rendererRef.current ||
+      !controlsRef.current
+    ) {
       return;
     }
 
@@ -613,7 +644,13 @@ const DynamicSculptureGenerator = () => {
   };
 
   const handleMouseMove = (event: MouseEvent) => {
-    if (!mouseRef.current || !raycasterRef.current || !sceneRef.current || !cameraRef.current) return;
+    if (
+      !mouseRef.current ||
+      !raycasterRef.current ||
+      !sceneRef.current ||
+      !cameraRef.current
+    )
+      return;
 
     // Update mouse position for raycaster
     mouseRef.current.x = (event.clientX / window.innerWidth) * 2 - 1;
@@ -623,7 +660,12 @@ const DynamicSculptureGenerator = () => {
     raycasterRef.current.setFromCamera(mouseRef.current, cameraRef.current);
 
     // If dragging, update shape
-    if (isDraggingRef.current && shapeRef.current && dragStartPointRef.current && dragStartShapeRef.current) {
+    if (
+      isDraggingRef.current &&
+      shapeRef.current &&
+      dragStartPointRef.current &&
+      dragStartShapeRef.current
+    ) {
       // Implement drag behavior here if needed
     }
   };
@@ -676,7 +718,7 @@ const DynamicSculptureGenerator = () => {
       75,
       dimensions.width / dimensions.height,
       0.1,
-      1000
+      1000,
     );
     cameraRef.current = camera;
     camera.position.z = isMobile ? 4.5 : 3;
@@ -694,7 +736,7 @@ const DynamicSculptureGenerator = () => {
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
     // Set renderer clear color based on current theme
-    renderer.setClearColor(theme === 'dark' ? 0x111111 : 0xffffff, 0);
+    renderer.setClearColor(theme === "dark" ? 0x111111 : 0xffffff, 0);
 
     // Create controls
     const controls = new OrbitControls(camera, renderer.domElement);
@@ -762,55 +804,60 @@ const DynamicSculptureGenerator = () => {
 
   // Toggle gallery mode
   const toggleGalleryMode = () => {
-    setUiConfig(prev => ({...prev, galleryMode: !prev.galleryMode}));
+    setUiConfig((prev) => ({ ...prev, galleryMode: !prev.galleryMode }));
   };
 
   // Toggle controls panel
   const toggleControlsPanel = () => {
-    setControlsPanelVisible(prev => !prev);
+    setControlsPanelVisible((prev) => !prev);
   };
 
   // Handle environment change
   const handleEnvironmentChange = (newEnvironment: string) => {
     if (!sceneRef.current) return;
 
-    setUiConfig(prev => ({...prev, environment: newEnvironment}));
+    setUiConfig((prev) => ({ ...prev, environment: newEnvironment }));
     updateLighting(newEnvironment);
   };
 
   // Theme management
   useEffect(() => {
     // Check for saved theme preference or use system preference
-    const savedTheme = localStorage.getItem('theme');
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const savedTheme = localStorage.getItem("theme");
+    const prefersDark = window.matchMedia(
+      "(prefers-color-scheme: dark)",
+    ).matches;
 
-    if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
-      setTheme('dark');
-      document.documentElement.classList.add('dark');
+    if (savedTheme === "dark" || (!savedTheme && prefersDark)) {
+      setTheme("dark");
+      document.documentElement.classList.add("dark");
     } else {
-      setTheme('light');
-      document.documentElement.classList.remove('dark');
+      setTheme("light");
+      document.documentElement.classList.remove("dark");
     }
   }, []);
 
   // Toggle theme function
   const toggleTheme = () => {
-    const newTheme = theme === 'light' ? 'dark' : 'light';
+    const newTheme = theme === "light" ? "dark" : "light";
     setTheme(newTheme);
 
     // Update DOM
-    if (newTheme === 'dark') {
-      document.documentElement.classList.add('dark');
+    if (newTheme === "dark") {
+      document.documentElement.classList.add("dark");
     } else {
-      document.documentElement.classList.remove('dark');
+      document.documentElement.classList.remove("dark");
     }
 
     // Save preference
-    localStorage.setItem('theme', newTheme);
+    localStorage.setItem("theme", newTheme);
 
     // Update renderer if initialized
     if (rendererRef.current && sceneRef.current && cameraRef.current) {
-      rendererRef.current.setClearColor(newTheme === 'dark' ? 0x111111 : 0xffffff, 0);
+      rendererRef.current.setClearColor(
+        newTheme === "dark" ? 0x111111 : 0xffffff,
+        0,
+      );
       rendererRef.current.render(sceneRef.current, cameraRef.current);
     }
 
@@ -827,15 +874,37 @@ const DynamicSculptureGenerator = () => {
     <button
       onClick={toggleTheme}
       className="p-3 bg-white dark:bg-gray-800 bg-opacity-80 backdrop-blur-md rounded-full shadow-lg transition-colors duration-300"
-      aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+      aria-label={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
     >
-      {theme === 'light' ? (
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+      {theme === "light" ? (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-6 w-6"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
+          />
         </svg>
       ) : (
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-6 w-6"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+          />
         </svg>
       )}
     </button>
@@ -917,11 +986,15 @@ const DynamicSculptureGenerator = () => {
   // Apply theme change to Three.js elements
   useEffect(() => {
     if (rendererRef.current && sceneRef.current && cameraRef.current) {
-      rendererRef.current.setClearColor(theme === 'dark' ? 0x111111 : 0xffffff, 0);
+      rendererRef.current.setClearColor(
+        theme === "dark" ? 0x111111 : 0xffffff,
+        0,
+      );
 
       // Update material color based on theme
       if (shapeRef.current) {
-        const material = shapeRef.current.material as THREE.MeshStandardMaterial;
+        const material = shapeRef.current
+          .material as THREE.MeshStandardMaterial;
         material.color.set(getMaterialColor(uiConfig.environment, theme));
         material.needsUpdate = true;
       }
@@ -990,13 +1063,40 @@ const DynamicSculptureGenerator = () => {
               className="p-3 bg-white dark:bg-gray-800 bg-opacity-80 backdrop-blur-md rounded-full shadow-lg"
             >
               {controlsPanelVisible ? (
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-6 w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
                 </svg>
               ) : (
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 018 0z" />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-6 w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                  />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 12a3 3 0 11-6 0 3 3 0 018 0z"
+                  />
                 </svg>
               )}
             </button>
@@ -1006,17 +1106,34 @@ const DynamicSculptureGenerator = () => {
             <ThemeToggle />
           </div>
 
-          <div className={`absolute top-0 left-0 w-full h-screen flex flex-col md:flex-row p-4 md:p-6 gap-4 md:gap-6 transition-transform duration-300 ${
-            !controlsPanelVisible && 'transform -translate-y-full md:translate-y-0 md:-translate-x-full'
-          }`}>
+          <div
+            className={`absolute top-0 left-0 w-full h-screen flex flex-col md:flex-row p-4 md:p-6 gap-4 md:gap-6 transition-transform duration-300 ${
+              !controlsPanelVisible &&
+              "transform -translate-y-full md:translate-y-0 md:-translate-x-full"
+            }`}
+          >
             <div className="w-full md:w-80 bg-white dark:bg-gray-800 bg-opacity-90 dark:bg-opacity-90 md:bg-opacity-80 md:dark:bg-opacity-80 backdrop-blur-md p-4 md:p-6 rounded-2xl shadow-xl border border-white border-opacity-20 dark:border-gray-700 dark:border-opacity-30 flex flex-col gap-6 max-h-[80vh] md:max-h-none overflow-auto">
               <div className="flex justify-between items-center">
                 <h2 className="text-xl font-bold">Sculpture Controls</h2>
                 <div className="flex items-center">
-                  <span className="text-xs text-gray-500 dark:text-gray-400 md:hidden mr-2">Swipe for more</span>
-                  <button onClick={toggleControlsPanel} className="md:hidden p-1.5 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                  <span className="text-xs text-gray-500 dark:text-gray-400 md:hidden mr-2">
+                    Swipe for more
+                  </span>
+                  <button
+                    onClick={toggleControlsPanel}
+                    className="md:hidden p-1.5 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                        clipRule="evenodd"
+                      />
                     </svg>
                   </button>
                 </div>
@@ -1026,20 +1143,26 @@ const DynamicSculptureGenerator = () => {
               <div className="control-card">
                 <h3 className="text-md font-semibold mb-3">Environment</h3>
                 <div className="grid grid-cols-1 gap-2">
-                  {["Studio", "Midnight Jazz Club", "Neon Graffiti", "Forest Cathedral", "Hidden Disco"].map((env) => (
+                  {[
+                    "Studio",
+                    "Midnight Jazz Club",
+                    "Neon Graffiti",
+                    "Forest Cathedral",
+                    "Hidden Disco",
+                  ].map((env) => (
                     <button
                       key={env}
                       onClick={() => handleEnvironmentChange(env)}
-                      className={`env-button ${uiConfig.environment === env ? 'env-button-active' : ''}`}
+                      className={`env-button ${uiConfig.environment === env ? "env-button-active" : ""}`}
                     >
                       <div
                         style={{
                           backgroundColor: getEnvironmentColorDot(env),
-                          width: '0.75rem',
-                          height: '0.75rem',
-                          borderRadius: '50%',
-                          marginRight: '0.5rem',
-                          boxShadow: '0 1px 2px rgba(0,0,0,0.2)'
+                          width: "0.75rem",
+                          height: "0.75rem",
+                          borderRadius: "50%",
+                          marginRight: "0.5rem",
+                          boxShadow: "0 1px 2px rgba(0,0,0,0.2)",
                         }}
                       ></div>
                       <span>{env}</span>
@@ -1051,7 +1174,9 @@ const DynamicSculptureGenerator = () => {
               {/* Control groups */}
               {controlGroups.map((group) => (
                 <div key={group.name} className="control-card">
-                  <h3 className="text-md font-semibold mb-3">{group.name} Controls</h3>
+                  <h3 className="text-md font-semibold mb-3">
+                    {group.name} Controls
+                  </h3>
                   <div className="space-y-4">
                     {group.controls.map((control) => (
                       <div key={control.key} className="space-y-2">
@@ -1060,22 +1185,37 @@ const DynamicSculptureGenerator = () => {
                             {control.name}
                           </label>
                           <span className="control-value">
-                                {control.format(uiConfig[control.key as keyof typeof uiConfig] as number)}
-                              </span>
+                            {control.format(
+                              uiConfig[
+                                control.key as keyof typeof uiConfig
+                              ] as number,
+                            )}
+                          </span>
                         </div>
                         <div className="flex items-center">
                           <button
                             onClick={() => {
                               const newValue = Math.max(
                                 control.min,
-                                (uiConfig[control.key as keyof typeof uiConfig] as number) - control.step
+                                (uiConfig[
+                                  control.key as keyof typeof uiConfig
+                                ] as number) - control.step,
                               );
                               handleControlChange(control.key, newValue);
                             }}
                             className="value-adjust-button"
                           >
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                              <path fillRule="evenodd" d="M3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="h-4 w-4"
+                              viewBox="0 0 20 20"
+                              fill="currentColor"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
+                                clipRule="evenodd"
+                              />
                             </svg>
                           </button>
                           <input
@@ -1083,7 +1223,11 @@ const DynamicSculptureGenerator = () => {
                             min={control.min}
                             max={control.max}
                             step={control.step}
-                            value={uiConfig[control.key as keyof typeof uiConfig] as number}
+                            value={
+                              uiConfig[
+                                control.key as keyof typeof uiConfig
+                              ] as number
+                            }
                             onChange={(e) => {
                               const value = parseFloat(e.target.value);
                               handleControlChange(control.key, value);
@@ -1094,14 +1238,25 @@ const DynamicSculptureGenerator = () => {
                             onClick={() => {
                               const newValue = Math.min(
                                 control.max,
-                                (uiConfig[control.key as keyof typeof uiConfig] as number) + control.step
+                                (uiConfig[
+                                  control.key as keyof typeof uiConfig
+                                ] as number) + control.step,
                               );
                               handleControlChange(control.key, newValue);
                             }}
                             className="value-adjust-button"
                           >
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                              <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="h-4 w-4"
+                              viewBox="0 0 20 20"
+                              fill="currentColor"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+                                clipRule="evenodd"
+                              />
                             </svg>
                           </button>
                         </div>
@@ -1117,9 +1272,18 @@ const DynamicSculptureGenerator = () => {
                   onClick={toggleGalleryMode}
                   className="primary-button primary-button-gradient"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 mr-2"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
                     <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                    <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
+                    <path
+                      fillRule="evenodd"
+                      d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
+                      clipRule="evenodd"
+                    />
                   </svg>
                   Enter Gallery Mode
                 </button>
@@ -1133,26 +1297,35 @@ const DynamicSculptureGenerator = () => {
                       complexity: 4.0,
                       smoothness: 0.7,
                       metalness: 0.5,
-                      roughness: 0.5
+                      roughness: 0.5,
                     };
 
-                    setUiConfig(prev => ({
+                    setUiConfig((prev) => ({
                       ...prev,
-                      ...defaultValues
+                      ...defaultValues,
                     }));
 
                     // Force recreate the shape with default values
                     if (shapeRef.current && sceneRef.current) {
                       createShape({
                         ...uiConfig,
-                        ...defaultValues
+                        ...defaultValues,
                       });
                     }
                   }}
                   className="secondary-button"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd" />
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-4 w-4 mr-2"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"
+                      clipRule="evenodd"
+                    />
                   </svg>
                   Reset to Defaults
                 </button>
@@ -1168,4 +1341,3 @@ const DynamicSculptureGenerator = () => {
 };
 
 export default DynamicSculptureGenerator;
-

@@ -6,7 +6,7 @@ import { FiMoon, FiSearch, FiStar, FiSun, FiX } from "react-icons/fi";
 import { Inter } from "next/font/google";
 
 // Initialize the Inter font
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({ subsets: ["latin"] });
 
 interface Review {
   id: number;
@@ -23,21 +23,25 @@ const reviews: Review[] = [
   {
     id: 1,
     name: "Dell XPS 15",
-    description: "Premium laptop with stunning 4K display and long battery life.",
+    description:
+      "Premium laptop with stunning 4K display and long battery life.",
     rating: 4.8,
     reviewer: "Jane Doe",
     category: "Laptops",
-    image: "https://images.unsplash.com/photo-1720556405438-d67f0f9ecd44?q=80&w=3460&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    image:
+      "https://images.unsplash.com/photo-1720556405438-d67f0f9ecd44?q=80&w=3460&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     longDescription: "The Dell XPS 15 is a powerhouse...",
   },
   {
     id: 2,
     name: "iPhone 14 Pro",
-    description: "Flagship smartphone with advanced camera and lightning-fast performance.",
+    description:
+      "Flagship smartphone with advanced camera and lightning-fast performance.",
     rating: 4.9,
     reviewer: "John Smith",
     category: "Smartphones",
-    image: "https://images.unsplash.com/photo-1663408466313-2d4e7edaf172?q=80&w=3387&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    image:
+      "https://images.unsplash.com/photo-1663408466313-2d4e7edaf172?q=80&w=3387&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     longDescription: "The iPhone 14 Pro sets a new standard...",
   },
   {
@@ -47,7 +51,8 @@ const reviews: Review[] = [
     rating: 4.7,
     reviewer: "Emily Chen",
     category: "Accessories",
-    image: "https://images.unsplash.com/photo-1586343797367-c8942268df67?q=80&w=3628&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    image:
+      "https://images.unsplash.com/photo-1586343797367-c8942268df67?q=80&w=3628&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     longDescription: "The Sony WH-1000XM5 headphones...",
   },
   {
@@ -57,7 +62,8 @@ const reviews: Review[] = [
     rating: 4.5,
     reviewer: "Michael Johnson",
     category: "Laptops",
-    image: "https://images.unsplash.com/photo-1659135890064-d57187f0946c?q=80&w=3540&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    image:
+      "https://images.unsplash.com/photo-1659135890064-d57187f0946c?q=80&w=3540&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     longDescription: "The MacBook Air M2 revolutionizes...",
   },
   {
@@ -67,7 +73,8 @@ const reviews: Review[] = [
     rating: 4.6,
     reviewer: "Sarah Williams",
     category: "Smartphones",
-    image: "https://images.unsplash.com/photo-1678958274412-563119ec18ab?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    image:
+      "https://images.unsplash.com/photo-1678958274412-563119ec18ab?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     longDescription: "The Samsung Galaxy S23 Ultra is a behemoth...",
   },
   {
@@ -77,20 +84,20 @@ const reviews: Review[] = [
     rating: 4.4,
     reviewer: "David Brown",
     category: "Accessories",
-    image: "https://images.unsplash.com/photo-1679436204470-87dc7da1e8be?q=80&w=3425&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    image:
+      "https://images.unsplash.com/photo-1679436204470-87dc7da1e8be?q=80&w=3425&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     longDescription: "The Apple Watch Ultra is built for adventure...",
   },
 ];
-
 
 const categoryOptions = ["All", "Laptops", "Smartphones", "Accessories"];
 
 // ReviewDialog component to display full review details
 const ReviewDialog = ({
-                        review,
-                        isOpen,
-                        onClose
-                      }: {
+  review,
+  isOpen,
+  onClose,
+}: {
   review: Review | null;
   isOpen: boolean;
   onClose: () => void;
@@ -98,9 +105,9 @@ const ReviewDialog = ({
   // Prevent scroll on body when dialog is open
   useEffect(() => {
     if (isOpen && review) {
-      document.body.style.overflow = 'hidden';
+      document.body.style.overflow = "hidden";
       return () => {
-        document.body.style.overflow = 'auto';
+        document.body.style.overflow = "auto";
       };
     }
   }, [isOpen, review]);
@@ -109,8 +116,10 @@ const ReviewDialog = ({
 
   const badgeColor = {
     Laptops: "bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100",
-    Smartphones: "bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100",
-    Accessories: "bg-pink-100 text-pink-800 dark:bg-pink-800 dark:text-pink-100",
+    Smartphones:
+      "bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100",
+    Accessories:
+      "bg-pink-100 text-pink-800 dark:bg-pink-800 dark:text-pink-100",
   }[review.category];
 
   // Stop event propagation to prevent main page scrolling
@@ -141,7 +150,9 @@ const ReviewDialog = ({
             <FiX className="text-gray-800 dark:text-white" size={20} />
           </button>
           <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-6">
-            <span className={`inline-block text-xs font-medium uppercase px-2 py-1 rounded-full mb-2 ${badgeColor}`}>
+            <span
+              className={`inline-block text-xs font-medium uppercase px-2 py-1 rounded-full mb-2 ${badgeColor}`}
+            >
               {review.category}
             </span>
             <h1 className="text-3xl font-bold text-white">{review.name}</h1>
@@ -149,14 +160,19 @@ const ReviewDialog = ({
         </div>
 
         {/* Content area with its own scrolling */}
-        <div className="p-6 overflow-y-auto" style={{ maxHeight: 'calc(90vh - 20rem)' }}>
+        <div
+          className="p-6 overflow-y-auto"
+          style={{ maxHeight: "calc(90vh - 20rem)" }}
+        >
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center">
               {[...Array(5)].map((_, i) => (
                 <FiStar
                   key={i}
                   className={`w-5 h-5 ${
-                    i < Math.floor(review.rating) ? "text-yellow-400 fill-current" : "text-gray-300"
+                    i < Math.floor(review.rating)
+                      ? "text-yellow-400 fill-current"
+                      : "text-gray-300"
                   }`}
                 />
               ))}
@@ -164,7 +180,9 @@ const ReviewDialog = ({
                 {review.rating.toFixed(1)} / 5
               </span>
             </div>
-            <span className="text-sm text-gray-500 dark:text-gray-400">Reviewed by {review.reviewer}</span>
+            <span className="text-sm text-gray-500 dark:text-gray-400">
+              Reviewed by {review.reviewer}
+            </span>
           </div>
 
           <div className="prose dark:prose-invert max-w-none">
@@ -172,15 +190,21 @@ const ReviewDialog = ({
               {review.description}
             </p>
 
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white mt-8 mb-4">Full Review</h2>
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white mt-8 mb-4">
+              Full Review
+            </h2>
             <p className="text-gray-700 dark:text-gray-300">
               {review.longDescription}
             </p>
 
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white mt-8 mb-4">Pros & Cons</h2>
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white mt-8 mb-4">
+              Pros & Cons
+            </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
               <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
-                <h3 className="font-bold text-green-700 dark:text-green-400 mb-2">Pros</h3>
+                <h3 className="font-bold text-green-700 dark:text-green-400 mb-2">
+                  Pros
+                </h3>
                 <ul className="list-disc pl-5 space-y-1 text-gray-700 dark:text-gray-300">
                   <li>High quality construction</li>
                   <li>Excellent performance</li>
@@ -188,7 +212,9 @@ const ReviewDialog = ({
                 </ul>
               </div>
               <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg">
-                <h3 className="font-bold text-red-700 dark:text-red-400 mb-2">Cons</h3>
+                <h3 className="font-bold text-red-700 dark:text-red-400 mb-2">
+                  Cons
+                </h3>
                 <ul className="list-disc pl-5 space-y-1 text-gray-700 dark:text-gray-300">
                   <li>Could have better battery life</li>
                   <li>Limited color options</li>
@@ -196,10 +222,13 @@ const ReviewDialog = ({
               </div>
             </div>
 
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white mt-8 mb-4">Verdict</h2>
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white mt-8 mb-4">
+              Verdict
+            </h2>
             <p className="text-gray-700 dark:text-gray-300">
-              Overall, this is an excellent product that we highly recommend for most users.
-              It strikes a great balance between performance, quality, and price.
+              Overall, this is an excellent product that we highly recommend for
+              most users. It strikes a great balance between performance,
+              quality, and price.
             </p>
           </div>
         </div>
@@ -208,13 +237,21 @@ const ReviewDialog = ({
   );
 };
 
-const ReviewCard = ({ review, onOpenReview }: { review: Review; onOpenReview: (review: Review) => void }) => {
+const ReviewCard = ({
+  review,
+  onOpenReview,
+}: {
+  review: Review;
+  onOpenReview: (review: Review) => void;
+}) => {
   const [isHovered, setIsHovered] = useState(false);
 
   const badgeColor = {
     Laptops: "bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100",
-    Smartphones: "bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100",
-    Accessories: "bg-pink-100 text-pink-800 dark:bg-pink-800 dark:text-pink-100",
+    Smartphones:
+      "bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100",
+    Accessories:
+      "bg-pink-100 text-pink-800 dark:bg-pink-800 dark:text-pink-100",
   }[review.category];
 
   return (
@@ -223,13 +260,25 @@ const ReviewCard = ({ review, onOpenReview }: { review: Review; onOpenReview: (r
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <img src={review.image} alt={review.name} className="w-full h-48 object-cover rounded-t-lg" />
+      <img
+        src={review.image}
+        alt={review.name}
+        className="w-full h-48 object-cover rounded-t-lg"
+      />
       <div className="p-6 flex flex-col flex-grow">
         <div className="flex-grow">
-          <span className={`inline-block text-xs font-medium uppercase px-2 py-1 rounded-full mb-2 ${badgeColor}`}>{review.category}</span>
-          <h3 className="text-2xl font-serif font-semibold text-gray-900 dark:text-white mb-1">{review.name}</h3>
+          <span
+            className={`inline-block text-xs font-medium uppercase px-2 py-1 rounded-full mb-2 ${badgeColor}`}
+          >
+            {review.category}
+          </span>
+          <h3 className="text-2xl font-serif font-semibold text-gray-900 dark:text-white mb-1">
+            {review.name}
+          </h3>
           {/* Georgia is kept only for the card heading above via font-serif */}
-          <p className="text-gray-600 dark:text-gray-300 mb-4">{review.description}</p>
+          <p className="text-gray-600 dark:text-gray-300 mb-4">
+            {review.description}
+          </p>
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center">
               {[...Array(5)].map((_, i) => (
@@ -239,15 +288,20 @@ const ReviewCard = ({ review, onOpenReview }: { review: Review; onOpenReview: (r
                 />
               ))}
               {isHovered && (
-                <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">{review.rating.toFixed(1)} / 5</span>
+                <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                  {review.rating.toFixed(1)} / 5
+                </span>
               )}
             </div>
-            <span className="text-sm text-gray-500 dark:text-gray-400">{review.reviewer}</span>
+            <span className="text-sm text-gray-500 dark:text-gray-400">
+              {review.reviewer}
+            </span>
           </div>
         </div>
         <button
           onClick={() => onOpenReview(review)}
-          className="w-full mt-auto bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition-colors duration-300">
+          className="w-full mt-auto bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition-colors duration-300"
+        >
           Read Full Review
         </button>
       </div>
@@ -268,8 +322,11 @@ const ReviewWebsite = () => {
   }, []);
 
   const filteredReviews = reviews.filter((review) => {
-    const matchesCategory = selectedCategory === "All" || review.category === selectedCategory;
-    const matchesSearch = review.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory =
+      selectedCategory === "All" || review.category === selectedCategory;
+    const matchesSearch = review.name
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
   });
 
@@ -283,11 +340,15 @@ const ReviewWebsite = () => {
   };
 
   return (
-    <div className={`${inter.className} min-h-screen ${darkMode ? "dark bg-gray-900" : "light bg-gray-100"}`}>
+    <div
+      className={`${inter.className} min-h-screen ${darkMode ? "dark bg-gray-900" : "light bg-gray-100"}`}
+    >
       <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-2 md:py-4">
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">GadgetReview</h1>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+              GadgetReview
+            </h1>
             <button
               onClick={() => setDarkMode(!darkMode)}
               className="p-2 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 transition-colors duration-300 cursor-pointer"
@@ -300,19 +361,25 @@ const ReviewWebsite = () => {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8 grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Filter by Category</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Filter by Category
+            </label>
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
               className="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md px-4 py-2 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               {categoryOptions.map((option) => (
-                <option key={option} value={option}>{option}</option>
+                <option key={option} value={option}>
+                  {option}
+                </option>
               ))}
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Search Reviews</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Search Reviews
+            </label>
             <div className="relative">
               <input
                 type="text"
@@ -336,7 +403,9 @@ const ReviewWebsite = () => {
             ))
           ) : (
             <div className="col-span-full text-center py-12 bg-white dark:bg-gray-800 rounded-lg shadow-md">
-              <p className="text-gray-600 dark:text-gray-300 text-lg">No reviews found. Try adjusting your filters or search query.</p>
+              <p className="text-gray-600 dark:text-gray-300 text-lg">
+                No reviews found. Try adjusting your filters or search query.
+              </p>
             </div>
           )}
         </div>
@@ -353,4 +422,3 @@ const ReviewWebsite = () => {
 };
 
 export default ReviewWebsite;
-

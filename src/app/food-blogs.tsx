@@ -18,7 +18,13 @@ type RecipeProps = {
   isReversed?: boolean;
 };
 
-const RecipeCard: React.FC<RecipeProps> = ({ image, title, time, description, isReversed }) => (
+const RecipeCard: React.FC<RecipeProps> = ({
+  image,
+  title,
+  time,
+  description,
+  isReversed,
+}) => (
   <motion.div
     initial={{ opacity: 0, y: 30 }}
     whileInView={{ opacity: 1, y: 0 }}
@@ -42,12 +48,16 @@ const RecipeCard: React.FC<RecipeProps> = ({ image, title, time, description, is
       <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
     </div>
     <div className="w-full md:w-1/2 flex flex-col justify-start space-y-3">
-      <h3 className="text-2xl font-semibold text-gray-800 dark:text-white">{title}</h3>
+      <h3 className="text-2xl font-semibold text-gray-800 dark:text-white">
+        {title}
+      </h3>
       <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400">
         <Clock className="w-5 h-5" />
         <span className="text-sm">{time}</span>
       </div>
-      <p className="text-gray-600 dark:text-gray-300 leading-relaxed">{description}</p>
+      <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+        {description}
+      </p>
       <a
         href="#"
         aria-label={`Read more about ${title}`}
@@ -66,8 +76,6 @@ const ThemeToggle = () => {
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
   }, [dark]);
-
-
 
   return (
     <button
@@ -89,12 +97,14 @@ const FoodBlogHome = () => {
 
       <main className="max-w-6xl mx-auto px-4 py-16 space-y-20">
         {/* Enhanced Soft Hero */}
-        <section className="max-w-4xl mx-auto p-8 md:p-12 mb-12 text-center rounded-2xl
+        <section
+          className="max-w-4xl mx-auto p-8 md:p-12 mb-12 text-center rounded-2xl
             bg-gradient-to-r from-orange-50 via-orange-100/50 to-orange-50
             dark:from-gray-800/80 dark:via-gray-700/40 dark:to-gray-800/80
             border border-orange-200/50 dark:border-white/10
             shadow-lg shadow-orange-100 dark:shadow-gray-900/30
-            backdrop-blur-sm">
+            backdrop-blur-sm"
+        >
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -116,18 +126,22 @@ const FoodBlogHome = () => {
             transition={{ duration: 0.6, delay: 0.1 }}
             className="mt-4 text-lg text-gray-700 dark:text-gray-300"
           >
-            Discover delicious recipes, cooking tips, and behind-the-scenes bites from our kitchen.
+            Discover delicious recipes, cooking tips, and behind-the-scenes
+            bites from our kitchen.
           </motion.p>
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="mt-6">
+            className="mt-6"
+          >
             <a
-              href='https://www.allrecipes.com' target="_blank"
+              href="https://www.allrecipes.com"
+              target="_blank"
               className="cursor-pointer px-6 py-3 bg-gradient-to-r from-orange-400 to-amber-500
                 text-white rounded-full hover:shadow-lg hover:from-orange-500 hover:to-amber-600
-                transition-all duration-300 font-medium">
+                transition-all duration-300 font-medium"
+            >
               Explore Recipes
             </a>
           </motion.div>
@@ -168,4 +182,3 @@ const FoodBlogHome = () => {
 };
 
 export default FoodBlogHome;
-

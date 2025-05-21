@@ -2,7 +2,15 @@
 
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { FaHeart, FaMoon, FaPaperPlane, FaRegCommentDots, FaRegHeart, FaShare, FaSun } from "react-icons/fa";
+import {
+  FaHeart,
+  FaMoon,
+  FaPaperPlane,
+  FaRegCommentDots,
+  FaRegHeart,
+  FaShare,
+  FaSun,
+} from "react-icons/fa";
 
 const avatarColors = [
   "bg-blue-500",
@@ -15,9 +23,9 @@ const avatarColors = [
 ];
 
 function getAvatarColor(name: string) {
-  const idx = name
-    .split("")
-    .reduce((acc, char) => acc + char.charCodeAt(0), 0) % avatarColors.length;
+  const idx =
+    name.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0) %
+    avatarColors.length;
   return avatarColors[idx];
 }
 
@@ -90,22 +98,20 @@ export default function SocialWall() {
       posts.map((post) =>
         post.id === postId
           ? {
-            ...post,
-            liked: !post.liked,
-            likes: post.liked ? post.likes - 1 : post.likes + 1,
-          }
-          : post
-      )
+              ...post,
+              liked: !post.liked,
+              likes: post.liked ? post.likes - 1 : post.likes + 1,
+            }
+          : post,
+      ),
     );
   };
 
   const toggleComments = (postId: number) => {
     setPosts(
       posts.map((post) =>
-        post.id === postId
-          ? { ...post, commentOpen: !post.commentOpen }
-          : post
-      )
+        post.id === postId ? { ...post, commentOpen: !post.commentOpen } : post,
+      ),
     );
   };
 
@@ -114,21 +120,21 @@ export default function SocialWall() {
       posts.map((post) =>
         post.id === postId && post.newComment.trim() !== ""
           ? {
-            ...post,
-            commentsList: [
-              ...post.commentsList,
-              {
-                id: post.commentsList.length + 1,
-                author: "You",
-                content: post.newComment,
-                timestamp: "Just now",
-              },
-            ],
-            comments: post.comments + 1,
-            newComment: "",
-          }
-          : post
-      )
+              ...post,
+              commentsList: [
+                ...post.commentsList,
+                {
+                  id: post.commentsList.length + 1,
+                  author: "You",
+                  content: post.newComment,
+                  timestamp: "Just now",
+                },
+              ],
+              comments: post.comments + 1,
+              newComment: "",
+            }
+          : post,
+      ),
     );
   };
 
@@ -155,22 +161,34 @@ export default function SocialWall() {
   };
 
   return (
-    <div className={`min-h-screen py-8 px-2 sm:px-0 transition-colors duration-300 ${dark ? "bg-gray-950" : "bg-gray-100"}`}>
+    <div
+      className={`min-h-screen py-8 px-2 sm:px-0 transition-colors duration-300 ${dark ? "bg-gray-950" : "bg-gray-100"}`}
+    >
       <div className="max-w-2xl mx-auto">
         {/* Header + Dark/Light Toggle */}
         <div className="flex items-center justify-between mb-6">
-          <h1 className={`text-2xl font-bold ${dark ? "text-white" : "text-gray-800"}`}>Social Wall</h1>
+          <h1
+            className={`text-2xl font-bold ${dark ? "text-white" : "text-gray-800"}`}
+          >
+            Social Wall
+          </h1>
           <button
             className="rounded-full p-2 border bg-white dark:bg-gray-800 dark:border-gray-700 border-gray-200 shadow-sm hover:shadow-md transition"
             onClick={() => setDark((v) => !v)}
             title="Toggle dark mode"
           >
-            {dark ? <FaSun className="h-5 w-5 text-yellow-400" /> : <FaMoon className="h-5 w-5 text-blue-600" />}
+            {dark ? (
+              <FaSun className="h-5 w-5 text-yellow-400" />
+            ) : (
+              <FaMoon className="h-5 w-5 text-blue-600" />
+            )}
           </button>
         </div>
 
         {/* Create Post */}
-        <div className={`mb-6 p-4 rounded-lg shadow-sm ${dark ? "bg-gray-900" : "bg-white"}`}>
+        <div
+          className={`mb-6 p-4 rounded-lg shadow-sm ${dark ? "bg-gray-900" : "bg-white"}`}
+        >
           <form onSubmit={handlePostSubmit}>
             <textarea
               className={`w-full p-3 border rounded-lg mb-3 resize-none bg-transparent ${
@@ -203,7 +221,9 @@ export default function SocialWall() {
           >
             <span className="text-5xl mb-4">🪴</span>
             <div className="font-semibold mb-1">No posts yet</div>
-            <div className="text-sm">Be the first to start the conversation!</div>
+            <div className="text-sm">
+              Be the first to start the conversation!
+            </div>
           </motion.div>
         )}
 
@@ -227,7 +247,7 @@ export default function SocialWall() {
                 <div className="flex items-center mb-3">
                   <div
                     className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold text-white shadow-sm ring-2 ring-white ${getAvatarColor(
-                      post.author
+                      post.author,
                     )}`}
                   >
                     {getInitials(post.author)}
@@ -261,7 +281,10 @@ export default function SocialWall() {
                     <FaRegCommentDots className="h-5 w-5 group-hover:text-blue-600 transition" />
                     <span>{post.comments}</span>
                   </button>
-                  <button className="flex items-center space-x-1 group" aria-label="Share">
+                  <button
+                    className="flex items-center space-x-1 group"
+                    aria-label="Share"
+                  >
                     <FaShare className="h-5 w-5 group-hover:text-green-600 transition" />
                     <span>Share</span>
                   </button>
@@ -287,17 +310,23 @@ export default function SocialWall() {
                           >
                             <div
                               className={`w-7 h-7 rounded-full flex items-center justify-center font-semibold text-white mr-2 mt-1 shadow-sm ${getAvatarColor(
-                                comment.author
+                                comment.author,
                               )}`}
                             >
                               {getInitials(comment.author)}
                             </div>
                             <div className="flex-1">
-                              <div className={`p-3 rounded-lg ${dark ? "bg-gray-800" : "bg-gray-100"}`}>
-                                <div className="text-sm font-medium">{comment.author}</div>
+                              <div
+                                className={`p-3 rounded-lg ${dark ? "bg-gray-800" : "bg-gray-100"}`}
+                              >
+                                <div className="text-sm font-medium">
+                                  {comment.author}
+                                </div>
                                 <p className="text-sm">{comment.content}</p>
                               </div>
-                              <p className="text-xs text-gray-400 mt-1">{comment.timestamp}</p>
+                              <p className="text-xs text-gray-400 mt-1">
+                                {comment.timestamp}
+                              </p>
                             </div>
                           </motion.div>
                         ))}
@@ -306,7 +335,7 @@ export default function SocialWall() {
                       <div className="flex items-center">
                         <div
                           className={`w-7 h-7 rounded-full flex items-center justify-center font-semibold text-white mr-2 ${getAvatarColor(
-                            "You"
+                            "You",
                           )}`}
                         >
                           Y
@@ -324,11 +353,15 @@ export default function SocialWall() {
                             onChange={(e) =>
                               setPosts(
                                 posts.map((p) =>
-                                  p.id === post.id ? { ...p, newComment: e.target.value } : p
-                                )
+                                  p.id === post.id
+                                    ? { ...p, newComment: e.target.value }
+                                    : p,
+                                ),
                               )
                             }
-                            onKeyDown={(e) => e.key === "Enter" && addComment(post.id)}
+                            onKeyDown={(e) =>
+                              e.key === "Enter" && addComment(post.id)
+                            }
                           />
                           <button
                             onClick={() => addComment(post.id)}

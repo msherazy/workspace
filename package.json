@@ -22,6 +22,7 @@
     "framer-motion": "^12.7.4",
     "gsap": "^3.13.0",
     "highlight.js": "^11.11.1",
+    "html-to-image": "^1.11.13",
     "lodash": "^4.17.21",
     "lucide-react": "^0.507.0",
     "next": "15.3.0",
@@ -36,7 +37,8 @@
     "react-tooltip": "^5.28.1",
     "recharts": "^2.15.2",
     "three": "^0.176.0",
-    "usehooks-ts": "^3.1.1"
+    "usehooks-ts": "^3.1.1",
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

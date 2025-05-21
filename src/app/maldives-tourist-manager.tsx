@@ -311,7 +311,13 @@ export default function IslandQuest() {
                   </svg>
                   <span className="font-medium">{experience.rating}</span>
                   <div className="ml-2 flex items-center gap-1 text-xs text-slate-400">
-                    <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <svg
+                      className="w-3 h-3"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
                       <circle cx="12" cy="12" r="10" />
                       <polyline points="12 6 12 12 16 14" />
                     </svg>
@@ -319,7 +325,9 @@ export default function IslandQuest() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2 text-xs mb-2">
-                  <div className={`flex items-center gap-1 ${darkMode ? "text-cyan-300" : "text-cyan-600"}`}>
+                  <div
+                    className={`flex items-center gap-1 ${darkMode ? "text-cyan-300" : "text-cyan-600"}`}
+                  >
                     <svg
                       className="w-4 h-4"
                       viewBox="0 0 24 24"
@@ -336,7 +344,11 @@ export default function IslandQuest() {
                     </svg>
                     <span className="font-medium">{experience.bookings}</span>
                   </div>
-                  <span className={`${darkMode ? "text-slate-400" : "text-slate-500"}`}>people booked</span>
+                  <span
+                    className={`${darkMode ? "text-slate-400" : "text-slate-500"}`}
+                  >
+                    people booked
+                  </span>
                 </div>
                 <div className="font-bold text-teal-600 mb-3">
                   ${experience.price}
@@ -393,4 +405,3 @@ export default function IslandQuest() {
     </div>
   );
 }
-

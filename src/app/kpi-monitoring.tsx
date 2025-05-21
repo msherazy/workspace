@@ -52,7 +52,7 @@ function getAllEmployees(filterTeam: string, filterRole: string) {
   });
   if (filterRole) {
     emps = emps.filter((e) =>
-      e.name.toLowerCase().includes(filterRole.toLowerCase())
+      e.name.toLowerCase().includes(filterRole.toLowerCase()),
     );
   }
   return emps;
@@ -60,7 +60,11 @@ function getAllEmployees(filterTeam: string, filterRole: string) {
 
 const cardAnim = {
   hidden: { opacity: 0, y: 24 },
-  visible: { opacity: 1, y: 0, transition: { type: "spring", bounce: 0.14, duration: 0.6 } },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { type: "spring", bounce: 0.14, duration: 0.6 },
+  },
 };
 const rowAnim = {
   hidden: { opacity: 0, x: -18 },
@@ -72,9 +76,16 @@ const rowAnim = {
 };
 const chipAnim = {
   hidden: { scale: 0.8, opacity: 0 },
-  visible: { scale: 1, opacity: 1, transition: { type: "spring", stiffness: 350, damping: 20 } },
+  visible: {
+    scale: 1,
+    opacity: 1,
+    transition: { type: "spring", stiffness: 350, damping: 20 },
+  },
 };
-const fade = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { delay: 0.14, duration: 0.38 } } };
+const fade = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { delay: 0.14, duration: 0.38 } },
+};
 
 export default function WorkforceKPIDashboard() {
   const [dark, setDark] = useState(false);
@@ -84,7 +95,7 @@ export default function WorkforceKPIDashboard() {
 
   const employees = useMemo(
     () => getAllEmployees(filterTeam, filterRole),
-    [filterTeam, filterRole]
+    [filterTeam, filterRole],
   );
 
   const layoffCount = Math.floor((layoffPct / 100) * employees.length);
@@ -95,7 +106,9 @@ export default function WorkforceKPIDashboard() {
   const layoffSavings = laidOff.reduce((sum, e) => sum + e.salary, 0);
   const remainingSalaries = remaining.reduce((sum, e) => sum + e.salary, 0);
 
-  const bg = dark ? "bg-[#18192A]" : "bg-gradient-to-br from-[#e5ecfb] to-[#f3f7fa]";
+  const bg = dark
+    ? "bg-[#18192A]"
+    : "bg-gradient-to-br from-[#e5ecfb] to-[#f3f7fa]";
   const card = dark ? "bg-[#23243a] text-[#eef0fa]" : "bg-white text-[#21243b]";
   const border = dark ? "border-[#2c2d47]" : "border-[#d7def8]";
   const label = dark ? "text-[#b7bcd7]" : "text-[#475274]";
@@ -142,7 +155,9 @@ export default function WorkforceKPIDashboard() {
       >
         <div className="flex items-center justify-between flex-wrap gap-2">
           <div>
-            <span className="font-extrabold text-lg sm:text-xl tracking-tight block">Workforce KPI Dashboard</span>
+            <span className="font-extrabold text-lg sm:text-xl tracking-tight block">
+              Workforce KPI Dashboard
+            </span>
           </div>
           <motion.button
             className={`rounded-full px-3 py-1 border ${border} ${
@@ -190,7 +205,9 @@ export default function WorkforceKPIDashboard() {
             />
           </div>
           <div className="flex flex-col items-start md:items-end">
-            <label className={`${label} text-xs`}>Layoff: bottom {layoffPct}%</label>
+            <label className={`${label} text-xs`}>
+              Layoff: bottom {layoffPct}%
+            </label>
             <input
               type="range"
               min={0}
@@ -216,65 +233,66 @@ export default function WorkforceKPIDashboard() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                <tr className={`${label}`}>
-                  <th className="text-left py-2">Name</th>
-                  <th className="text-left py-2">Team</th>
-                  <th className="text-left py-2">KPI</th>
-                  <th className="text-left py-2">Salary</th>
-                  <th className="text-left py-2">Status</th>
-                </tr>
+                  <tr className={`${label}`}>
+                    <th className="text-left py-2">Name</th>
+                    <th className="text-left py-2">Team</th>
+                    <th className="text-left py-2">KPI</th>
+                    <th className="text-left py-2">Salary</th>
+                    <th className="text-left py-2">Status</th>
+                  </tr>
                 </thead>
                 <tbody>
-                <AnimatePresence>
-                  {sortedByKPI.map((emp, i) => {
-                    const isLaidOff = laidOff.some((e) => e.id === emp.id);
-                    return (
-                      <motion.tr
-                        key={emp.id}
-                        variants={rowAnim}
-                        initial="hidden"
-                        animate="visible"
-                        exit="hidden"
-                        custom={i}
-                        className={
-                          isLaidOff
-                            ? "bg-red-100 text-red-800 dark:bg-red-700/40 dark:text-red-100 font-semibold"
-                            : "hover:bg-blue-100 dark:hover:bg-[#23243a] transition"
-                        }
-                      >
-                        <td className="py-2 font-semibold">{emp.name}</td>
-                        <td>{emp.team}</td>
-                        <td>
-                          <KPIBar value={emp.kpi} />
-                        </td>
-                        <td>
-                          ${emp.salary.toLocaleString("en-US", {
-                          maximumFractionDigits: 0,
-                        })}
-                        </td>
-                        <td>
-                          <motion.span
-                            className={
-                              isLaidOff
-                                ? "bg-red-500 text-white rounded px-2 py-1 text-xs font-bold shadow"
-                                : "bg-green-500 text-white rounded px-2 py-1 text-xs font-bold shadow"
-                            }
-                            initial={{ scale: 0.7, opacity: 0.7 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            transition={{
-                              type: "spring",
-                              stiffness: 400,
-                              damping: 12,
-                              delay: i * 0.025,
-                            }}
-                          >
-                            {isLaidOff ? "Laid Off" : "Retained"}
-                          </motion.span>
-                        </td>
-                      </motion.tr>
-                    );
-                  })}
-                </AnimatePresence>
+                  <AnimatePresence>
+                    {sortedByKPI.map((emp, i) => {
+                      const isLaidOff = laidOff.some((e) => e.id === emp.id);
+                      return (
+                        <motion.tr
+                          key={emp.id}
+                          variants={rowAnim}
+                          initial="hidden"
+                          animate="visible"
+                          exit="hidden"
+                          custom={i}
+                          className={
+                            isLaidOff
+                              ? "bg-red-100 text-red-800 dark:bg-red-700/40 dark:text-red-100 font-semibold"
+                              : "hover:bg-blue-100 dark:hover:bg-[#23243a] transition"
+                          }
+                        >
+                          <td className="py-2 font-semibold">{emp.name}</td>
+                          <td>{emp.team}</td>
+                          <td>
+                            <KPIBar value={emp.kpi} />
+                          </td>
+                          <td>
+                            $
+                            {emp.salary.toLocaleString("en-US", {
+                              maximumFractionDigits: 0,
+                            })}
+                          </td>
+                          <td>
+                            <motion.span
+                              className={
+                                isLaidOff
+                                  ? "bg-red-500 text-white rounded px-2 py-1 text-xs font-bold shadow"
+                                  : "bg-green-500 text-white rounded px-2 py-1 text-xs font-bold shadow"
+                              }
+                              initial={{ scale: 0.7, opacity: 0.7 }}
+                              animate={{ scale: 1, opacity: 1 }}
+                              transition={{
+                                type: "spring",
+                                stiffness: 400,
+                                damping: 12,
+                                delay: i * 0.025,
+                              }}
+                            >
+                              {isLaidOff ? "Laid Off" : "Retained"}
+                            </motion.span>
+                          </td>
+                        </motion.tr>
+                      );
+                    })}
+                  </AnimatePresence>
                 </tbody>
               </table>
             </div>
@@ -288,7 +306,12 @@ export default function WorkforceKPIDashboard() {
             animate="visible"
           >
             <h2 className="font-bold text-lg mb-2">Impact Overview</h2>
-            <motion.div className="space-y-2 mb-3" variants={fade} initial="hidden" animate="visible">
+            <motion.div
+              className="space-y-2 mb-3"
+              variants={fade}
+              initial="hidden"
+              animate="visible"
+            >
               <div>
                 <span className={label}>Total Employees:</span>{" "}
                 <span className="font-bold">{employees.length}</span>
@@ -314,9 +337,9 @@ export default function WorkforceKPIDashboard() {
                 <span className="font-bold">
                   {remaining.length
                     ? (
-                      remaining.reduce((sum, e) => sum + e.kpi, 0) /
-                      remaining.length
-                    ).toFixed(1)
+                        remaining.reduce((sum, e) => sum + e.kpi, 0) /
+                        remaining.length
+                      ).toFixed(1)
                     : "-"}
                 </span>
               </div>
@@ -329,7 +352,7 @@ export default function WorkforceKPIDashboard() {
                 {[0, 20, 40, 60, 80].map((low, i) => {
                   const high = low + 20;
                   const count = employees.filter(
-                    (e) => e.kpi >= low && e.kpi < high
+                    (e) => e.kpi >= low && e.kpi < high,
                   ).length;
                   const isActive =
                     layoffCount > 0 &&
@@ -338,13 +361,19 @@ export default function WorkforceKPIDashboard() {
                     <motion.div
                       key={i}
                       className={`flex flex-col items-center justify-center w-12 h-12 rounded-lg font-semibold text-base
-                        ${isActive
-                        ? "bg-pink-300 text-gray-800"
-                        : "bg-gray-200 text-gray-700"}
+                        ${
+                          isActive
+                            ? "bg-pink-300 text-gray-800"
+                            : "bg-gray-200 text-gray-700"
+                        }
                       `}
                       initial={{ scaleY: 0.2 }}
                       animate={{ scaleY: 1 }}
-                      transition={{ type: "spring", stiffness: 160, damping: 24 }}
+                      transition={{
+                        type: "spring",
+                        stiffness: 160,
+                        damping: 24,
+                      }}
                     >
                       {low}
                     </motion.div>
@@ -379,13 +408,16 @@ export default function WorkforceKPIDashboard() {
           <div className="font-bold mb-2">Smart Recommendations</div>
           <ul className="list-disc pl-6 text-sm space-y-1">
             <li>
-              Consider upskilling or transferring employees before finalizing layoffs.
+              Consider upskilling or transferring employees before finalizing
+              layoffs.
             </li>
             <li>
-              Review at-risk teams with high layoff impact to avoid critical skill loss.
+              Review at-risk teams with high layoff impact to avoid critical
+              skill loss.
             </li>
             <li>
-              Aim for balanced retention across departments for business stability.
+              Aim for balanced retention across departments for business
+              stability.
             </li>
             <li>
               If KPIs drop below a threshold, project delivery may be at risk.
@@ -399,4 +431,3 @@ export default function WorkforceKPIDashboard() {
     </div>
   );
 }
-

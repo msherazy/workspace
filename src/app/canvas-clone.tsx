@@ -2,7 +2,16 @@
 
 import { useEffect, useRef, useState } from "react";
 import { HexColorPicker } from "react-colorful";
-import { FiFolder, FiImage, FiLayers, FiMoon, FiRotateCw, FiSave, FiSun, FiTrash2 } from "react-icons/fi";
+import {
+  FiFolder,
+  FiImage,
+  FiLayers,
+  FiMoon,
+  FiRotateCw,
+  FiSave,
+  FiSun,
+  FiTrash2,
+} from "react-icons/fi";
 import { FaRegNoteSticky } from "react-icons/fa6";
 
 // Types for board elements
@@ -99,7 +108,7 @@ const Board = () => {
   const toggleElementSelection = (id: number, e: React.MouseEvent) => {
     e.stopPropagation();
     setSelectedElements((prev) =>
-      prev.includes(id) ? prev.filter((el) => el !== id) : [...prev, id]
+      prev.includes(id) ? prev.filter((el) => el !== id) : [...prev, id],
     );
   };
 
@@ -107,7 +116,7 @@ const Board = () => {
   const handleDrag = (
     id: number,
     startEvent: MouseEvent | TouchEvent,
-    isTouch = false
+    isTouch = false,
   ) => {
     // Find the element to drag
     const element = elements.find((el) => el.id === id);
@@ -147,7 +156,7 @@ const Board = () => {
 
       // Update the element's position
       setElements((prev) =>
-        prev.map((el) => (el.id === id ? { ...el, x: newX, y: newY } : el))
+        prev.map((el) => (el.id === id ? { ...el, x: newX, y: newY } : el)),
       );
     };
 
@@ -164,7 +173,9 @@ const Board = () => {
 
     // Attach event listeners for drag movement and end
     if (isTouch) {
-      window.addEventListener("touchmove", move as EventListener, { passive: false });
+      window.addEventListener("touchmove", move as EventListener, {
+        passive: false,
+      });
       window.addEventListener("touchend", up);
     } else {
       window.addEventListener("mousemove", move as EventListener);
@@ -176,7 +187,7 @@ const Board = () => {
   const handleResize = (
     id: number,
     e: React.MouseEvent<HTMLDivElement, MouseEvent>,
-    corner: string
+    corner: string,
   ) => {
     // Find the element to resize
     const element = elements.find((el) => el.id === id);
@@ -220,7 +231,7 @@ const Board = () => {
             };
           }
           return el;
-        })
+        }),
       );
     };
 
@@ -239,7 +250,7 @@ const Board = () => {
   // Rotate (mouse only)
   const handleRotate = (
     id: number,
-    e: React.MouseEvent<HTMLDivElement, MouseEvent>
+    e: React.MouseEvent<HTMLDivElement, MouseEvent>,
   ) => {
     // Find the element to rotate
     const element = elements.find((el) => el.id === id);
@@ -253,13 +264,13 @@ const Board = () => {
     const move = (moveEvent: MouseEvent) => {
       const angle =
         (Math.atan2(
-            moveEvent.clientY - boardRect.top - centerY,
-            moveEvent.clientX - boardRect.left - centerX
-          ) *
+          moveEvent.clientY - boardRect.top - centerY,
+          moveEvent.clientX - boardRect.left - centerX,
+        ) *
           180) /
         Math.PI;
       setElements((prev) =>
-        prev.map((el) => (el.id === id ? { ...el, rotation: angle } : el))
+        prev.map((el) => (el.id === id ? { ...el, rotation: angle } : el)),
       );
     };
 
@@ -278,10 +289,10 @@ const Board = () => {
   // Edit sticky note
   const handleTextEdit = (
     id: number,
-    e: React.ChangeEvent<HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLTextAreaElement>,
   ) => {
     setElements((prev) =>
-      prev.map((el) => (el.id === id ? { ...el, text: e.target.value } : el))
+      prev.map((el) => (el.id === id ? { ...el, text: e.target.value } : el)),
     );
   };
 
@@ -368,10 +379,7 @@ const Board = () => {
 
           {/* Image */}
           <div className="relative group">
-            <label
-              htmlFor="image-upload"
-              className="p-0 cursor-pointer"
-            >
+            <label htmlFor="image-upload" className="p-0 cursor-pointer">
               <input
                 id="image-upload"
                 type="file"
@@ -412,7 +420,10 @@ const Board = () => {
             </span>
             {showColorPicker && (
               <div className="absolute left-4 mt-10 z-50">
-                <HexColorPicker color={backgroundColor} onChange={setBackgroundColor} />
+                <HexColorPicker
+                  color={backgroundColor}
+                  onChange={setBackgroundColor}
+                />
               </div>
             )}
           </div>
@@ -617,7 +628,7 @@ const Board = () => {
                     textarea.onblur = (ev) => {
                       handleTextEdit(
                         element.id,
-                        ev as unknown as React.ChangeEvent<HTMLTextAreaElement>
+                        ev as unknown as React.ChangeEvent<HTMLTextAreaElement>,
                       );
                       (ev.target as HTMLTextAreaElement).parentNode!.innerHTML =
                         (ev.target as HTMLTextAreaElement).value;
@@ -689,4 +700,3 @@ const Board = () => {
 };
 
 export default Board;
-

@@ -1,4 +1,3 @@
-
 "use client";
 import { useState } from "react";
 import {
@@ -10,7 +9,7 @@ import {
   FiMenu,
   FiPlusCircle,
   FiUsers,
-  FiX
+  FiX,
 } from "react-icons/fi";
 import { Poppins } from "next/font/google";
 
@@ -80,7 +79,7 @@ export default function RealEstateDashboard() {
   >("properties");
   const [showSidebar, setShowSidebar] = useState(false);
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(
-    null
+    null,
   );
   const [, setActiveAgent] = useState<Agent | null>(null);
   const [, setActiveActivity] = useState<Activity | null>(null);
@@ -373,22 +372,22 @@ export default function RealEstateDashboard() {
   };
 
   const filteredProperties = properties.filter((property) =>
-    property.title.toLowerCase().includes(searchQuery.toLowerCase())
+    property.title.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   const soldProperties = properties.filter(
-    (property) => property.status === "sold"
+    (property) => property.status === "sold",
   );
   const pendingProperties = properties.filter(
-    (property) => property.status === "pending"
+    (property) => property.status === "pending",
   );
   const activeProperties = properties.filter(
-    (property) => property.status === "featured" || property.status === "new"
+    (property) => property.status === "featured" || property.status === "new",
   );
 
   const totalSales = soldProperties.reduce(
     (sum, property) => sum + property.price,
-    0
+    0,
   );
   const totalCommission = financialRecords
     .filter((record) => record.type === "commission")
@@ -480,14 +479,16 @@ export default function RealEstateDashboard() {
         />
         <span
           className={`absolute top-2 left-2 px-2 py-1 rounded-full text-xs font-semibold ${getStatusBadgeColor(
-            property.status
+            property.status,
           )}`}
         >
-        {property.status}
-      </span>
+          {property.status}
+        </span>
       </div>
       <div className="p-4">
-        <h3 className="font-bold text-lg text-gray-800 mb-2">{property.title}</h3>
+        <h3 className="font-bold text-lg text-gray-800 mb-2">
+          {property.title}
+        </h3>
 
         <p className="text-indigo-600 font-semibold text-xl mb-3">
           {formatCurrency(property.price)}
@@ -506,7 +507,8 @@ export default function RealEstateDashboard() {
 
         <div className="mt-3 p-3 bg-gray-50 rounded text-sm space-y-1 text-gray-600">
           <p>
-            <span className="font-medium text-gray-800">Agent:</span> {property.agent}
+            <span className="font-medium text-gray-800">Agent:</span>{" "}
+            {property.agent}
           </p>
           <p>
             <span className="font-medium text-gray-800">Listed:</span>{" "}
@@ -520,7 +522,6 @@ export default function RealEstateDashboard() {
           )}
         </div>
       </div>
-
     </div>
   );
   const renderAgentCard = (agent: Agent) => (
@@ -570,7 +571,7 @@ export default function RealEstateDashboard() {
         <h3 className="font-bold">{activity.title}</h3>
         <span
           className={`text-xs px-2 py-1 rounded-full ${getStatusBadgeColor(
-            activity.status
+            activity.status,
           )}`}
         >
           {activity.status}
@@ -658,7 +659,7 @@ export default function RealEstateDashboard() {
                 )}
                 <span className="capitalize">{tab}</span>
               </button>
-            )
+            ),
           )}
         </nav>
       </aside>
@@ -813,7 +814,7 @@ export default function RealEstateDashboard() {
                 {financialRecords
                   .sort(
                     (a, b) =>
-                      new Date(b.date).getTime() - new Date(a.date).getTime()
+                      new Date(b.date).getTime() - new Date(a.date).getTime(),
                   )
                   .map(renderFinancialRecord)}
               </div>

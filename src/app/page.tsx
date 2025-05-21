@@ -1,548 +1,467 @@
 "use client";
 
-import React from "react";
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
+import React, { useRef, useState } from "react";
+import { toPng } from "html-to-image";
 
-interface Shoutout {
+// SVG Fantasy Elements
+const GARDEN_ITEMS = [
+    {
+        type: "mushroom",
+        label: "",
+        svg: (color: string, size: number) => (
+            <svg width={size} height={size} viewBox="0 0 64 64">
+                <ellipse cx="32" cy="40" rx="16" ry="8" fill="#fff" />
+                <ellipse cx="32" cy="32" rx="24" ry="14" fill={color} />
+                <ellipse cx="24" cy="30" rx="3" ry="2" fill="#fff" />
+                <ellipse cx="40" cy="28" rx="3" ry="2" fill="#fff" />
+                <ellipse cx="32" cy="36" rx="2" ry="1" fill="#fff" />
+                <rect x="26" y="40" width="12" height="14" rx="6" fill="#e2c69a" />
+            </svg>
+        ),
+        defaultColor: "#D978F6",
+    },
+    {
+        type: "butterfly",
+        label: "",
+        svg: (color: string, size: number) => (
+            <svg width={size} height={size} viewBox="0 0 64 64">
+                <ellipse cx="20" cy="32" rx="16" ry="12" fill={color} opacity="0.8" />
+                <ellipse cx="44" cy="32" rx="16" ry="12" fill={color} opacity="0.6" />
+                <rect x="29" y="25" width="6" height="16" rx="3" fill="#222" />
+                <ellipse cx="32" cy="23" rx="4" ry="3" fill="#222" />
+                <ellipse cx="30" cy="20" rx="1" ry="3" fill="#444" />
+                <ellipse cx="34" cy="20" rx="1" ry="3" fill="#444" />
+            </svg>
+        ),
+        defaultColor: "#62D9FB",
+    },
+    {
+        type: "tree",
+        label: "",
+        svg: (color: string, size: number) => (
+            <svg width={size} height={size} viewBox="0 0 64 64">
+                <ellipse cx="32" cy="30" rx="18" ry="14" fill={color} />
+                <ellipse cx="22" cy="38" rx="10" ry="8" fill={color} opacity="0.85" />
+                <ellipse cx="44" cy="38" rx="10" ry="8" fill={color} opacity="0.85" />
+                <rect x="28" y="44" width="8" height="14" rx="3" fill="#B8926A" />
+            </svg>
+        ),
+        defaultColor: "#73E89C",
+    },
+    {
+        type: "star",
+        label: "",
+        svg: (color: string, size: number) => (
+            <svg width={size} height={size} viewBox="0 0 64 64">
+                <polygon
+                    points="32,8 39,27 60,27 42,39 48,58 32,47 16,58 22,39 4,27 25,27"
+                    fill={color}
+                />
+            </svg>
+        ),
+        defaultColor: "#FFDE59",
+    },
+];
+
+type GardenItemType = typeof GARDEN_ITEMS[number]["type"];
+
+interface GardenElement {
     id: number;
-    text: string;
-    reactions: number;
+    type: GardenItemType;
+    color: string;
+    size: number;
+    x: number;
+    y: number;
+    isSelected: boolean;
 }
 
-const App = () => {
-    const [shoutouts, setShoutouts] = useState<Shoutout[]>([]);
-    const [newShoutout, setNewShoutout] = useState("");
-    const [isFormOpen, setIsFormOpen] = useState(false);
-    const [isMobile, setIsMobile] = useState(false);
-    const [darkMode, setDarkMode] = useState(false);
+export default function GardenPage() {
+    const [garden, setGarden] = useState<GardenElement[]>([]);
+    const [selectedItem, setSelectedItem] = useState<GardenItemType>("mushroom");
+    const [color, setColor] = useState<string>(GARDEN_ITEMS[0].defaultColor);
+    const [size, setSize] = useState<number>(70);
+    const [mode, setMode] = useState<"day" | "night">("night");
+    const [dragId, setDragId] = useState<number | null>(null);
+    const gardenRef = useRef<HTMLDivElement>(null);
+    const nextId = useRef<number>(1);
 
-    // Animation variants
-    const cardVariants = {
-        hidden: { opacity: 0, y: 20 },
-        visible: {
-            opacity: 1,
-            y: 0,
-            transition: {
-                type: "spring",
-                stiffness: 300,
-                damping: 20,
-                duration: 0.5
-            }
-        },
-        hover: {
-            y: -3,
-            transition: { duration: 0.2 }
-        }
-    };
+    function handleCanvasClick(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
+        if (e.target !== gardenRef.current) return;
+        const rect = gardenRef.current!.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        setGarden([
+            ...garden,
+            {
+                id: nextId.current++,
+                type: selectedItem,
+                color,
+                size,
+                x,
+                y,
+                isSelected: false,
+            },
+        ]);
+    }
 
-    const formOverlayVariants = {
-        hidden: { opacity: 0 },
-        visible: { opacity: 1, transition: { duration: 0.3 } },
-        exit: { opacity: 0, transition: { duration: 0.2 } }
-    };
-
-    const formContentVariants = {
-        hidden: { y: 20, opacity: 0 },
-        visible: {
-            y: 0,
-            opacity: 1,
-            transition: {
-                type: "spring",
-                stiffness: 300,
-                damping: 25,
-                duration: 0.5
-            }
-        },
-        exit: {
-            y: -20,
-            opacity: 0,
-            transition: { duration: 0.2 }
-        }
-    };
-
-    const reactionVariants = {
-        rest: { scale: 1, color: "inherit" },
-        active: {
-            scale: [1, 1.3, 1],
-            color: ["inherit", "#a78bfa", "inherit"],
-            transition: { duration: 0.6 }
-        }
-    };
-
-    useEffect(() => {
-        const checkMobile = () => {
-            setIsMobile(window.innerWidth < 768);
-        };
-
-        const storedShoutouts = localStorage.getItem("shoutouts");
-        if (storedShoutouts) {
-            setShoutouts(JSON.parse(storedShoutouts));
-        }
-
-        const storedDarkMode = localStorage.getItem("darkMode");
-        if (storedDarkMode) {
-            setDarkMode(JSON.parse(storedDarkMode));
-        }
-
-        checkMobile();
-        window.addEventListener("resize", checkMobile);
-
-        return () => {
-            window.removeEventListener("resize", checkMobile);
-        };
-    }, []);
-
-    useEffect(() => {
-        localStorage.setItem("shoutouts", JSON.stringify(shoutouts));
-    }, [shoutouts]);
-
-    useEffect(() => {
-        localStorage.setItem("darkMode", JSON.stringify(darkMode));
-    }, [darkMode]);
-
-    const handleAddShoutout = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (newShoutout.trim()) {
-            const updatedShoutouts = [
-                { id: Date.now(), text: newShoutout, reactions: 0 },
-                ...shoutouts,
-            ];
-            setShoutouts(updatedShoutouts);
-            setNewShoutout("");
-            setIsFormOpen(false);
-        }
-    };
-
-    const handleReact = (id: number) => {
-        const updatedShoutouts = shoutouts.map((shoutout) => {
-            if (shoutout.id === id) {
-                return { ...shoutout, reactions: shoutout.reactions + 1 };
-            }
-            return shoutout;
-        });
-
-        const sortedShoutouts = [...updatedShoutouts].sort(
-            (a, b) => b.reactions - a.reactions
+    function handleElementMouseDown(id: number) {
+        setDragId(id);
+        setGarden((prev) =>
+            prev.map((el) =>
+                el.id === id
+                    ? { ...el, isSelected: true }
+                    : { ...el, isSelected: false }
+            )
         );
+    }
 
-        setShoutouts(sortedShoutouts);
-    };
-
-    const toggleDarkMode = () => {
-        setDarkMode(!darkMode);
-    };
-
-    const ReactionButton = ({ shoutout }: { shoutout: Shoutout }) => {
-        const [isReacting, setIsReacting] = useState(false);
-
-        const handleClick = () => {
-            setIsReacting(true);
-            handleReact(shoutout.id);
-            setTimeout(() => setIsReacting(false), 600);
-        };
-
-        return (
-            <motion.button
-                onClick={handleClick}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className={`flex items-center ${
-                    darkMode
-                        ? "text-indigo-400 hover:text-indigo-300"
-                        : "text-indigo-600 hover:text-indigo-800"
-                }`}
-            >
-                <motion.span
-                    animate={isReacting ? "active" : "rest"}
-                    variants={reactionVariants}
-                    className="inline-flex items-center"
-                >
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-5 w-5 mr-1"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
-                    >
-                        <path
-                            fillRule="evenodd"
-                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                            clipRule="evenodd"
-                        />
-                    </svg>
-                    Smile
-                </motion.span>
-            </motion.button>
+    function handleCanvasMouseMove(e: React.MouseEvent<HTMLDivElement>) {
+        if (dragId === null) return;
+        const rect = gardenRef.current!.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        setGarden((prev) =>
+            prev.map((el) =>
+                el.id === dragId ? { ...el, x, y } : el
+            )
         );
-    };
+    }
+
+    function handleCanvasMouseUp() {
+        setDragId(null);
+        setGarden((prev) =>
+            prev.map((el) =>
+                el.isSelected ? { ...el, isSelected: false } : el
+            )
+        );
+    }
+
+    function updateSelected(prop: Partial<Pick<GardenElement, "color" | "size">>) {
+        setGarden((prev) =>
+            prev.map((el) =>
+                el.isSelected ? { ...el, ...prop } : el
+            )
+        );
+    }
+
+    function clearGarden() {
+        setGarden([]);
+    }
+
+    async function saveImage() {
+        if (!gardenRef.current) return;
+        const dataUrl = await toPng(gardenRef.current, { cacheBust: true });
+        const link = document.createElement("a");
+        link.download = "my-garden.png";
+        link.href = dataUrl;
+        link.click();
+    }
+
+    // Modern gradient backgrounds (animated)
+    const gradientDay =
+        "linear-gradient(120deg, #e0c3fc 0%, #8ec5fc 100%)";
+    const gradientNight =
+        "linear-gradient(120deg, #35327a 0%, #6d53a1 100%)";
+
+    // Floating particles for background magic
+    const particles = Array.from({ length: 8 }, (_, i) => ({
+        left: `${10 + i * 11}%`,
+        top: `${15 + (i % 3) * 22}%`,
+        size: 80 + Math.random() * 40,
+        opacity: 0.20 + Math.random() * 0.14,
+        color: `hsl(${180 + i * 24},70%,70%)`,
+        animation: `float${i % 4}`,
+    }));
 
     return (
-        <div className={`min-h-screen flex flex-col ${
-            darkMode
-                ? "bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900 text-white"
-                : "bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 text-gray-800"
-        }`}>
-            <header className="px-4 py-5 flex justify-between items-center">
-                <motion.h1
-                    className="text-2xl font-bold flex items-center"
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.5 }}
-                >
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-6 w-6 mr-2"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                    >
-                        <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                        />
-                    </svg>
-                    SmileFeed
-                </motion.h1>
-                <motion.button
-                    onClick={toggleDarkMode}
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.95 }}
-                    className={`p-2 rounded-full ${
-                        darkMode
-                            ? "bg-gray-700 text-yellow-400 hover:bg-gray-600"
-                            : "bg-indigo-100 text-indigo-600 hover:bg-indigo-200"
-                    } transition-colors duration-300`}
-                >
-                    {darkMode ? (
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-5 w-5"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                        >
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
-                            />
-                        </svg>
-                    ) : (
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-5 w-5"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                        >
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
-                            />
-                        </svg>
-                    )}
-                </motion.button>
-            </header>
-
-            <main className="flex-1 px-4 py-2 overflow-hidden flex flex-col">
-                <h2 className="text-xl font-semibold mb-3 flex items-center">
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-5 w-5 mr-2"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                    >
-                        <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                        />
-                    </svg>
-                    Recent Shoutouts
-                </h2>
-
-                <div className="flex-1 overflow-hidden">
-                    {shoutouts.length === 0 ? (
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ duration: 0.5 }}
-                            className={`flex-1 flex items-center justify-center p-6 rounded-xl ${
-                                darkMode
-                                    ? "bg-gray-800/50 backdrop-blur-sm border border-gray-700"
-                                    : "bg-white/60 backdrop-blur-sm shadow-sm border border-indigo-100"
-                            } transition-all duration-300`}
-                        >
-                            <div className="text-center max-w-md">
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    className={`h-12 w-12 mx-auto mb-4 ${
-                                        darkMode ? "text-indigo-400" : "text-indigo-500"
-                                    }`}
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                >
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={2}
-                                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                                    />
-                                </svg>
-                                <p
-                                    className={`text-lg font-medium mb-2 ${
-                                        darkMode ? "text-gray-300" : "text-gray-700"
-                                    }`}
-                                >
-                                    No shoutouts yet
-                                </p>
-                                <p
-                                    className={`text-sm ${
-                                        darkMode ? "text-gray-400" : "text-gray-500"
-                                    }`}
-                                >
-                                    Be the first to share something that made you smile!
-                                </p>
-                            </div>
-                        </motion.div>
-                    ) : (
-                        <LayoutGroup>
-                            <motion.div
-                                className={`grid grid-cols-1 ${
-                                    isMobile ? "gap-4" : "sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5"
-                                } overflow-y-auto h-full p-2`}
-                                layout
-                            >
-                                {shoutouts.map((shoutout) => (
-                                    <motion.div
-                                        key={shoutout.id}
-                                        layout
-                                        variants={cardVariants}
-                                        initial="hidden"
-                                        animate="visible"
-                                        whileHover="hover"
-                                        className={`flex flex-col rounded-xl p-5 ${
-                                            darkMode
-                                                ? "bg-gray-800/70 backdrop-blur-sm border border-gray-700"
-                                                : "bg-white/80 backdrop-blur-sm shadow-sm border border-gray-100"
-                                        } space-y-4`}
-                                    >
-                                        <p
-                                            className={`text-sm ${
-                                                darkMode ? "text-gray-200" : "text-gray-700"
-                                            }`}
-                                        >
-                                            {shoutout.text}
-                                        </p>
-                                        <div className="flex items-center justify-between mt-auto">
-                      <span
-                          className={`text-xs ${
-                              darkMode ? "text-gray-400" : "text-gray-500"
-                          }`}
-                      >
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-4 w-4 inline mr-1"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                        >
-                          <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                          />
-                        </svg>
-                          {shoutout.reactions} {shoutout.reactions === 1 ? "smile" : "smiles"}
-                      </span>
-                                            <ReactionButton shoutout={shoutout} />
-                                        </div>
-                                    </motion.div>
-                                ))}
-                            </motion.div>
-                        </LayoutGroup>
-                    )}
-                </div>
-            </main>
-
-            <div className="sticky bottom-4 right-4 flex justify-end p-4">
-                <motion.button
-                    onClick={() => setIsFormOpen(!isFormOpen)}
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    className={`fixed bottom-8 right-8 z-10 flex items-center justify-center w-14 h-14 rounded-full ${
-                        darkMode
-                            ? "bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-800/20"
-                            : "bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-200"
-                    } transition-all duration-300 focus:outline-none`}
-                    aria-label={isFormOpen ? "Close form" : "Add shoutout"}
-                >
-                    <motion.svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        animate={{ rotate: isFormOpen ? 45 : 0 }}
-                        className="h-6 w-6"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                    >
-                        <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M12 4v16m8-8H4"
-                        />
-                    </motion.svg>
-                </motion.button>
-
-                <AnimatePresence>
-                    {isFormOpen && (
-                        <>
-                            <motion.div
-                                variants={formOverlayVariants}
-                                initial="hidden"
-                                animate="visible"
-                                exit="exit"
-                                className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
-                                onClick={() => setIsFormOpen(false)}
-                            />
-
-                            <motion.div
-                                variants={formContentVariants}
-                                initial="hidden"
-                                animate="visible"
-                                exit="exit"
-                                className="fixed inset-0 z-50 flex items-center justify-center p-4"
-                            >
-                                <div className="w-full max-w-md mx-auto">
-                                    <motion.div
-                                        layout
-                                        className={`rounded-lg ${
-                                            darkMode
-                                                ? "bg-gray-800/90 backdrop-blur-md border border-gray-700"
-                                                : "bg-white/90 backdrop-blur-md border border-indigo-100"
-                                        } shadow-xl p-6 relative`}
-                                    >
-                                        <motion.button
-                                            onClick={() => setIsFormOpen(false)}
-                                            whileHover={{ scale: 1.1 }}
-                                            whileTap={{ scale: 0.9 }}
-                                            className={`absolute top-4 right-4 p-2 rounded-full ${
-                                                darkMode
-                                                    ? "text-gray-400 hover:text-white hover:bg-gray-700"
-                                                    : "text-gray-500 hover:text-gray-700 hover:bg-indigo-100"
-                                            } transition-colors duration-200`}
-                                        >
-                                            <svg
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                className="h-5 w-5"
-                                                fill="none"
-                                                viewBox="0 0 24 24"
-                                                stroke="currentColor"
-                                            >
-                                                <path
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                    strokeWidth={2}
-                                                    d="M6 18L18 6M6 6l12 12"
-                                                />
-                                            </svg>
-                                        </motion.button>
-                                        <h3
-                                            className={`text-xl font-semibold mb-4 flex items-center ${
-                                                darkMode ? "text-indigo-300" : "text-indigo-600"
-                                            }`}
-                                        >
-                                            <svg
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                className="h-5 w-5 mr-2"
-                                                fill="none"
-                                                viewBox="0 0 24 24"
-                                                stroke="currentColor"
-                                            >
-                                                <path
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                    strokeWidth={2}
-                                                    d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                                                />
-                                            </svg>
-                                            Share Your Smile
-                                        </h3>
-                                        <form onSubmit={handleAddShoutout}>
-                                            <div className="mb-4">
-                                                <label
-                                                    htmlFor="shoutout"
-                                                    className={`block text-sm font-medium mb-2 ${
-                                                        darkMode ? "text-gray-300" : "text-gray-700"
-                                                    }`}
-                                                >
-                                                    Something that made you smile today?
-                                                </label>
-                                                <motion.textarea
-                                                    id="shoutout"
-                                                    className={`w-full p-3 rounded-lg ${
-                                                        darkMode
-                                                            ? "bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                                                            : "border border-indigo-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-gray-700 placeholder-gray-500"
-                                                    } transition-all duration-200`}
-                                                    rows={3}
-                                                    placeholder="Write your shoutout here..."
-                                                    value={newShoutout}
-                                                    onChange={(e) => setNewShoutout(e.target.value)}
-                                                    required
-                                                    whileFocus={{
-                                                        scale: 1.01,
-                                                        boxShadow: darkMode
-                                                            ? "0 0 0 2px rgba(129, 140, 248, 0.5)"
-                                                            : "0 0 0 2px rgba(99, 102, 241, 0.5)"
-                                                    }}
-                                                />
-                                            </div>
-                                            <motion.button
-                                                type="submit"
-                                                whileHover={{ scale: 1.02 }}
-                                                whileTap={{ scale: 0.98 }}
-                                                className={`w-full py-3 px-4 rounded-lg font-medium flex items-center justify-center transition-colors duration-300 shadow-md ${
-                                                    darkMode
-                                                        ? "bg-indigo-600 hover:bg-indigo-500"
-                                                        : "bg-indigo-600 hover:bg-indigo-700 text-white"
-                                                }`}
-                                            >
-                                                <svg
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    className="h-5 w-5 mr-2"
-                                                    fill="none"
-                                                    viewBox="0 0 24 24"
-                                                    stroke="currentColor"
-                                                >
-                                                    <path
-                                                        strokeLinecap="round"
-                                                        strokeLinejoin="round"
-                                                        strokeWidth={2}
-                                                        d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                                                    />
-                                                </svg>
-                                                Share Shoutout
-                                            </motion.button>
-                                        </form>
-                                    </motion.div>
-                                </div>
-                            </motion.div>
-                        </>
-                    )}
-                </AnimatePresence>
+        <main
+            className="min-h-screen w-full flex flex-col items-center justify-center font-sans"
+            style={{
+                background: mode === "day" ? gradientDay : gradientNight,
+                position: "relative",
+                overflow: "hidden",
+                transition: "background 0.9s cubic-bezier(.85,.17,.61,1.03)",
+            }}
+        >
+            {/* Animated background particles */}
+            {particles.map((p, idx) => (
+                <div
+                    key={idx}
+                    style={{
+                        position: "absolute",
+                        left: p.left,
+                        top: p.top,
+                        width: p.size,
+                        height: p.size,
+                        background: `radial-gradient(circle at 60% 40%, ${p.color} 60%, transparent 100%)`,
+                        borderRadius: "50%",
+                        opacity: p.opacity,
+                        pointerEvents: "none",
+                        filter: "blur(2px)",
+                        animation: `${p.animation} 8s ease-in-out infinite alternate`,
+                        zIndex: 1,
+                    }}
+                />
+            ))}
+            {/* Animation keyframes for floating */}
+            <style>
+                {`
+          @keyframes float0 { 0%{transform:translateY(0)} 100%{transform:translateY(-18px)} }
+          @keyframes float1 { 0%{transform:translateY(0)} 100%{transform:translateY(22px)} }
+          @keyframes float2 { 0%{transform:translateY(0)} 100%{transform:translateY(-12px)} }
+          @keyframes float3 { 0%{transform:translateY(0)} 100%{transform:translateY(12px)} }
+          @keyframes butterfly-fly {
+            0% { transform: translateY(0) scale(1.06) rotate(-4deg);}
+            100% { transform: translateY(-12px) scale(1.12) rotate(3deg);}
+          }
+          @keyframes star-twinkle {
+            0% { opacity: 0.8; }
+            100% { opacity: 1; filter: blur(1.5px);}
+          }
+        `}
+            </style>
+            {/* Header */}
+            <div
+                className="pt-12 pb-4 text-5xl font-extrabold tracking-tight"
+                style={{
+                    color: mode === "day" ? "#402F60" : "#f3f0ff",
+                    textShadow: mode === "night"
+                        ? "0 2px 20px #281f40"
+                        : "0 1px 12px #e8defa",
+                    letterSpacing: "1px",
+                    zIndex: 10,
+                    fontFamily: "inherit",
+                }}
+            >
+                Magical Garden Creator
             </div>
-        </div>
+            {/* Glassy Top Controls */}
+            <div
+                className="flex flex-wrap items-center justify-between w-full max-w-4xl px-8 py-5 mb-8 rounded-3xl"
+                style={{
+                    background: "rgba(255,255,255,0.78)",
+                    border: "2.5px solid #d6d0fa",
+                    boxShadow: "0 10px 42px 0 #b7b7f388, 0 2px 8px #d2c5f7",
+                    backdropFilter: "blur(22px)",
+                    gap: "1.2rem",
+                    zIndex: 12,
+                }}
+            >
+                {/* Shape Selectors */}
+                <div className="flex items-center gap-4">
+                    {GARDEN_ITEMS.map((item) => (
+                        <button
+                            key={item.type}
+                            className={`flex flex-col items-center rounded-full border-2 shadow-lg transition-all duration-200
+                ${selectedItem === item.type
+                                ? "border-[#8057e4] bg-white scale-110 ring-4 ring-[#8057e4]"
+                                : "border-[#e0d7ff] bg-white/90"
+                            }`}
+                            style={{
+                                width: 62,
+                                height: 62,
+                                margin: 2,
+                                justifyContent: "center",
+                                boxShadow: "0 2px 12px 1px #c1b5ee66",
+                            }}
+                            title={`Add a ${item.label}`}
+                            onClick={() => {
+                                setSelectedItem(item.type);
+                                setColor(item.defaultColor);
+                                setSize(70);
+                            }}
+                        >
+                            <span className="p-1 flex items-center justify-center">{item.svg(item.defaultColor, 30)}</span>
+                            <span className="text-[0.8rem] mt-1 font-medium" style={{ color: selectedItem === item.type ? "#8057e4" : "#8e82af" }}>{item.label}</span>
+                        </button>
+                    ))}
+                </div>
+                {/* Color and Size pickers */}
+                <div className="flex items-center gap-4 ml-2">
+                    <label className="flex items-center gap-2">
+                        <span style={{ color: "#4a43e4", fontWeight: 600 }}>Color</span>
+                        <input
+                            type="color"
+                            value={color}
+                            onChange={(e) => setColor(e.target.value)}
+                            className="w-8 h-8 rounded-full border-2 border-[#8057e4] bg-white shadow"
+                        />
+                    </label>
+                    <label className="flex items-center gap-2">
+                        <span style={{ color: "#4a43e4", fontWeight: 600 }}>Size</span>
+                        <input
+                            type="range"
+                            min={40}
+                            max={120}
+                            value={size}
+                            onChange={(e) => setSize(Number(e.target.value))}
+                            className="accent-[#4a43e4] border border-[#d5d2ff] rounded h-2"
+                        />
+                    </label>
+                </div>
+                {/* Actions */}
+                <div className="flex items-center gap-3 ml-4">
+                    <button
+                        className="px-5 py-2 rounded-full font-semibold shadow-lg bg-gradient-to-r from-[#c471f5] to-[#fa71cd] text-white hover:scale-105 hover:brightness-110 transition-all"
+                        onClick={clearGarden}
+                    >
+                        Clear Garden
+                    </button>
+                    <button
+                        className="px-5 py-2 rounded-full font-semibold shadow-lg bg-gradient-to-r from-[#43cea2] to-[#185a9d] text-white hover:scale-105 hover:brightness-110 transition-all"
+                        onClick={saveImage}
+                    >
+                        Save Image
+                    </button>
+                    <button
+                        className="px-5 py-2 rounded-full font-semibold shadow-lg bg-gradient-to-r from-[#7f53ac] to-[#647dee] text-white hover:scale-105 hover:brightness-110 transition-all"
+                        onClick={() => setMode(mode === "day" ? "night" : "day")}
+                    >
+                        {mode === "day" ? "Switch to Night" : "Switch to Day"}
+                    </button>
+                </div>
+            </div>
+            {/* Canvas Area */}
+            <div
+                className="flex-1 w-full max-w-5xl rounded-3xl shadow-2xl overflow-hidden relative"
+                ref={gardenRef}
+                style={{
+                    minHeight: 520,
+                    cursor: dragId ? "grabbing" : "crosshair",
+                    background:
+                        mode === "day"
+                            ? "linear-gradient(180deg, #f2ebff 70%, #b8e0fc 100%)"
+                            : "linear-gradient(180deg, #332b5c 60%, #342356 100%)",
+                    border: "6px solid #f6ebff",
+                    marginBottom: 32,
+                    transition: "background 0.8s cubic-bezier(.85,.17,.61,1.03)",
+                    zIndex: 20,
+                }}
+                onMouseDown={handleCanvasMouseUp}
+                onMouseMove={handleCanvasMouseMove}
+                onMouseUp={handleCanvasMouseUp}
+                onClick={handleCanvasClick}
+                tabIndex={0}
+                aria-label="Magical Garden Canvas"
+            >
+                {garden.map((item) => {
+                    const ItemSVG =
+                        GARDEN_ITEMS.find((g) => g.type === item.type)?.svg ??
+                        (() => null);
+                    return (
+                        <div
+                            key={item.id}
+                            style={{
+                                position: "absolute",
+                                left: item.x - item.size / 2,
+                                top: item.y - item.size / 2,
+                                width: item.size,
+                                height: item.size,
+                                zIndex: item.isSelected ? 10 : 2,
+                                boxShadow: item.isSelected
+                                    ? "0 0 22px 10px #fff1ff, 0 0 32px 8px #c8bbfa"
+                                    : "0 2px 12px 2px #d0c3ff22",
+                                borderRadius: "50%",
+                                cursor: "pointer",
+                                outline: item.isSelected
+                                    ? "3px solid #8057e4"
+                                    : "1.5px solid #ede6f7",
+                                transition:
+                                    "outline 0.18s, box-shadow 0.18s, transform 0.18s cubic-bezier(.8,.2,.6,1.2)",
+                                userSelect: "none",
+                                background: "rgba(255,255,255,0.08)",
+                                backdropFilter: "blur(2px)",
+                            }}
+                            onMouseDown={(e) => {
+                                e.stopPropagation();
+                                handleElementMouseDown(item.id);
+                            }}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setGarden((prev) =>
+                                    prev.map((el) =>
+                                        el.id === item.id
+                                            ? { ...el, isSelected: !el.isSelected }
+                                            : { ...el, isSelected: false }
+                                    )
+                                );
+                            }}
+                            tabIndex={0}
+                            aria-label={item.type}
+                        >
+                            <div
+                                style={{
+                                    width: "100%",
+                                    height: "100%",
+                                    transition: "transform 0.32s",
+                                    transform: item.isSelected
+                                        ? "scale(1.15) rotate(-2deg)"
+                                        : "scale(1)",
+                                    filter:
+                                        mode === "night"
+                                            ? "drop-shadow(0 0 14px #d1bbffbb)"
+                                            : undefined,
+                                    animation:
+                                        item.type === "butterfly"
+                                            ? "butterfly-fly 2.2s ease-in-out infinite alternate"
+                                            : item.type === "star"
+                                                ? "star-twinkle 1.1s ease-in-out infinite alternate"
+                                                : undefined,
+                                }}
+                            >
+                                {ItemSVG(item.color, item.size)}
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
+            {/* Editor Panel for Selected */}
+            {garden.some((el) => el.isSelected) && (
+                <div
+                    className="z-50 fixed left-1/2 bottom-7 -translate-x-1/2 flex items-center gap-6 px-8 py-4 bg-white/90 rounded-xl shadow-2xl border border-[#e2d9ff]"
+                    style={{
+                        backdropFilter: "blur(14px)",
+                    }}
+                >
+          <span
+              className="font-bold text-base"
+              style={{ color: "#6c47a6", marginRight: 10 }}
+          >
+            Edit Selection
+          </span>
+                    <input
+                        type="color"
+                        value={garden.find((el) => el.isSelected)?.color || "#ffffff"}
+                        onChange={(e) => updateSelected({ color: e.target.value })}
+                        className="w-9 h-9 rounded-full border-2 border-[#8057e4] bg-white shadow"
+                        title="Edit Color"
+                    />
+                    <input
+                        type="range"
+                        min={40}
+                        max={120}
+                        value={garden.find((el) => el.isSelected)?.size || 70}
+                        onChange={(e) => updateSelected({ size: Number(e.target.value) })}
+                        title="Edit Size"
+                        className="mx-2 accent-[#8057e4] border border-[#d5d2ff] rounded h-2"
+                    />
+                    <button
+                        className="px-4 py-2 rounded-full bg-gradient-to-r from-[#ff85a2] to-[#fa7ba0] text-white font-semibold shadow-lg hover:scale-105 transition-all"
+                        onClick={() => {
+                            setGarden((prev) => prev.filter((el) => !el.isSelected));
+                        }}
+                    >
+                        Remove
+                    </button>
+                </div>
+            )}
+            {/* Font import */}
+            <style jsx global>{`
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
+        html {
+          font-family: 'Montserrat', sans-serif;
+        }
+      `}</style>
+        </main>
     );
-};
-
-export default App;
+}
