@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import confetti from 'canvas-confetti'
 import {
   Heart,
   MessageSquare,
@@ -506,6 +507,14 @@ export default function SocialApp() {
     setNewPostContent('')
     setImagePreview(null)
     setShowImageUpload(false)
+
+    // Create confetti effect
+    confetti({
+      particleCount: 100,
+      spread: 70,
+      origin: { y: 0.6 },
+      colors: ['#9333ea', '#ec4899', '#8b5cf6', '#d946ef']
+    })
   }
 
   const removeHashtag = (postId: string, tagIndex: number) => {
@@ -1553,9 +1562,9 @@ export default function SocialApp() {
                           <div className="flex justify-between items-center border-t pt-3">
                             <button
                               onClick={() => handleLike(post.id)}
-                              className={`flex items-center space-x-1 px-3 py-1 rounded-full transition-all cursor-pointer ${post.liked ? (darkMode ? 'text-pink-400' : 'text-pink-500') : (darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100')}`}
+                              className={`flex items-center space-x-1 px-3 py-1 rounded-full transition-all cursor-pointer transform active:scale-125 duration-200 ${post.liked ? (darkMode ? 'text-pink-400' : 'text-pink-500') : (darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100')}`}
                             >
-                              {post.liked ? <Heart className="fill-current" /> : <Heart />}
+                              {post.liked ? <Heart className="fill-current animate-pulse" /> : <Heart />}
                               <span>{post.likes}</span>
                             </button>
                             <button
@@ -1769,7 +1778,7 @@ export default function SocialApp() {
                         </div>
                         <button
                           onClick={() => setFollowingStatus(prev => ({ ...prev, [suggestion.user.id]: !prev[suggestion.user.id] }))}
-                          className={`px-3 py-1 rounded-full text-sm font-medium cursor-pointer ${followingStatus[suggestion.user.id] ? (darkMode ? 'bg-gray-700 text-white hover:bg-gray-600' : 'bg-gray-200 text-gray-900 hover:bg-gray-300') : (darkMode ? 'bg-white text-gray-900 hover:bg-gray-200' : 'bg-gray-900 text-white hover:bg-gray-800')}`}
+                          className={`px-3 py-1 rounded-full text-sm font-medium cursor-pointer transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg ${followingStatus[suggestion.user.id] ? (darkMode ? 'bg-gray-700 text-white hover:bg-gray-600' : 'bg-gray-200 text-gray-900 hover:bg-gray-300') : (darkMode ? 'bg-white text-gray-900 hover:bg-gray-200' : 'bg-gray-900 text-white hover:bg-gray-800')}`}
                         >
                           {followingStatus[suggestion.user.id] ? 'Following' : 'Follow'}
                         </button>
