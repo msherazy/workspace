@@ -26,8 +26,8 @@ import {
 import EmojiPicker from 'emoji-picker-react'
 import Head from 'next/head'
 import React from 'react'
-import { Inter } from 'next/font/google'
-const inter = Inter({ subsets: ['latin'] })
+import { Outfit } from 'next/font/google'
+const outfit = Outfit({ subsets: ['latin'] })
 
 type User = {
   id: string
@@ -696,11 +696,11 @@ export default function SocialApp() {
 
   const handleEmojiClick = (emojiData: never, context: 'post' | string) => {
     if (context === 'post') {
-      setNewPostContent(prev => prev + emojiData.emoji)
+      setNewPostContent(prev => prev + emojiData?.emoji)
     } else {
       setCommentInputs(prev => ({
         ...prev,
-        [context]: (prev[context] || '') + emojiData.emoji
+        [context]: (prev[context] || '') + emojiData?.emoji
       }))
     }
     setShowEmojiPicker(false)
@@ -794,7 +794,7 @@ export default function SocialApp() {
         <title>BlissBlaze - Connect and Share</title>
       </Head>
 
-      <div className={`min-h-screen transition-colors duration-200 ${darkMode ? 'bg-gradient-to-br from-gray-900 to-gray-800 text-white' : 'bg-gradient-to-br from-gray-50 to-gray-100 text-gray-900'} ${inter.className}`}>
+      <div className={`min-h-screen transition-colors duration-200 ${darkMode ? 'bg-gradient-to-br from-gray-900 to-gray-800 text-white' : 'bg-gradient-to-br from-gray-50 to-gray-100 text-gray-900'} ${outfit.className}`}>
         {/* Desktop Navigation */}
         <nav
           className={`hidden md:flex flex-col h-screen fixed left-0 top-0 p-4 border-r ${darkMode ? 'border-purple-900 bg-gray-800' : 'border-purple-200 bg-white'} transition-all duration-200`}
